@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import ToolsView from './views/tools/index.vue'
 
 const tabs = [
   { key: 'home', label: '主页' },
@@ -66,11 +67,9 @@ const active = ref('home')
         v-show="active === 'tools'"
         role="tabpanel"
         aria-labelledby="tools"
-        class="min-h-[calc(100vh-64px)] bg-canvas px-apple-section py-apple-section"
+        class="min-h-[calc(100vh-64px)] bg-canvas"
       >
-        <div class="flex min-h-[60vh] items-center justify-center">
-          <p class="text-caption text-ink-muted-48">待填充</p>
-        </div>
+        <ToolsView />
       </section>
     </main>
   </div>
