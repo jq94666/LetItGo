@@ -123,6 +123,12 @@
 }
 
 @layer base {
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
   html {
     font-family: var(--font-text);
     -webkit-font-smoothing: antialiased;
@@ -136,5 +142,7 @@
     line-height: 1.47;
     letter-spacing: -0.374px;
     margin: 0;
+    /* 滚动限制在页面/组件内部，避免最外侧浏览器滚动条 */
+    overflow: hidden;
   }
 }

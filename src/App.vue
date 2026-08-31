@@ -1,16 +1,23 @@
 <script setup>
+<<<<<<< HEAD
 import { ref } from 'vue'
 import HomeView from './views/home/index.vue'
 import SitesView from './views/sites/index.vue'
 import ToolsView from './views/tools/index.vue'
+=======
+import { useRoute } from 'vue-router'
+>>>>>>> 39bf6a4ad23b6510127591600760261b871b8b18
 
+const route = useRoute()
+
+// 顶部 Tab，通过 vue-router 跳转
 const tabs = [
-  { key: 'home', label: '主页' },
-  { key: 'sites', label: '网站' },
-  { key: 'tools', label: '工具' }
+  { key: 'home', label: '主页', path: '/' },
+  { key: 'sites', label: '网站', path: '/sites' },
+  { key: 'tools', label: '工具', path: '/tools' }
 ]
 
-const active = ref('home')
+const active = () => route.path
 </script>
 
 <template>
@@ -21,23 +28,23 @@ const active = ref('home')
       role="tablist"
     >
       <div class="mx-auto flex h-full max-w-apple-grid items-center justify-center gap-apple-xs px-apple-xl">
-        <button
+        <router-link
           v-for="tab in tabs"
           :key="tab.key"
-          type="button"
+          :to="tab.path"
           role="tab"
-          :aria-selected="active === tab.key"
-          class="rounded-pill px-apple-lg py-apple-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.95]"
-          :class="active === tab.key
+          :aria-selected="active() === tab.path"
+          class="rounded-pill px-apple-lg py-apple-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.95] no-underline"
+          :class="active() === tab.path
             ? 'bg-primary text-on-primary'
             : 'bg-surface-pearl text-ink-muted-80 hover:text-ink'"
-          @click="active = tab.key"
         >
           <span class="text-caption-strong">{{ tab.label }}</span>
-        </button>
+        </router-link>
       </div>
     </nav>
 
+<<<<<<< HEAD
     <!-- 三个可切换面板：参考 product-tile-light / product-tile-parchment 节奏 -->
     <main class="mx-auto max-w-apple-grid px-apple-xl">
       <!-- 主页：壁纸与布局由 HomeView 全权负责 -->
@@ -69,6 +76,11 @@ const active = ref('home')
       >
         <ToolsView />
       </section>
+=======
+    <!-- 路由承载：滚动限制在 <main> 内部，最外层浏览器无滚动条 -->
+    <main class="mx-auto h-[calc(100vh-64px)] max-w-apple-grid overflow-y-auto px-apple-xl">
+      <RouterView />
+>>>>>>> 39bf6a4ad23b6510127591600760261b871b8b18
     </main>
   </div>
 </template>
