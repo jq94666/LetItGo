@@ -1,0 +1,7 @@
+# 图片资源目录
+# 将站点用到的图片（PNG / JPG / WebP / GIF 等）放入此目录，例如：
+#   src/assets/images/banner.jpg
+#
+# 引用示例：
+#   import bannerUrl from '@/assets/images/banner.jpg'
+#   <img :src="bannerUrl" alt="banner" />

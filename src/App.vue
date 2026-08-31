@@ -37,8 +37,8 @@ const active = () => route.path
       </div>
     </nav>
 
-    <!-- 路由承载：滚动限制在 <main> 内部，最外层浏览器无滚动条 -->
-    <main class="mx-auto h-[calc(100vh-64px)] max-w-apple-grid overflow-y-auto px-apple-xl">
+    <!-- 路由承载：全宽，滚动限制在 <main> 内部；宽度/内边距由各视图自管 -->
+    <main class="h-[calc(100vh-64px)] w-full overflow-y-auto">
       <RouterView />
     </main>
   </div>
