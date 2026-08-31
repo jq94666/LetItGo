@@ -268,7 +268,6 @@ function iconOf(node) {
   >
     <span class="flex h-11 w-11 items-center justify-center rounded-apple-md bg-linear-to-br from-violet-400 to-fuchsia-400 text-xl">👨‍👩‍👧</span>
     <p class="text-body-strong text-ink">亲戚计算机器</p>
-    <p class="text-fine-print text-ink-muted-48">点按钮走家谱 · 亲属图实时展示</p>
   </button>
 
   <Teleport to="body">

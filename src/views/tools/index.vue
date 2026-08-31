@@ -1,7 +1,10 @@
 <script setup>
 import { ref } from 'vue'
 import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
+import ImgToPdfTool from './components/ImgToPdfTool.vue'
 import PdfScanTool from './components/PdfScanTool.vue'
+import PdfToExcelTool from './components/PdfToExcelTool.vue'
+import PdfToWordTool from './components/PdfToWordTool.vue'
 import UppercaseAmountTool from './components/UppercaseAmountTool.vue'
 
 // 侧边菜单：每个菜单项带彩色图标（badge 底色 + 图标 emoji）
@@ -112,7 +115,7 @@ const collapsed = ref(false)
         </div>
       </section>
 
-      <!-- PDF：转扫描件 -->
+      <!-- PDF：转扫描件 / 转Excel / 转Word / 图片转PDF -->
       <section
         v-show="active === 'pdf'"
         role="tabpanel"
@@ -120,6 +123,9 @@ const collapsed = ref(false)
       >
         <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
           <PdfScanTool />
+          <PdfToExcelTool />
+          <PdfToWordTool />
+          <ImgToPdfTool />
         </div>
       </section>
     </main>

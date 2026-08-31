@@ -128,7 +128,6 @@ function removeFile(id) {
   >
     <span class="flex h-11 w-11 items-center justify-center rounded-apple-md bg-linear-to-br from-orange-400 to-rose-400 text-xl">🖨️</span>
     <p class="text-body-strong text-ink">PDF转扫描件</p>
-    <p class="text-fine-print text-ink-muted-48">上传 · 逐页旋转 · 生成下载</p>
   </button>
 
   <Teleport to="body">
