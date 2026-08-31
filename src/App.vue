@@ -1,12 +1,5 @@
 <script setup>
-<<<<<<< HEAD
-import { ref } from 'vue'
-import HomeView from './views/home/index.vue'
-import SitesView from './views/sites/index.vue'
-import ToolsView from './views/tools/index.vue'
-=======
 import { useRoute } from 'vue-router'
->>>>>>> 39bf6a4ad23b6510127591600760261b871b8b18
 
 const route = useRoute()
 
@@ -44,43 +37,9 @@ const active = () => route.path
       </div>
     </nav>
 
-<<<<<<< HEAD
-    <!-- 三个可切换面板：参考 product-tile-light / product-tile-parchment 节奏 -->
-    <main class="mx-auto max-w-apple-grid px-apple-xl">
-      <!-- 主页：壁纸与布局由 HomeView 全权负责 -->
-      <section
-        v-show="active === 'home'"
-        role="tabpanel"
-        aria-labelledby="home"
-        class="min-h-[calc(100vh-64px)]"
-      >
-        <HomeView />
-      </section>
-
-      <!-- 网站 -->
-      <section
-        v-show="active === 'sites'"
-        role="tabpanel"
-        aria-labelledby="sites"
-        class="min-h-[calc(100vh-64px)] bg-canvas-parchment px-apple-section py-apple-section"
-      >
-        <SitesView />
-      </section>
-
-      <!-- 工具 -->
-      <section
-        v-show="active === 'tools'"
-        role="tabpanel"
-        aria-labelledby="tools"
-        class="min-h-[calc(100vh-64px)] bg-canvas px-apple-section py-apple-section"
-      >
-        <ToolsView />
-      </section>
-=======
     <!-- 路由承载：滚动限制在 <main> 内部，最外层浏览器无滚动条 -->
     <main class="mx-auto h-[calc(100vh-64px)] max-w-apple-grid overflow-y-auto px-apple-xl">
       <RouterView />
->>>>>>> 39bf6a4ad23b6510127591600760261b871b8b18
     </main>
   </div>
 </template>
