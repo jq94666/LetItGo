@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue'
+import { designSiteGroups } from '../../../data/sites.js'
+import SiteCard from './SiteCard.vue'
 
 /* 设计相关站点：按子菜单分组 */
 const subMenus = [
@@ -7,13 +9,6 @@ const subMenus = [
 ]
 
 const active = ref('icons')
-
-const siteGroups = {
-  icons: [
-    { name: 'iconfont', href: 'https://www.iconfont.cn/' },
-    { name: 'iconpark', href: 'https://iconpark.oceanengine.com/home' }
-  ]
-}
 </script>
 
 <template>
@@ -44,20 +39,7 @@ const siteGroups = {
       :aria-label="sub.label"
       class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4"
     >
-      <a
-        v-for="site in siteGroups[sub.key]"
-        :key="site.name"
-        :href="site.href"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="flex flex-col items-center gap-apple-xs rounded-apple-lg bg-canvas p-apple-sm transition-all duration-200 hover:shadow-hairline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.97] no-underline"
-      >
-        <!-- 图标占位：待用户自行定义 -->
-        <span
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-surface-tile-2"
-        ></span>
-        <span class="text-caption-strong text-ink">{{ site.name }}</span>
-      </a>
+      <SiteCard v-for="site in designSiteGroups[sub.key]" :key="site.name" :site="site" />
     </div>
   </div>
 </template>

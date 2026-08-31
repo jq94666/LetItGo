@@ -1,0 +1,5 @@
+# 图标资源目录
+# favicon 由 npm run fetch:favicons 自动抓取到此目录（favicon-*.png 等）
+# 也可手动放置自定义图标（SVG / PNG 等），引用示例：
+#   import logoUrl from '@/assets/icons/logo.svg'
+#   <img :src="logoUrl" alt="logo" />

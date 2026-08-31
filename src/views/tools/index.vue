@@ -1,12 +1,14 @@
 <script setup>
 import { ref } from 'vue'
 import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
+import PdfScanTool from './components/PdfScanTool.vue'
 import UppercaseAmountTool from './components/UppercaseAmountTool.vue'
 
 // 侧边菜单：每个菜单项带彩色图标（badge 底色 + 图标 emoji）
 const menus = [
   { key: 'family', label: '家庭', icon: '👨‍👩‍👧', badge: 'bg-violet-100', accent: 'text-violet-600' },
-  { key: 'finance', label: '财务', icon: '💰', badge: 'bg-emerald-100', accent: 'text-emerald-600' }
+  { key: 'finance', label: '财务', icon: '💰', badge: 'bg-emerald-100', accent: 'text-emerald-600' },
+  { key: 'pdf', label: 'PDF', icon: '🖨️', badge: 'bg-orange-100', accent: 'text-orange-600' }
 ]
 
 const active = ref('family')
@@ -107,6 +109,17 @@ const collapsed = ref(false)
       >
         <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
           <UppercaseAmountTool />
+        </div>
+      </section>
+
+      <!-- PDF：转扫描件 -->
+      <section
+        v-show="active === 'pdf'"
+        role="tabpanel"
+        aria-label="PDF"
+      >
+        <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
+          <PdfScanTool />
         </div>
       </section>
     </main>
