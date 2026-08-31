@@ -1,5 +1,8 @@
 <script setup>
 import { ref } from 'vue'
+import HomeView from './views/home/index.vue'
+import SitesView from './views/sites/index.vue'
+import ToolsView from './views/tools/index.vue'
 
 const tabs = [
   { key: 'home', label: '主页' },
@@ -37,16 +40,14 @@ const active = ref('home')
 
     <!-- 三个可切换面板：参考 product-tile-light / product-tile-parchment 节奏 -->
     <main class="mx-auto max-w-apple-grid px-apple-xl">
-      <!-- 主页 -->
+      <!-- 主页：壁纸与布局由 HomeView 全权负责 -->
       <section
         v-show="active === 'home'"
         role="tabpanel"
         aria-labelledby="home"
-        class="min-h-[calc(100vh-64px)] bg-canvas px-apple-section py-apple-section"
+        class="min-h-[calc(100vh-64px)]"
       >
-        <div class="flex min-h-[60vh] items-center justify-center">
-          <p class="text-caption text-ink-muted-48">待填充</p>
-        </div>
+        <HomeView />
       </section>
 
       <!-- 网站 -->
@@ -56,9 +57,7 @@ const active = ref('home')
         aria-labelledby="sites"
         class="min-h-[calc(100vh-64px)] bg-canvas-parchment px-apple-section py-apple-section"
       >
-        <div class="flex min-h-[60vh] items-center justify-center">
-          <p class="text-caption text-ink-muted-48">待填充</p>
-        </div>
+        <SitesView />
       </section>
 
       <!-- 工具 -->
@@ -68,9 +67,7 @@ const active = ref('home')
         aria-labelledby="tools"
         class="min-h-[calc(100vh-64px)] bg-canvas px-apple-section py-apple-section"
       >
-        <div class="flex min-h-[60vh] items-center justify-center">
-          <p class="text-caption text-ink-muted-48">待填充</p>
-        </div>
+        <ToolsView />
       </section>
     </main>
   </div>
