@@ -5,8 +5,6 @@ import UppercaseAmountTool from './components/UppercaseAmountTool.vue'
 // 侧边菜单
 const menus = [
   { key: 'finance', label: '财务' },
-  { key: 'report', label: '报表' },
-  { key: 'settings', label: '设置' }
 ]
 const active = ref('finance')
 </script>
@@ -38,7 +36,7 @@ const active = ref('finance')
     </aside>
 
     <!-- 右侧功能面板 -->
-    <main class="flex-1 bg-canvas-parchment px-apple-section py-apple-section">
+    <main class="flex-1 bg-canvas-parchment px-apple-section pb-apple-section pt-apple-sm">
       <!-- 财务：放置工具卡片组件 -->
       <section
         v-show="active === 'finance'"

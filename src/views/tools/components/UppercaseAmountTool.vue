@@ -105,11 +105,11 @@ const ruleList = [
     <!-- 工具卡片 -->
     <button
       type="button"
-      class="flex w-full flex-col items-center gap-apple-md rounded-apple-lg bg-canvas p-apple-lg transition-all duration-200 hover:shadow-hairline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.97]"
+      class="flex w-full flex-col items-center gap-apple-xs rounded-apple-lg bg-canvas p-apple-sm transition-all duration-200 hover:shadow-hairline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.97]"
       @click="open = true"
     >
       <span
-        class="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-[26px] font-semibold text-on-primary"
+        class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-[18px] font-semibold text-on-primary"
       >
         ¥
       </span>
