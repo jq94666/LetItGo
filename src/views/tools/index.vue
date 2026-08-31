@@ -1,16 +1,20 @@
 <script setup>
 import { ref } from 'vue'
+import ExcelMergeTool from './components/ExcelMergeTool.vue'
 import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
 import ImgToPdfTool from './components/ImgToPdfTool.vue'
 import PdfScanTool from './components/PdfScanTool.vue'
 import PdfToExcelTool from './components/PdfToExcelTool.vue'
 import PdfToWordTool from './components/PdfToWordTool.vue'
 import UppercaseAmountTool from './components/UppercaseAmountTool.vue'
+import WordDraftPaperTool from './components/WordDraftPaperTool.vue'
 
 // 侧边菜单：每个菜单项带彩色图标（badge 底色 + 图标 emoji）
 const menus = [
   { key: 'family', label: '家庭', icon: '👨‍👩‍👧', badge: 'bg-violet-100', accent: 'text-violet-600' },
   { key: 'finance', label: '财务', icon: '💰', badge: 'bg-emerald-100', accent: 'text-emerald-600' },
+  { key: 'excel', label: 'Excel', icon: '📊', badge: 'bg-green-100', accent: 'text-green-600' },
+  { key: 'word', label: 'Word', icon: '📘', badge: 'bg-sky-100', accent: 'text-sky-600' },
   { key: 'pdf', label: 'PDF', icon: '🖨️', badge: 'bg-orange-100', accent: 'text-orange-600' }
 ]
 
@@ -112,6 +116,28 @@ const collapsed = ref(false)
       >
         <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
           <UppercaseAmountTool />
+        </div>
+      </section>
+
+      <!-- Excel：合并 -->
+      <section
+        v-show="active === 'excel'"
+        role="tabpanel"
+        aria-label="Excel"
+      >
+        <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
+          <ExcelMergeTool />
+        </div>
+      </section>
+
+      <!-- Word：草稿纸 -->
+      <section
+        v-show="active === 'word'"
+        role="tabpanel"
+        aria-label="Word"
+      >
+        <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
+          <WordDraftPaperTool />
         </div>
       </section>
 
