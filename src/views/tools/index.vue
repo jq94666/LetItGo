@@ -1,13 +1,15 @@
 <script setup>
 import { ref } from 'vue'
+import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
 import UppercaseAmountTool from './components/UppercaseAmountTool.vue'
 
 // 侧边菜单：每个菜单项带彩色图标（badge 底色 + 图标 emoji）
 const menus = [
+  { key: 'family', label: '家庭', icon: '👨‍👩‍👧', badge: 'bg-violet-100', accent: 'text-violet-600' },
   { key: 'finance', label: '财务', icon: '💰', badge: 'bg-emerald-100', accent: 'text-emerald-600' }
 ]
 
-const active = ref('finance')
+const active = ref('family')
 
 // 侧边栏折叠状态：true = 收起为窄条
 const collapsed = ref(false)
@@ -86,6 +88,17 @@ const collapsed = ref(false)
 
     <!-- 右侧功能面板 -->
     <main class="min-w-0 flex-1 px-apple-md py-apple-md sm:px-apple-section">
+      <!-- 家庭：亲戚计算机器 -->
+      <section
+        v-show="active === 'family'"
+        role="tabpanel"
+        aria-label="家庭"
+      >
+        <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
+          <FamilyRelativesTool />
+        </div>
+      </section>
+
       <!-- 财务：放置工具卡片组件 -->
       <section
         v-show="active === 'finance'"
@@ -95,18 +108,6 @@ const collapsed = ref(false)
         <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
           <UppercaseAmountTool />
         </div>
-      </section>
-
-      <!-- 报表 / 设置：待填充 -->
-      <section
-        v-show="active !== 'finance'"
-        role="tabpanel"
-        :aria-label="active === 'report' ? '报表' : '设置'"
-        class="flex min-h-[60vh] items-center justify-center"
-      >
-        <p class="text-caption text-ink-muted-48">
-          {{ active === 'report' ? '报表' : '设置' }} - 待填充
-        </p>
       </section>
     </main>
   </div>

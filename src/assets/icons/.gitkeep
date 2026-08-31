@@ -1,7 +1,0 @@
-# 图标资源目录
-# 将自定义图标（SVG / PNG 等）放入此目录，例如：
-#   src/assets/icons/logo.svg
-#
-# 引用示例：
-#   import logoUrl from '@/assets/icons/logo.svg'
-#   <img :src="logoUrl" alt="logo" />

@@ -1,12 +1,14 @@
 <script setup>
 import { ref } from 'vue'
-import PdfSites from './components/PdfSites.vue'
+import DesignSites from './components/DesignSites.vue'
 import DirectorySites from './components/DirectorySites.vue'
+import PdfSites from './components/PdfSites.vue'
 
 // 侧边菜单：每个菜单项带彩色图标（badge 底色 + 图标 emoji）
 const menus = [
   { key: 'pdf', label: 'PDF', icon: '📄', badge: 'bg-orange-100', accent: 'text-orange-600' },
-  { key: 'directory', label: '文档', icon: '📚', badge: 'bg-blue-100', accent: 'text-blue-600' }
+  { key: 'directory', label: '文档', icon: '📚', badge: 'bg-blue-100', accent: 'text-blue-600' },
+  { key: 'design', label: '设计', icon: '🎨', badge: 'bg-pink-100', accent: 'text-pink-600' }
 ]
 
 const active = ref('pdf')
@@ -90,6 +92,7 @@ const collapsed = ref(false)
     <main class="min-w-0 flex-1 px-apple-md py-apple-md sm:px-apple-section">
       <PdfSites v-show="active === 'pdf'" />
       <DirectorySites v-show="active === 'directory'" />
+      <DesignSites v-show="active === 'design'" />
     </main>
   </div>
 </template>
