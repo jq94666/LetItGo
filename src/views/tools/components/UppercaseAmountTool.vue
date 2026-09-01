@@ -3,6 +3,10 @@ import { ref, computed } from 'vue'
 
 /* ---------- 大写金额工具 ---------- */
 const open = ref(false)
+function openTool() {
+  open.value = true
+}
+defineExpose({ open: openTool })
 const amountInput = ref('')
 
 const cnDigit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
@@ -101,21 +105,7 @@ const ruleList = [
 </script>
 
 <template>
-  <div>
-    <!-- 工具卡片 -->
-    <button
-      type="button"
-      class="flex w-full flex-col items-center gap-apple-xs rounded-apple-lg bg-canvas p-apple-sm transition-all duration-200 hover:shadow-hairline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.97]"
-      @click="open = true"
-    >
-      <span
-        class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-[18px] font-semibold text-on-primary"
-      >
-        ¥
-      </span>
-      <span class="text-caption-strong text-ink">大写金额</span>
-    </button>
-
+  <Teleport to="body">
     <!-- 苹果风格弹窗 -->
     <Transition name="modal">
       <div
@@ -197,7 +187,7 @@ const ruleList = [
         </div>
       </div>
     </Transition>
-  </div>
+  </Teleport>
 </template>
 
 <style scoped>

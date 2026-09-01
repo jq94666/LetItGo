@@ -2,6 +2,10 @@
 import { computed, ref } from 'vue'
 
 const open = ref(false)
+function openTool() {
+  open.value = true
+}
+defineExpose({ open: openTool })
 const mySex = ref('女')
 
 // ------------- 家族图谱数据模型 -------------
@@ -260,16 +264,6 @@ function iconOf(node) {
 </script>
 
 <template>
-  <button
-    type="button"
-    class="flex flex-col items-start gap-apple-sm rounded-apple-lg border border-divider-soft bg-canvas p-apple-md text-left shadow-hairline transition-all duration-200 hover:-translate-y-px hover:shadow-product focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.98]"
-    :aria-haspopup="'dialog'"
-    @click="open = true"
-  >
-    <span class="flex h-11 w-11 items-center justify-center rounded-apple-md bg-linear-to-br from-violet-400 to-fuchsia-400 text-xl">👨‍👩‍👧</span>
-    <p class="text-body-strong text-ink">亲戚计算机器</p>
-  </button>
-
   <Teleport to="body">
     <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0" leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0">
       <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-apple-sm backdrop-blur-sm sm:p-apple-xl" @click.self="open = false">

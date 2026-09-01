@@ -1,159 +1,171 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useDesktop } from '../../composables/useDesktop.js'
+import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
+import DesktopFolderTile from '../../components/DesktopFolderTile.vue'
 import ExcelMergeTool from './components/ExcelMergeTool.vue'
 import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
+import ImageCompressTool from './components/ImageCompressTool.vue'
 import ImgToPdfTool from './components/ImgToPdfTool.vue'
 import PdfScanTool from './components/PdfScanTool.vue'
 import PdfToExcelTool from './components/PdfToExcelTool.vue'
 import PdfToWordTool from './components/PdfToWordTool.vue'
+import ToolTile from './components/ToolTile.vue'
 import UppercaseAmountTool from './components/UppercaseAmountTool.vue'
+import UrlToQrCodeTool from './components/UrlToQrCodeTool.vue'
 import WordDraftPaperTool from './components/WordDraftPaperTool.vue'
 
-// 侧边菜单：每个菜单项带彩色图标（badge 底色 + 图标 emoji）
-const menus = [
-  { key: 'family', label: '家庭', icon: '👨‍👩‍👧', badge: 'bg-violet-100', accent: 'text-violet-600' },
-  { key: 'finance', label: '财务', icon: '💰', badge: 'bg-emerald-100', accent: 'text-emerald-600' },
-  { key: 'excel', label: 'Excel', icon: '📊', badge: 'bg-green-100', accent: 'text-green-600' },
-  { key: 'word', label: 'Word', icon: '📘', badge: 'bg-sky-100', accent: 'text-sky-600' },
-  { key: 'pdf', label: 'PDF', icon: '🖨️', badge: 'bg-orange-100', accent: 'text-orange-600' }
+// 同分类的工具合并为一个文件夹
+const groups = [
+  {
+    id: 'family',
+    label: '家庭',
+    tools: [{ id: 'relatives', label: '亲戚计算', icon: '👨‍👩‍👧', tint: 'from-violet-400 to-fuchsia-400' }]
+  },
+  {
+    id: 'finance',
+    label: '财务',
+    tools: [{ id: 'uppercase', label: '大写金额', icon: '¥', tint: 'from-emerald-400 to-teal-400' }]
+  },
+  {
+    id: 'excel',
+    label: 'Excel',
+    tools: [{ id: 'excelMerge', label: '合并', icon: '📗', tint: 'from-green-400 to-emerald-400' }]
+  },
+  {
+    id: 'word',
+    label: 'Word',
+    tools: [{ id: 'wordDraft', label: '草稿纸', icon: '📘', tint: 'from-sky-400 to-blue-500' }]
+  },
+  {
+    id: 'pdf',
+    label: 'PDF',
+    tools: [
+      { id: 'pdfScan', label: '转扫描件', icon: '🖨️', tint: 'from-orange-400 to-rose-400' },
+      { id: 'pdfToExcel', label: '转Excel', icon: '📊', tint: 'from-emerald-400 to-teal-400' },
+      { id: 'pdfToWord', label: '转Word', icon: '📝', tint: 'from-blue-400 to-indigo-400' },
+      { id: 'imgToPdf', label: '图片转PDF', icon: '🖼️', tint: 'from-fuchsia-400 to-pink-400' }
+    ]
+  },
+  {
+    id: 'qrcode',
+    label: '二维码',
+    tools: [{ id: 'urlToQrCode', label: '网址转码', icon: '🔳', tint: 'from-indigo-400 to-blue-500' }]
+  },
+  {
+    id: 'image',
+    label: '图片',
+    tools: [{ id: 'imageCompress', label: '压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' }]
+  }
 ]
 
-const active = ref('family')
+const toolComponents = {
+  relatives: FamilyRelativesTool,
+  uppercase: UppercaseAmountTool,
+  excelMerge: ExcelMergeTool,
+  wordDraft: WordDraftPaperTool,
+  pdfScan: PdfScanTool,
+  pdfToExcel: PdfToExcelTool,
+  pdfToWord: PdfToWordTool,
+  imgToPdf: ImgToPdfTool,
+  urlToQrCode: UrlToQrCodeTool,
+  imageCompress: ImageCompressTool
+}
 
-// 侧边栏折叠状态：true = 收起为窄条
-const collapsed = ref(false)
+const {
+  screenEl, auto, positions, openedId, dragId, tileWidth, deskHeight, slotPos,
+  onDown, onMove, onUp, onCancel, onClick
+} = useDesktop({ storageKey: 'workmate.tools.screen', itemCount: groups.length })
+
+// 打开弹窗后，首帧内禁止遮罩捕获指针事件：移动端点按按钮后浏览器会合成一次 click，
+// 此时遮罩恰好覆盖按钮，该 click 会落在遮罩上触发关闭（phantom click），导致弹窗一开即关。
+// 让遮罩在首帧穿透，使该 click 落到按钮（onClick 中已打开则为无副作用），随后再恢复交互。
+const armed = ref(true)
+watch(openedId, (val, old) => {
+  if (val && !old) {
+    armed.value = false
+    requestAnimationFrame(() => requestAnimationFrame(() => { armed.value = true }))
+  }
+})
+
+const tiles = computed(() =>
+  groups.map((group, i) => {
+    const pos = auto.value ? slotPos(i) : (positions[group.id] ?? slotPos(i))
+    return { id: group.id, group, x: pos.x, y: pos.y }
+  })
+)
+
+const openedGroup = computed(() => groups.find((g) => g.id === openedId.value) ?? null)
+// 桌面滚动容器（供滚动定位等用途）
+const deskScroller = ref(null)
+
+// 工具组件以弹窗形式存在，这里集中挂载并通过 ref 调用其 open()
+const toolRefs = {}
+function setToolRef(id, el) {
+  if (el) toolRefs[id] = el
+}
+function launch(tool) {
+  openedId.value = null
+  toolRefs[tool.id]?.open?.()
+}
 </script>
 
 <template>
-  <div class="flex min-h-[calc(100vh-64px)] flex-col sm:flex-row sm:items-start">
-    <!-- 侧边菜单卡片：四周留白（m-apple-md），多彩图标，支持展开/收起 -->
-    <aside
-      class="flex shrink-0 flex-col gap-apple-sm rounded-apple-lg border border-divider-soft bg-canvas p-apple-sm shadow-hairline transition-[width] duration-300 ease-in-out sm:m-apple-md sm:gap-apple-md sm:p-apple-md"
-      :class="collapsed ? 'w-full sm:w-[76px]' : 'w-full sm:w-[240px]'"
-      role="navigation"
-      aria-label="工具菜单"
-    >
-      <!-- 头部：品牌 + 折叠开关 -->
-      <div class="flex items-center justify-between">
-        <div v-if="!collapsed" class="flex min-w-0 items-center gap-apple-sm">
-          <span
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-apple-md bg-linear-to-br from-emerald-400 via-teal-400 to-cyan-400 text-base"
-          >🧰</span>
-          <div class="min-w-0">
-            <p class="truncate text-body-strong text-ink">工具中心</p>
-            <p class="hidden text-fine-print text-ink-muted-48 sm:block">{{ menus.length }} 个分类</p>
-          </div>
-        </div>
+  <!-- 工具面板：与网站页同一套桌面（壁纸与底部按钮由 App 统一提供） -->
+  <div ref="screenEl" class="relative h-full w-full overflow-hidden">
+    <!-- 可纵向滚动的桌面：内容超出视口时整块可滑动，文件夹弹窗保持固定不随滚动 -->
+    <div ref="deskScroller" class="h-full w-full overflow-y-auto overscroll-contain">
+      <div class="relative w-full" :style="{ minHeight: '100%', height: deskHeight }">
         <button
+          v-for="tile in tiles"
+          :key="tile.id"
           type="button"
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-apple-md text-ink-muted-80 transition hover:bg-surface-pearl hover:text-ink active:scale-[0.95]"
-          :aria-expanded="!collapsed"
-          :aria-label="collapsed ? '展开菜单' : '收起菜单'"
-          @click="collapsed = !collapsed"
+          class="absolute z-10 select-none rounded-apple-md transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
+          :class="[dragId === tile.id ? 'cursor-grabbing' : auto ? 'cursor-default' : 'cursor-grab', auto ? 'touch-pan-y' : 'touch-none']"
+          :style="{
+            left: `${tile.x}%`,
+            top: `${tile.y}%`,
+            width: tileWidth,
+            transform: `translate(-50%, -50%) scale(${dragId === tile.id ? 1.06 : 1})`
+          }"
+          :aria-label="`${tile.group.label}，${tile.group.tools.length} 个工具`"
+          @pointerdown="onDown($event, tile)"
+          @pointermove="onMove"
+          @pointerup="onUp"
+          @pointercancel="onCancel"
+          @click="onClick(tile)"
+          @keydown.enter.prevent="openedId = tile.id"
+          @keydown.space.prevent="openedId = tile.id"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="h-5 w-5"
-          >
-            <path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" />
-          </svg>
+          <DesktopFolderTile :title="tile.group.label" :items="tile.group.tools" />
         </button>
       </div>
+    </div>
 
-      <!-- 菜单项 -->
-      <ul class="flex flex-row flex-wrap gap-apple-xs sm:flex-col" role="menu">
-        <li v-for="menu in menus" :key="menu.key" role="none">
-          <button
-            type="button"
-            role="menuitem"
-            :aria-current="active === menu.key ? 'page' : undefined"
-            class="flex grow items-center gap-apple-sm rounded-apple-md px-apple-sm py-apple-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.98] sm:m-0 sm:w-full sm:grow-0 sm:gap-apple-md sm:px-apple-sm"
-            :class="[
-              collapsed ? 'justify-center px-0' : 'px-apple-sm',
-              active === menu.key
-                ? 'bg-primary text-on-primary'
-                : 'text-ink hover:bg-surface-pearl'
-            ]"
-            :title="menu.label"
-            @click="active = menu.key"
-          >
-            <span
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-apple-sm text-sm"
-              :class="active === menu.key ? 'bg-white/20' : menu.badge + ' ' + menu.accent"
-            >
-              {{ menu.icon }}
-            </span>
-            <span v-if="!collapsed" class="truncate text-caption-strong">{{ menu.label }}</span>
-          </button>
-        </li>
-      </ul>
-    </aside>
-
-    <!-- 右侧功能面板 -->
-    <main class="min-w-0 flex-1 px-apple-md py-apple-md sm:px-apple-section">
-      <!-- 家庭：亲戚计算机器 -->
-      <section
-        v-show="active === 'family'"
-        role="tabpanel"
-        aria-label="家庭"
+    <!-- 文件夹展开 -->
+    <Transition name="folder">
+      <div
+        v-if="openedGroup"
+        class="absolute inset-0 z-20"
+        :class="{ 'pointer-events-none': !armed }"
       >
-        <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
-          <FamilyRelativesTool />
-        </div>
-      </section>
+        <DesktopFolderPanel
+          :title="openedGroup.label"
+          :subtitle="`${openedGroup.tools.length} 个工具`"
+          @close="openedId = null"
+        >
+          <ToolTile v-for="tool in openedGroup.tools" :key="tool.id" :tool="tool" @launch="launch" />
+        </DesktopFolderPanel>
+      </div>
+    </Transition>
 
-      <!-- 财务：放置工具卡片组件 -->
-      <section
-        v-show="active === 'finance'"
-        role="tabpanel"
-        aria-label="财务"
-      >
-        <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
-          <UppercaseAmountTool />
-        </div>
-      </section>
 
-      <!-- Excel：合并 -->
-      <section
-        v-show="active === 'excel'"
-        role="tabpanel"
-        aria-label="Excel"
-      >
-        <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
-          <ExcelMergeTool />
-        </div>
-      </section>
-
-      <!-- Word：草稿纸 -->
-      <section
-        v-show="active === 'word'"
-        role="tabpanel"
-        aria-label="Word"
-      >
-        <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
-          <WordDraftPaperTool />
-        </div>
-      </section>
-
-      <!-- PDF：转扫描件 / 转Excel / 转Word / 图片转PDF -->
-      <section
-        v-show="active === 'pdf'"
-        role="tabpanel"
-        aria-label="PDF"
-      >
-        <div class="grid grid-cols-2 gap-apple-md sm:grid-cols-3 lg:grid-cols-4">
-          <PdfScanTool />
-          <PdfToExcelTool />
-          <PdfToWordTool />
-          <ImgToPdfTool />
-        </div>
-      </section>
-    </main>
+    <!-- 各工具的弹窗统一挂在此处 -->
+    <component
+      v-for="(comp, id) in toolComponents"
+      :key="id"
+      :is="comp"
+      :ref="(el) => setToolRef(id, el)"
+    />
   </div>
 </template>

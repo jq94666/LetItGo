@@ -17,7 +17,7 @@ function onSubmit(e) {
 
 <template>
   <!-- 背景：单一 parchment 表面，无大色块对比，靠磨砂卡片自身提供层次 -->
-  <div class="relative min-h-[calc(100vh-64px)] w-full bg-canvas-parchment">
+  <div class="relative min-h-full w-full">
     <!-- 内容：搜索框靠上（距顶 apple-xxl 48px） -->
     <div class="relative z-10 mx-auto w-full max-w-apple-content px-apple-xl pb-apple-section pt-apple-xxl">
       <!-- 搜索框 -->

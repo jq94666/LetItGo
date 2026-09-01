@@ -3,6 +3,10 @@ import { ref } from 'vue'
 import { PDFDocument } from 'pdf-lib'
 
 const open = ref(false)
+function openTool() {
+  open.value = true
+}
+defineExpose({ open: openTool })
 const images = ref([]) // { id, name, img, rotation, crop, rotUrl, thumbUrl }
 const cropId = ref(null) // 当前裁剪中的图片 id
 const sel = ref(null) // 拖选区域 {x0,y0,x1,y1}（相对旋转后显示图）
@@ -169,16 +173,6 @@ async function generate() {
 </script>
 
 <template>
-  <button
-    type="button"
-    class="flex flex-col items-start gap-apple-sm rounded-apple-lg border border-divider-soft bg-canvas p-apple-md text-left shadow-hairline transition-all duration-200 hover:-translate-y-px hover:shadow-product focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.98]"
-    :aria-haspopup="'dialog'"
-    @click="open = true"
-  >
-    <span class="flex h-11 w-11 items-center justify-center rounded-apple-md bg-linear-to-br from-fuchsia-400 to-pink-400 text-xl">🖼️</span>
-    <p class="text-body-strong text-ink">图片转PDF</p>
-  </button>
-
   <Teleport to="body">
     <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0" leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0">
       <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-apple-sm backdrop-blur-sm sm:p-apple-xl" @click.self="open = false">
