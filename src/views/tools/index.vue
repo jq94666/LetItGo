@@ -160,7 +160,6 @@ function launch(tool) {
       >
         <DesktopFolderPanel
           :title="openedGroup.label"
-          :subtitle="`${openedGroup.tools.length} 个工具`"
           @close="openedId = null"
         >
           <ToolTile v-for="tool in openedGroup.tools" :key="tool.id" :tool="tool" @launch="launch" />

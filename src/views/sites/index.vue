@@ -89,7 +89,6 @@ const deskScroller = ref(null)
       >
         <DesktopFolderPanel
           :title="openedFolder.label"
-          :subtitle="`${openedFolder.sites.length} 个网站`"
           @close="openedId = null"
         >
           <AppTile v-for="site in openedFolder.sites" :key="site.name" :site="site" />

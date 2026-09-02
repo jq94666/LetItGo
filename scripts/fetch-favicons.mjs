@@ -1,7 +1,7 @@
 /* 抓取 src/data/sites.js 中所有站点的 favicon，
    保存到 src/assets/icons/，并重新生成 favicon-manifest.js
    用法：npm run fetch:favicons */
-import { mkdir, writeFile, readFile } from 'node:fs/promises'
+import { mkdir, writeFile, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { designSiteGroups, directoryGroups, pdfSites } from '../src/data/sites.js'
@@ -48,6 +48,15 @@ async function fetchBuffer(url, timeoutMs = 12000) {
 }
 
 function extFrom(buf, url, contentType = '') {
+  // 优先按真实字节魔数判断，避免「URL 以 .svg 结尾但内容其实是 JPEG/PNG」导致存错扩展名
+  if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpg'
+  if (
+    buf.length > 8 &&
+    buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47
+  ) return 'png'
+  if (buf.length > 4 && buf[0] === 0x00 && buf[1] === 0x00 && buf[2] === 0x01 && buf[3] === 0x00) return 'ico'
+  const ascii6 = buf.slice(0, 6).toString('ascii')
+  if (ascii6 === 'GIF89a' || ascii6 === 'GIF87a') return 'gif'
   const head = buf.slice(0, 16).toString('utf8').toLowerCase()
   if (
     contentType.includes('svg') ||
@@ -111,6 +120,16 @@ await mkdir(ICONS_DIR, { recursive: true })
 
 const entries = []
 for (const site of sites) {
+  // 已抓取过且本地图标文件仍在：直接沿用，不再重复下载
+  if (prev[site.name]) {
+    const existing = path.join(ICONS_DIR, path.basename(prev[site.name]))
+    try {
+      await stat(existing)
+      entries.push([site.name, prev[site.name]])
+      console.log(`==  ${site.name}: 已存在，跳过`)
+      continue
+    } catch {}
+  }
   try {
     const r = await grab(site)
     if (r) {

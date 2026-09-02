@@ -3,9 +3,7 @@ import { computed } from 'vue'
 
 const props = defineProps({
   // 文件夹标题
-  title: { type: String, required: true },
-  // 副标题，如「4 个网站」
-  subtitle: { type: String, default: '' }
+  title: { type: String, required: true }
 })
 
 const emit = defineEmits(['close'])
@@ -24,7 +22,6 @@ const emit = defineEmits(['close'])
       <div class="flex items-start justify-between gap-apple-sm">
         <div class="min-w-0">
           <p class="truncate text-body-strong text-ink">{{ title }}</p>
-          <p v-if="subtitle" class="text-fine-print text-ink-muted-48">{{ subtitle }}</p>
         </div>
         <button
           type="button"

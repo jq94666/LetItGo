@@ -12,7 +12,10 @@ export const directoryGroups = [
   {
     id: 'document-search',
     label: '文档检索',
-    sites: [{ name: 'anytxt', href: 'https://anytxt.net/' }]
+    sites: [
+      { name: 'anytxt', href: 'https://anytxt.net/' },
+      { name: 'everything', href: 'https://www.voidtools.com/zh-cn/' }
+    ]
   },
   {
     id: 'file-transfer',
@@ -33,7 +36,8 @@ export const directoryGroups = [
     label: 'OCR',
     sites: [
       { name: 'MinerU', href: 'https://mineru.net' },
-      { name: 'Paddleocr', href: 'https://aistudio.baidu.com/paddleocr' }
+      { name: 'Paddleocr', href: 'https://aistudio.baidu.com/paddleocr' },
+      { name: 'Umi-OCR', href: 'https://github.com/hiroi-sora/Umi-OCR' }
     ]
   },
   {
@@ -57,7 +61,89 @@ export const directoryGroups = [
   {
     id: 'database',
     label: '数据库',
-    sites: []
+    sites: [
+      { name: 'dbeaver', href: 'https://dbeaver.io/' },
+      { name: 'HeidiSQL', href: 'https://www.heidisql.com/' }
+    ]
+  },
+  {
+    id: 'blog',
+    label: '博客',
+    sites: [
+      { name: '阮一峰', href: 'https://www.ruanyifeng.com/blog/index.html' },
+      { name: '廖雪峰', href: 'https://liaoxuefeng.com/index.html' },
+      { name: '潮流周刊', href: 'https://weekly.tw93.fun/' }
+    ]
+  },
+  {
+    id: 'editor',
+    label: '文本编辑器',
+    sites: [
+      { name: 'VSCode', href: 'https://code.visualstudio.com/' },
+      { name: 'Sublime', href: 'https://www.sublimetext.com/' }
+    ]
+  },
+  {
+    id: 'game',
+    label: '单机游戏',
+    sites: [
+      { name: '游民星空', href: 'https://www.gamersky.com/' },
+      { name: '3DM', href: 'https://www.3dmgame.com/' }
+    ]
+  },
+  {
+    id: 'video',
+    label: '视频',
+    sites: [
+      { name: '央视片库', href: 'https://tv.cctv.com/yxg' },
+      { name: 'bilibili', href: 'https://www.bilibili.com/' },
+      { name: '斗鱼', href: 'https://www.douyu.com/' }
+    ]
+  },
+  {
+    id: 'forum',
+    label: '论坛',
+    sites: [
+      { name: '豆瓣网', href: 'https://www.douban.com/' },
+      { name: '知乎', href: 'https://www.zhihu.com/' }
+    ]
+  },
+  {
+    id: 'git',
+    label: 'Git',
+    sites: [
+      { name: 'Gitee', href: 'https://gitee.com/' },
+      { name: 'GitHub', href: 'https://github.com/' }
+    ]
+  },
+  {
+    id: 'newspaper',
+    label: '电子报刊',
+    sites: [{ name: '人民日报', href: 'https://paper.people.com.cn/' }]
+  },
+  {
+    id: 'compress',
+    label: '压缩软件',
+    sites: [
+      { name: '7-Zip', href: 'https://sparanoid.com/lab/7z/' },
+      { name: '360压缩', href: 'https://yasuo.360.cn/' }
+    ]
+  },
+  {
+    id: 'edu',
+    label: '学习平台',
+    sites: [
+      { name: '国家中小学教育平台', href: 'https://basic.smartedu.cn/' },
+      { name: '终身教育平台', href: 'https://le.ouchn.cn/home' },
+      { name: '学堂在线', href: 'https://www.xuetangx.com/' },
+      { name: '中国大学MOOC', href: 'https://www.icourse163.org/' },
+      { name: 'WPS学堂', href: 'https://www.wps.cn/learning?chan=pc_web_official' }
+    ]
+  },
+  {
+    id: 'office',
+    label: 'Office',
+    sites: [{ name: 'WPS', href: 'https://www.wps.cn/' }]
   }
 ]
 
