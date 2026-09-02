@@ -9,6 +9,7 @@ export const favicons = {
   '语雀': new URL('./favicon-yuque-com.svg', import.meta.url).href,
   '有道云笔记': new URL('./favicon-note-youdao-com.ico', import.meta.url).href,
   'MinerU': new URL('./favicon-mineru-net.png', import.meta.url).href,
+  'Paddleocr': new URL('./favicon-aistudio-baidu-com.png', import.meta.url).href,
   '傲梅分区助手': new URL('./favicon-disktool-cn.ico', import.meta.url).href,
   'Excalidraw': new URL('./favicon-excalidraw-com.png', import.meta.url).href,
   'Drawio': new URL('./favicon-app-diagrams-net.png', import.meta.url).href,

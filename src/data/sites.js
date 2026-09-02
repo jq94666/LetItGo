@@ -31,7 +31,10 @@ export const directoryGroups = [
   {
     id: 'ocr',
     label: 'OCR',
-    sites: [{ name: 'MinerU', href: 'https://mineru.net' }]
+    sites: [
+      { name: 'MinerU', href: 'https://mineru.net' },
+      { name: 'Paddleocr', href: 'https://aistudio.baidu.com/paddleocr' }
+    ]
   },
   {
     id: 'install',
@@ -50,6 +53,11 @@ export const directoryGroups = [
     id: 'famous-painting',
     label: '名画',
     sites: [{ name: '故宫名画记', href: 'https://minghuaji.dpm.org.cn/' }]
+  },
+  {
+    id: 'database',
+    label: '数据库',
+    sites: []
   }
 ]
 
