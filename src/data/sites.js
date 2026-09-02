@@ -37,6 +37,14 @@ export const directoryGroups = [
     id: 'install',
     label: '装机',
     sites: [{ name: '傲梅分区助手', href: 'https://www.disktool.cn/feature.html' }]
+  },
+  {
+    id: 'draw',
+    label: '画图',
+    sites: [
+      { name: 'Excalidraw', href: 'https://excalidraw.com/' },
+      { name: 'Drawio', href: 'https://app.diagrams.net/' }
+    ]
   }
 ]
 
