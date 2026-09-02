@@ -43,7 +43,14 @@ export const directoryGroups = [
   {
     id: 'install',
     label: '装机',
-    sites: [{ name: '傲梅分区助手', href: 'https://www.disktool.cn/feature.html' }]
+    sites: [
+      { name: '傲梅分区助手', href: 'https://www.disktool.cn/feature.html' },
+      { name: '老毛桃', href: 'https://www.laomaotao.net/' },
+      { name: 'I Tell You', href: 'https://next.itellyou.cn' },
+      { name: 'DLL-FILES', href: 'https://www.dll-files.com/n/' },
+      { name: '向日葵', href: 'https://sunlogin.oray.com/download' },
+      { name: '360（认准极速）', href: 'https://www.360.cn/download/' }
+    ]
   },
   {
     id: 'draw',
@@ -85,10 +92,15 @@ export const directoryGroups = [
   },
   {
     id: 'game',
-    label: '单机游戏',
+    label: '游戏',
     sites: [
       { name: '游民星空', href: 'https://www.gamersky.com/' },
-      { name: '3DM', href: 'https://www.3dmgame.com/' }
+      { name: '3DM', href: 'https://www.3dmgame.com/' },
+      { name: '奇趣电玩', href: 'https://www.qqarc.com/' },
+      { name: '畅玩空间', href: 'https://www.wo1wan.com/' },
+      { name: '游聚', href: 'https://www.gotvg.com/' },
+      { name: 'Emu666', href: 'https://www.emu666.com/' },
+      { name: '网页红警', href: 'https://www.ra2web.com/' }
     ]
   },
   {

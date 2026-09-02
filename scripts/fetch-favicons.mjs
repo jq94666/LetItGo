@@ -55,6 +55,7 @@ function extFrom(buf, url, contentType = '') {
     buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47
   ) return 'png'
   if (buf.length > 4 && buf[0] === 0x00 && buf[1] === 0x00 && buf[2] === 0x01 && buf[3] === 0x00) return 'ico'
+  if (buf.length > 2 && buf[0] === 0x42 && buf[1] === 0x4d) return 'bmp'
   const ascii6 = buf.slice(0, 6).toString('ascii')
   if (ascii6 === 'GIF89a' || ascii6 === 'GIF87a') return 'gif'
   const head = buf.slice(0, 16).toString('utf8').toLowerCase()

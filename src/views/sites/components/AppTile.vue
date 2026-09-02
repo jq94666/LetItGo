@@ -25,6 +25,6 @@ defineProps({
       />
       <span v-else class="text-body-strong text-ink-muted-48">{{ site.name.charAt(0).toUpperCase() }}</span>
     </span>
-    <span class="w-full truncate text-center text-fine-print text-ink-muted-80">{{ site.name }}</span>
+    <span class="line-clamp-2 w-full text-center text-fine-print text-ink-muted-80">{{ site.name }}</span>
   </a>
 </template>

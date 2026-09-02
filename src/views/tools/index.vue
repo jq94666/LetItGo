@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useDesktop } from '../../composables/useDesktop.js'
 import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
 import DesktopFolderTile from '../../components/DesktopFolderTile.vue'
+import AnalogClockTool from './components/AnalogClockTool.vue'
 import ExcelMergeTool from './components/ExcelMergeTool.vue'
 import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
 import ImageCompressTool from './components/ImageCompressTool.vue'
@@ -58,6 +59,11 @@ const groups = [
     id: 'image',
     label: '图片',
     tools: [{ id: 'imageCompress', label: '压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' }]
+  },
+  {
+    id: 'simulate',
+    label: '模拟',
+    tools: [{ id: 'analogClock', label: '模拟时钟', icon: '🕰️', tint: 'from-amber-400 to-orange-500' }]
   }
 ]
 
@@ -72,7 +78,8 @@ const toolComponents = {
   pdfToWord: PdfToWordTool,
   imgToPdf: ImgToPdfTool,
   urlToQrCode: UrlToQrCodeTool,
-  imageCompress: ImageCompressTool
+  imageCompress: ImageCompressTool,
+  analogClock: AnalogClockTool
 }
 
 const {
