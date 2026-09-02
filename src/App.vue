@@ -3,7 +3,7 @@ import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, r
 import { useRoute, useRouter } from 'vue-router'
 import Wallpaper from './components/Wallpaper.vue'
 import DesktopSettings from './components/DesktopSettings.vue'
-import { getDesktopSettings } from './composables/desktopStore.js'
+import { useDesktopStore } from './stores/desktop.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -120,10 +120,11 @@ const trackStyle = computed(() => ({
 }))
 
 // 底部导航右侧的设置按钮：主页 / 网站 / 工具 三页均显示，各自独立持久化
+const desktopStore = useDesktopStore()
 const settings = computed(() => {
-  if (tabIndex.value === 0) return getDesktopSettings('workmate.home.screen')
-  if (tabIndex.value === 1) return getDesktopSettings('workmate.sites.screen')
-  if (tabIndex.value === 2) return getDesktopSettings('workmate.tools.screen')
+  if (tabIndex.value === 0) return desktopStore.getSettings('workmate.home.screen')
+  if (tabIndex.value === 1) return desktopStore.getSettings('workmate.sites.screen')
+  if (tabIndex.value === 2) return desktopStore.getSettings('workmate.tools.screen')
   return null
 })
 </script>

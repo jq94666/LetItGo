@@ -15,9 +15,9 @@ const folders = [
 ]
 
 const {
-  screenEl, auto, positions, openedId, dragId, tileWidth, deskHeight, slotPos,
+  screenEl, auto, positions, openedId, order, dragId, dragX, dragY, tileWidth, deskHeight, slotPos,
   onDown, onMove, onUp, onCancel, onClick
-} = useDesktop({ storageKey: 'workmate.sites.screen', itemCount: folders.length })
+} = useDesktop({ storageKey: 'workmate.sites.screen', itemCount: folders.length, defaultOrder: folders.map((f) => f.id) })
 
 // 打开弹窗后，首帧内禁止遮罩捕获指针事件：移动端点按按钮后浏览器会合成一次 click，
 // 此时遮罩恰好覆盖按钮，该 click 会落在遮罩上触发关闭（phantom click），导致弹窗一开即关。
@@ -30,13 +30,18 @@ watch(openedId, (val, old) => {
   }
 })
 
-// 自动排列：一律按网格顺序紧凑落位；自由摆放：优先使用拖动记录的位置
-const tiles = computed(() =>
-  folders.map((folder, i) => {
-    const pos = auto.value ? slotPos(i) : (positions[folder.id] ?? slotPos(i))
-    return { id: folder.id, folder, x: pos.x, y: pos.y }
+// 自动排列：按「持久化的文件夹顺序」紧凑落位；手动：优先使用拖动记录的位置
+const tiles = computed(() => {
+  const map = Object.fromEntries(folders.map((f) => [f.id, f]))
+  const ordered = order.value.map((id) => map[id]).filter(Boolean)
+  return ordered.map((folder, i) => {
+    const base = auto.value ? slotPos(i) : (positions[folder.id] ?? slotPos(i))
+    const isDrag = dragId.value === folder.id
+    const x = isDrag && dragX.value != null ? dragX.value : base.x
+    const y = isDrag && dragY.value != null ? dragY.value : base.y
+    return { id: folder.id, folder, x, y }
   })
-)
+})
 
 const openedFolder = computed(() => folders.find((f) => f.id === openedId.value) ?? null)
 // 桌面滚动容器（供滚动定位等用途）
@@ -54,7 +59,7 @@ const deskScroller = ref(null)
           :key="tile.id"
           type="button"
           class="absolute z-10 select-none rounded-apple-md transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
-          :class="[dragId === tile.id ? 'cursor-grabbing' : auto ? 'cursor-default' : 'cursor-grab', auto ? 'touch-pan-y' : 'touch-none']"
+          :class="[dragId === tile.id ? 'cursor-grabbing touch-none' : auto ? 'cursor-default touch-pan-y' : 'cursor-grab touch-none']"
           :style="{
             left: `${tile.x}%`,
             top: `${tile.y}%`,

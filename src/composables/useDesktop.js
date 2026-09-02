@@ -1,8 +1,8 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-import { getDesktopSettings } from './desktopStore.js'
+import { useDesktopStore } from '../stores/desktop.js'
 
-/* 桌面布局：网格排布、拖拽摆放、自动排列
-   网站页与工具页共用同一套逻辑；列数/行数/位置等设置由 desktopStore 统一持久化，
+/* 桌面布局：网格排布、拖拽摆放、自动排列、长按重排文件夹顺序
+   网站页与工具页共用同一套逻辑；列数/行数/位置/顺序等设置由 Pinia store 统一持久化，
    以便底部导航里的设置按钮与页面共享同一份状态。 */
 
 const TILE_MAX = 120 // 图标/文件夹最大边长（px）
@@ -11,20 +11,32 @@ const LABEL_H = 22 // 图标下方文字高度（px）
 const EDGE_PAD = 20 // 网格左右内边距（px）
 const TOP_PAD = 16 // 网格顶部留白（px）
 const MIN_TILE = 80 // 单格最小图标边长（px）：低于此值则自动减少列数（移动端换行）
+const LONG_PRESS = 380 // 自动排列模式下，长按进入「重排」的阈值（ms）
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
 
-export function useDesktop({ storageKey, itemCount = 0 }) {
-  const s = getDesktopSettings(storageKey) // 与底部导航共享的响应式设置
+export function useDesktop({ storageKey, itemCount = 0, defaultOrder = [] }) {
+  const store = useDesktopStore()
+  const s = store.getSettings(storageKey) // 与底部导航共享的响应式设置
   const screenEl = ref(null)
   const openedId = ref(null)
   const dragId = ref(null)
+  const dragX = ref(null) // 拖拽中文件夹的实时中心坐标（% 屏幕），用于跟手显示
+  const dragY = ref(null)
   const screenSize = reactive({ w: 0, h: 0 })
 
   // 以 computed 代理共享状态，保持页面内 v-model / watch 的用法不变
   const cols = computed({ get: () => s.cols, set: (v) => (s.cols = clamp(Number(v) || 4, 3, 12)) })
   const auto = computed({ get: () => s.auto, set: (v) => (s.auto = v) })
   const positions = s.pos
+
+  // 文件夹顺序：以持久化的自定义顺序为准，补入默认中存在但自定义缺失的项，剔除已不存在的项
+  const order = computed(() => {
+    const set = new Set(defaultOrder)
+    const out = s.order.filter((id) => set.has(id))
+    for (const id of defaultOrder) if (!out.includes(id)) out.push(id)
+    return out
+  })
 
   /* ---------- 屏幕尺寸 ---------- */
   function measure() {
@@ -42,20 +54,15 @@ export function useDesktop({ storageKey, itemCount = 0 }) {
   onBeforeUnmount(() => window.removeEventListener('resize', measure))
 
   /* ---------- 网格排布 ---------- */
-  // 单元格取「屏幕均分」与「图标尺寸 + 固定间距」的较小值，
-  // 屏幕过宽时不拉伸间距，整块网格默认靠左上排列
   const layout = computed(() => {
     const { w, h } = screenSize
     const availW = w ? w - EDGE_PAD * 2 : 0
     const availH = h ? h - TOP_PAD : 0
-    // 列数：按可用宽度自动缩减，保证单格不小于 MIN_TILE（移动端自动换行、不挤在一起）
     const effCols = clamp(Math.floor((availW + TILE_GAP) / (MIN_TILE + TILE_GAP)), 3, cols.value)
-    // 行数：由内容数量决定，保证所有文件夹都能排下（超出视口则整块可纵向滑动）
     const effRows = Math.max(2, Math.ceil(itemCount / effCols))
     const cellW = availW > 0 ? Math.min(availW / effCols, TILE_MAX + TILE_GAP) : TILE_MAX + TILE_GAP
     const cellH = availH > 0 ? Math.min(availH / effRows, TILE_MAX + LABEL_H + TILE_GAP) : TILE_MAX + LABEL_H + TILE_GAP
     const tile = Math.max(56, Math.min(TILE_MAX, cellW - TILE_GAP, cellH - LABEL_H - TILE_GAP))
-    // 桌面高度取「视口高度」与「内容所需高度」的较大值：内容超出视口即可纵向滚动
     const deskH = Math.max(availH, TOP_PAD + effRows * cellH)
     return {
       w,
@@ -85,9 +92,17 @@ export function useDesktop({ storageKey, itemCount = 0 }) {
   const tileWidth = computed(() => `${layout.value.tile}px`)
   const deskHeight = computed(() => `${layout.value.deskH}px`)
 
-  /* ---------- 拖拽：可在整个屏幕内自由摆放 ---------- */
+  /* ---------- 拖拽 ---------- */
   let drag = null
   let lastMoved = false // 记录「最近一次按下到抬起」之间是否发生过明显移动（用于 click 兜底判定）
+  let longPressTimer = null
+
+  const clearLongPress = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer)
+      longPressTimer = null
+    }
+  }
 
   function onDown(e, tile) {
     if (openedId.value || e.button > 0) return
@@ -104,49 +119,119 @@ export function useDesktop({ storageKey, itemCount = 0 }) {
       sx: e.clientX,
       sy: e.clientY,
       rect,
+      el: e.currentTarget,
+      pid: e.pointerId,
       padX: (tileW / 2 / rect.width) * 100 + 1,
       padY: (tileH / 2 / deskH) * 100 + 1,
       moved: false,
-      canDrag: !auto.value // 自动排列时只允许点击，不允许拖动
+      reorder: false,
+      aborted: false
     }
-    dragId.value = drag.canDrag ? tile.id : null
-    // 仅手动模式下抢占手势并阻止冒泡，避免与「整屏左右滑动切换面板」冲突；
-    // 自动排列（默认）下不抢占，让手势继续冒泡给底部导航的滑动切换
-    if (drag.canDrag) {
+    if (auto.value) {
+      // 自动排列：长按进入「重排模式」——未达阈值而移动则视为翻页滑动，不进入重排
+      longPressTimer = setTimeout(() => {
+        if (!drag || drag.aborted || drag.moved) return
+        drag.reorder = true
+        dragId.value = drag.id
+        dragX.value = drag.x
+        dragY.value = drag.y
+        // 首次重排时，把当前顺序固化进自定义顺序，便于后续移动
+        if (!s.order.length) s.order.splice(0, s.order.length, ...order.value)
+        try {
+          drag.el?.setPointerCapture?.(drag.pid)
+        } catch {
+          /* ignore */
+        }
+      }, LONG_PRESS)
+    } else {
+      // 手动排列：立即进入自由拖拽（抢占手势，避免与底部导航滑动切换冲突）
+      drag.reorder = true
+      dragId.value = drag.id
       e.stopPropagation?.()
-      e.currentTarget.setPointerCapture?.(e.pointerId)
+      try {
+        drag.el?.setPointerCapture?.(drag.pid)
+      } catch {
+        /* ignore */
+      }
     }
   }
 
+  // 根据手指（拖拽物中心）所在网格单元，将 draggedId 移动到对应位置
+  function reorderTo(px, py, draggedId) {
+    const { w, deskH, offsetX, offsetY, cellW, cellH, effCols, effRows } = layout.value
+    if (!w) return
+    const localX = (px / 100) * w - offsetX
+    const localY = (py / 100) * deskH - offsetY
+    const col = clamp(Math.floor(localX / cellW), 0, effCols - 1)
+    const row = clamp(Math.floor(localY / cellH), 0, effRows - 1)
+    const target = clamp(row * effCols + col, 0, s.order.length - 1)
+    const from = s.order.indexOf(draggedId)
+    if (from < 0 || target === from) return
+    s.order.splice(from, 1)
+    s.order.splice(target, 0, draggedId)
+  }
+
   function onMove(e) {
-    if (!drag) return
+    if (!drag || drag.aborted) return
     const dx = e.clientX - drag.sx
     const dy = e.clientY - drag.sy
     if (!drag.moved && Math.abs(dx) + Math.abs(dy) >= 10) {
       drag.moved = true
       lastMoved = true
+      if (auto.value && !drag.reorder) {
+        // 自动模式下提前滑动 → 判定为翻页，放弃本次拖拽（让手势冒泡给底部导航）
+        clearLongPress()
+        drag.aborted = true
+        return
+      }
     }
-    if (!drag.canDrag) return // 自动排列：只判定是否为点击，不跟随移动
-    positions[drag.id] = {
-      x: clamp(drag.x + (dx / drag.rect.width) * 100, drag.padX, 100 - drag.padX),
-      y: clamp(drag.y + (dy / layout.value.deskH) * 100, drag.padY, 100 - drag.padY)
+    if (auto.value) {
+      if (!drag.reorder) return // 长按尚未触发，仅记录移动量
+      e.stopPropagation?.() // 进入重排后阻止事件冒泡，避免触发整屏翻页
+      dragX.value = clamp(drag.x + (dx / drag.rect.width) * 100, 0, 100)
+      dragY.value = clamp(drag.y + (dy / layout.value.deskH) * 100, 0, 100)
+      reorderTo(dragX.value, dragY.value, drag.id)
+    } else {
+      // 手动：可在整个屏幕内自由摆放
+      positions[drag.id] = {
+        x: clamp(drag.x + (dx / drag.rect.width) * 100, drag.padX, 100 - drag.padX),
+        y: clamp(drag.y + (dy / layout.value.deskH) * 100, drag.padY, 100 - drag.padY)
+      }
     }
+  }
+
+  function finishDrag() {
+    clearLongPress()
+    drag = null
+    dragId.value = null
+    dragX.value = null
+    dragY.value = null
   }
 
   function onUp() {
     if (!drag) return
-    // 拖动过程中位置已写入 positions（即 s.pos），由 desktopStore 的 watcher 自动持久化
+    // 拖动过程中位置/顺序已写入 state（s.pos / s.order），由 store 的 watcher 自动持久化
+    if (drag.aborted) {
+      finishDrag()
+      return
+    }
+    if (drag.reorder) {
+      finishDrag()
+      return
+    }
     if (!drag.moved) openedId.value = drag.id // 未拖动则视为点击，展开文件夹
-    drag = null
-    dragId.value = null
+    finishDrag()
   }
 
   function onCancel() {
     // 触摸被浏览器取消（如被判为滚动）时，若未发生拖动仍视为点击，展开文件夹
-    // （移动端轻点常被识别为潜在滚动而触发 pointercancel，需在此兜底打开）
-    if (drag && !drag.moved) openedId.value = drag.id
-    drag = null
-    dragId.value = null
+    if (!drag) return
+    if (drag.aborted || drag.reorder) {
+      finishDrag()
+      return
+    }
+    if (!drag.moved) openedId.value = drag.id
+    finishDrag()
   }
 
   function onClick(tile) {
@@ -170,8 +255,11 @@ export function useDesktop({ storageKey, itemCount = 0 }) {
     cols,
     auto,
     positions,
+    order,
     openedId,
     dragId,
+    dragX,
+    dragY,
     tileWidth,
     deskHeight,
     slotPos,

@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeUnmount, ref, watch } from 'vue'
 
-// 直接接收底部导航与页面共享的响应式设置对象（来自 desktopStore）
+// 直接接收底部导航与页面共享的响应式设置对象（来自 Pinia desktop store）
 const props = defineProps({
   settings: { type: Object, required: true }
 })
@@ -96,6 +96,16 @@ onBeforeUnmount(() => cleanup?.())
             <button type="button" aria-label="增加列数" class="flex h-7 w-7 items-center justify-center rounded-full bg-canvas-parchment text-ink transition hover:bg-hairline active:scale-[0.9]" @click="step('cols', 1, 3, 12)">+</button>
           </span>
         </div>
+
+        <button
+          v-if="settings.auto"
+          type="button"
+          :disabled="!settings.order || settings.order.length === 0"
+          class="mt-apple-md w-full rounded-apple-md bg-canvas-parchment py-apple-xs text-button-utility text-ink-muted-80 transition hover:text-ink active:scale-[0.98] disabled:cursor-default disabled:opacity-40 disabled:active:scale-100"
+          @click="settings.resetOrder()"
+        >
+          恢复默认顺序
+        </button>
 
         <button
           v-if="!settings.auto"

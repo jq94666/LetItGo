@@ -76,9 +76,9 @@ const toolComponents = {
 }
 
 const {
-  screenEl, auto, positions, openedId, dragId, tileWidth, deskHeight, slotPos,
+  screenEl, auto, positions, openedId, order, dragId, dragX, dragY, tileWidth, deskHeight, slotPos,
   onDown, onMove, onUp, onCancel, onClick
-} = useDesktop({ storageKey: 'workmate.tools.screen', itemCount: groups.length })
+} = useDesktop({ storageKey: 'workmate.tools.screen', itemCount: groups.length, defaultOrder: groups.map((g) => g.id) })
 
 // 打开弹窗后，首帧内禁止遮罩捕获指针事件：移动端点按按钮后浏览器会合成一次 click，
 // 此时遮罩恰好覆盖按钮，该 click 会落在遮罩上触发关闭（phantom click），导致弹窗一开即关。
@@ -91,12 +91,18 @@ watch(openedId, (val, old) => {
   }
 })
 
-const tiles = computed(() =>
-  groups.map((group, i) => {
-    const pos = auto.value ? slotPos(i) : (positions[group.id] ?? slotPos(i))
-    return { id: group.id, group, x: pos.x, y: pos.y }
+// 自动排列：按「持久化的文件夹顺序」紧凑落位；手动：优先使用拖动记录的位置
+const tiles = computed(() => {
+  const map = Object.fromEntries(groups.map((g) => [g.id, g]))
+  const ordered = order.value.map((id) => map[id]).filter(Boolean)
+  return ordered.map((group, i) => {
+    const base = auto.value ? slotPos(i) : (positions[group.id] ?? slotPos(i))
+    const isDrag = dragId.value === group.id
+    const x = isDrag && dragX.value != null ? dragX.value : base.x
+    const y = isDrag && dragY.value != null ? dragY.value : base.y
+    return { id: group.id, group, x, y }
   })
-)
+})
 
 const openedGroup = computed(() => groups.find((g) => g.id === openedId.value) ?? null)
 // 桌面滚动容器（供滚动定位等用途）
@@ -124,7 +130,7 @@ function launch(tool) {
           :key="tile.id"
           type="button"
           class="absolute z-10 select-none rounded-apple-md transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
-          :class="[dragId === tile.id ? 'cursor-grabbing' : auto ? 'cursor-default' : 'cursor-grab', auto ? 'touch-pan-y' : 'touch-none']"
+          :class="[dragId === tile.id ? 'cursor-grabbing touch-none' : auto ? 'cursor-default touch-pan-y' : 'cursor-grab touch-none']"
           :style="{
             left: `${tile.x}%`,
             top: `${tile.y}%`,
