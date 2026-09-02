@@ -6,6 +6,11 @@ import { reactive, watch, effectScope } from 'vue'
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
 
+// 移动端（窄屏）默认 3 列，PC 端默认 12 列
+const isMobile = () =>
+  typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+const defaultCols = () => (isMobile() ? 3 : 12)
+
 // 使用 detached effectScope，使持久化 watcher 脱离组件生命周期，
 // 这样页面来回切换（组件卸载/重建）后设置仍能正确读写
 const scope = effectScope(true)
@@ -13,16 +18,14 @@ const cache = {} // storageKey -> reactive state
 
 function create(storageKey) {
   const state = reactive({
-    cols: 4,
-    rows: 5,
+    cols: defaultCols(),
     auto: true,
     pos: {} // id -> { x, y }（屏幕百分比坐标）
   })
 
   try {
     const raw = JSON.parse(localStorage.getItem(storageKey) || '{}')
-    state.cols = clamp(Number(raw.cols) || 4, 2, 8)
-    state.rows = clamp(Number(raw.rows) || 5, 2, 10)
+    state.cols = clamp(Number(raw.cols) || defaultCols(), 3, 12)
     state.auto = raw.auto !== false
     for (const [id, p] of Object.entries(raw.pos ?? {})) {
       if (p && Number.isFinite(p.x) && Number.isFinite(p.y)) {
@@ -40,7 +43,7 @@ function create(storageKey) {
         try {
           localStorage.setItem(
             storageKey,
-            JSON.stringify({ cols: state.cols, rows: state.rows, auto: state.auto, pos: state.pos })
+            JSON.stringify({ cols: state.cols, auto: state.auto, pos: state.pos })
           )
         } catch {
           /* 本地存储不可用时忽略 */

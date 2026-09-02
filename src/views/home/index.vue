@@ -1,7 +1,5 @@
 <script setup>
 import { ref } from 'vue'
-import WeatherCard from './components/WeatherCard.vue'
-import CalendarCard from './components/CalendarCard.vue'
 
 const query = ref('')
 
@@ -61,11 +59,6 @@ function onSubmit(e) {
         </form>
       </div>
 
-      <!-- 两张功能卡片：响应式 2 列，桌面等分，移动堆叠 -->
-      <div class="mx-auto mt-apple-xxl grid w-full max-w-apple-content grid-cols-1 gap-apple-lg sm:grid-cols-2">
-        <WeatherCard />
-        <CalendarCard />
-      </div>
     </div>
   </div>
 </template>

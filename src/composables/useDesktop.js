@@ -22,8 +22,7 @@ export function useDesktop({ storageKey, itemCount = 0 }) {
   const screenSize = reactive({ w: 0, h: 0 })
 
   // 以 computed 代理共享状态，保持页面内 v-model / watch 的用法不变
-  const cols = computed({ get: () => s.cols, set: (v) => (s.cols = clamp(Number(v) || 4, 2, 8)) })
-  const rows = computed({ get: () => s.rows, set: (v) => (s.rows = clamp(Number(v) || 5, 2, 10)) })
+  const cols = computed({ get: () => s.cols, set: (v) => (s.cols = clamp(Number(v) || 4, 3, 12)) })
   const auto = computed({ get: () => s.auto, set: (v) => (s.auto = v) })
   const positions = s.pos
 
@@ -50,7 +49,7 @@ export function useDesktop({ storageKey, itemCount = 0 }) {
     const availW = w ? w - EDGE_PAD * 2 : 0
     const availH = h ? h - TOP_PAD : 0
     // 列数：按可用宽度自动缩减，保证单格不小于 MIN_TILE（移动端自动换行、不挤在一起）
-    const effCols = clamp(Math.floor((availW + TILE_GAP) / (MIN_TILE + TILE_GAP)), 2, cols.value)
+    const effCols = clamp(Math.floor((availW + TILE_GAP) / (MIN_TILE + TILE_GAP)), 3, cols.value)
     // 行数：由内容数量决定，保证所有文件夹都能排下（超出视口则整块可纵向滑动）
     const effRows = Math.max(2, Math.ceil(itemCount / effCols))
     const cellW = availW > 0 ? Math.min(availW / effCols, TILE_MAX + TILE_GAP) : TILE_MAX + TILE_GAP
@@ -169,7 +168,6 @@ export function useDesktop({ storageKey, itemCount = 0 }) {
   return {
     screenEl,
     cols,
-    rows,
     auto,
     positions,
     openedId,

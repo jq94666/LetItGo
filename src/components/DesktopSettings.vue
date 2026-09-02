@@ -66,9 +66,6 @@ onBeforeUnmount(() => cleanup?.())
         class="absolute bottom-[56px] right-0 z-30 w-[236px] origin-bottom rounded-apple-lg bg-white/90 p-apple-md shadow-product ring-1 ring-black/5 backdrop-blur-apple"
         @click.stop
       >
-        <p class="text-caption-strong text-ink">屏幕容量</p>
-        <p class="mt-apple-xs text-fine-print text-ink-muted-48">设置屏幕可容纳的图标行列数</p>
-
         <!-- 排列方式 -->
         <div class="mt-apple-md flex items-center justify-between gap-apple-sm">
           <div class="min-w-0">
@@ -91,24 +88,13 @@ onBeforeUnmount(() => cleanup?.())
           </button>
         </div>
 
-        <div class="mt-apple-md flex flex-col gap-apple-sm">
-          <div class="flex items-center justify-between">
-            <span class="text-caption text-ink-muted-80">列数</span>
-            <span class="flex items-center gap-apple-xs">
-              <button type="button" aria-label="减少列数" class="flex h-7 w-7 items-center justify-center rounded-full bg-canvas-parchment text-ink transition hover:bg-hairline active:scale-[0.9]" @click="step('cols', -1, 2, 8)">−</button>
-              <span class="w-6 text-center text-caption-strong text-ink">{{ settings.cols }}</span>
-              <button type="button" aria-label="增加列数" class="flex h-7 w-7 items-center justify-center rounded-full bg-canvas-parchment text-ink transition hover:bg-hairline active:scale-[0.9]" @click="step('cols', 1, 2, 8)">+</button>
-            </span>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <span class="text-caption text-ink-muted-80">行数</span>
-            <span class="flex items-center gap-apple-xs">
-              <button type="button" aria-label="减少行数" class="flex h-7 w-7 items-center justify-center rounded-full bg-canvas-parchment text-ink transition hover:bg-hairline active:scale-[0.9]" @click="step('rows', -1, 2, 10)">−</button>
-              <span class="w-6 text-center text-caption-strong text-ink">{{ settings.rows }}</span>
-              <button type="button" aria-label="增加行数" class="flex h-7 w-7 items-center justify-center rounded-full bg-canvas-parchment text-ink transition hover:bg-hairline active:scale-[0.9]" @click="step('rows', 1, 2, 10)">+</button>
-            </span>
-          </div>
+        <div class="mt-apple-md flex items-center justify-between">
+          <span class="text-caption text-ink-muted-80">列数</span>
+          <span class="flex items-center gap-apple-xs">
+            <button type="button" aria-label="减少列数" class="flex h-7 w-7 items-center justify-center rounded-full bg-canvas-parchment text-ink transition hover:bg-hairline active:scale-[0.9]" @click="step('cols', -1, 3, 12)">−</button>
+            <span class="w-6 text-center text-caption-strong text-ink">{{ settings.cols }}</span>
+            <button type="button" aria-label="增加列数" class="flex h-7 w-7 items-center justify-center rounded-full bg-canvas-parchment text-ink transition hover:bg-hairline active:scale-[0.9]" @click="step('cols', 1, 3, 12)">+</button>
+          </span>
         </div>
 
         <button

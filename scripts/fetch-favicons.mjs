@@ -1,7 +1,7 @@
 /* 抓取 src/data/sites.js 中所有站点的 favicon，
    保存到 src/assets/icons/，并重新生成 favicon-manifest.js
    用法：npm run fetch:favicons */
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, writeFile, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { designSiteGroups, directoryGroups, pdfSites } from '../src/data/sites.js'
@@ -25,7 +25,17 @@ function collectSites() {
   return all.filter((s) => !seen.has(s.name) && seen.add(s.name))
 }
 
-const slug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+// 按站点域名生成文件名（对中文 name 也更稳定，避免出现乱码文件名）
+const slug = (site) => {
+  try {
+    return new URL(site.href)
+      .hostname.replace(/^www\./, '')
+      .replace(/[^a-z0-9]+/gi, '-')
+      .replace(/^-+|-+$/g, '')
+  } catch {
+    return site.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+  }
+}
 
 async function fetchBuffer(url, timeoutMs = 12000) {
   const res = await fetch(url, {
@@ -38,12 +48,21 @@ async function fetchBuffer(url, timeoutMs = 12000) {
 }
 
 function extFrom(buf, url, contentType = '') {
-  if (contentType.includes('svg') || url.endsWith('.svg')) return 'svg'
+  const head = buf.slice(0, 16).toString('utf8').toLowerCase()
+  if (
+    contentType.includes('svg') ||
+    url.toLowerCase().endsWith('.svg') ||
+    head.startsWith('<?xml') ||
+    head.startsWith('<svg')
+  ) {
+    return 'svg'
+  }
   if (contentType.includes('gif')) return 'gif'
   if (contentType.includes('jpeg') || contentType.includes('jpg')) return 'jpg'
-  if (contentType.includes('ico') || url.includes('.ico')) return 'ico'
+  if (contentType.includes('ico') || url.toLowerCase().includes('.ico')) return 'ico'
   if (buf.length > 8 && buf[0] === 0x89 && buf[1] === 0x50) return 'png'
-  return 'png'
+  // 兜底：非 png/ico 的内容（多为 xml/svg）按 svg 处理，浏览器 <img> 可正常显示
+  return 'svg'
 }
 
 async function grab(site) {
@@ -77,6 +96,16 @@ async function grab(site) {
   return null
 }
 
+// 读取现有清单：对本次无法抓到的站点，沿用已保存的图标，
+// 避免丢失像「金山云文档」这种需手动补的图标
+let prev = {}
+try {
+  const txt = await readFile(MANIFEST, 'utf8')
+  for (const m of txt.matchAll(/'([^']+)':\s*new URL\('\.\/([^']+)'/g)) {
+    prev[m[1]] = './' + m[2]
+  }
+} catch {}
+
 const sites = collectSites()
 await mkdir(ICONS_DIR, { recursive: true })
 
@@ -85,15 +114,23 @@ for (const site of sites) {
   try {
     const r = await grab(site)
     if (r) {
-      const file = `favicon-${slug(site.name)}.${r.ext}`
+      const file = `favicon-${slug(site)}.${r.ext}`
       await writeFile(path.join(ICONS_DIR, file), r.buf)
       entries.push([site.name, `./${file}`])
       console.log(`ok  ${site.name} -> ${file} (${(r.buf.length / 1024).toFixed(1)} KB)`)
+    } else if (prev[site.name]) {
+      entries.push([site.name, prev[site.name]])
+      console.log(`~~  ${site.name}: 未抓到，沿用已有图标 ${prev[site.name]}`)
     } else {
       console.warn(`--  ${site.name}: 未找到 favicon，页面将使用占位图标`)
     }
   } catch (e) {
-    console.warn(`--  ${site.name}: ${e.message}`)
+    if (prev[site.name]) {
+      entries.push([site.name, prev[site.name]])
+      console.log(`~~  ${site.name}: 抓取出错，沿用已有图标 ${prev[site.name]}`)
+    } else {
+      console.warn(`--  ${site.name}: ${e.message}`)
+    }
   }
 }
 

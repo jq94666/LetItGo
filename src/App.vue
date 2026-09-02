@@ -119,8 +119,9 @@ const trackStyle = computed(() => ({
   transform: `translateX(calc(${tabIndex.value * -100}% + ${dragX.value}px))`
 }))
 
-// 底部导航右侧的设置按钮：仅在「网站 / 工具」页存在网格设置，主页无
+// 底部导航右侧的设置按钮：主页 / 网站 / 工具 三页均显示，各自独立持久化
 const settings = computed(() => {
+  if (tabIndex.value === 0) return getDesktopSettings('workmate.home.screen')
   if (tabIndex.value === 1) return getDesktopSettings('workmate.sites.screen')
   if (tabIndex.value === 2) return getDesktopSettings('workmate.tools.screen')
   return null

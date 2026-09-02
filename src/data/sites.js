@@ -18,6 +18,25 @@ export const directoryGroups = [
     id: 'file-transfer',
     label: '文件传输',
     sites: [{ name: 'localsend', href: 'https://localsend.org/zh-CN/download' }]
+  },
+  {
+    id: 'cloud-docs',
+    label: '云文档',
+    sites: [
+      { name: '金山云文档', href: 'https://www.kdocs.cn/' },
+      { name: '语雀', href: 'https://www.yuque.com/' },
+      { name: '有道云笔记', href: 'https://note.youdao.com/' }
+    ]
+  },
+  {
+    id: 'ocr',
+    label: 'OCR',
+    sites: [{ name: 'MinerU', href: 'https://mineru.net' }]
+  },
+  {
+    id: 'install',
+    label: '装机',
+    sites: [{ name: '傲梅分区助手', href: 'https://www.disktool.cn/feature.html' }]
   }
 ]
 
