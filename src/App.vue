@@ -107,69 +107,11 @@ function onUp(e) {
 function onTouchMoveGuard(e) {
   if (swipe?.locked) e.preventDefault()
 }
-
-/* 鼠标滚轮 / 触控板：在面板之间滑动切换（与指针左右滑动等效）
-   - 横向滚动（触控板双指左右滑、带左右倾的滚轮、Shift+滚轮）→ 直接切换
-   - 纵向滚动：仅当当前面板已滚动到边界、无法继续滚动时，才切换相邻面板（macOS 触控板式边缘吸附）
-   若正有弹窗（文件夹 / 设置 / 工具）打开，则交由弹窗自身处理滚动，不切换面板。 */
-function scrollableAncestorCanScroll(target, dir) {
-  let node = target
-  while (node && node !== document.body && node !== document.documentElement) {
-    const style = getComputedStyle(node)
-    const canY = style.overflowY === 'auto' || style.overflowY === 'scroll'
-    const canX = style.overflowX === 'auto' || style.overflowX === 'scroll'
-    if (canY || canX) {
-      const scrollable =
-        (canY && node.scrollHeight > node.clientHeight + 1) ||
-        (canX && node.scrollWidth > node.clientWidth + 1)
-      if (scrollable) {
-        if (dir > 0 &&
-          (node.scrollTop + node.clientHeight < node.scrollHeight - 1 ||
-            node.scrollLeft + node.clientWidth < node.scrollWidth - 1)) return true
-        if (dir < 0 && (node.scrollTop > 1 || node.scrollLeft > 1)) return true
-      }
-    }
-    node = node.parentElement
-  }
-  return false
-}
-
-let wheelLock = false
-function onWheel(e) {
-  if (document.querySelector('[role="dialog"]')) return // 弹窗打开时，让弹窗处理滚动
-  const dx = e.deltaX
-  const dy = e.deltaY
-  const horizontal = Math.abs(dx) > Math.abs(dy)
-
-  if (horizontal) {
-    if (Math.abs(dx) < 8) return
-    e.preventDefault()
-    if (wheelLock) return
-    wheelLock = true
-    setTimeout(() => (wheelLock = false), 550)
-    go(tabIndex.value + (dx > 0 ? 1 : -1))
-    return
-  }
-
-  // 纵向：仅在当前可滚动容器已到边界时切换面板
-  const dir = dy > 0 ? 1 : -1
-  if (!scrollableAncestorCanScroll(e.target, dir)) {
-    if (Math.abs(dy) < 4) return
-    e.preventDefault()
-    if (wheelLock) return
-    wheelLock = true
-    setTimeout(() => (wheelLock = false), 550)
-    go(tabIndex.value + dir)
-  }
-}
-
 onMounted(() => {
   viewportEl.value?.addEventListener('touchmove', onTouchMoveGuard, { passive: false })
-  viewportEl.value?.addEventListener('wheel', onWheel, { passive: false })
 })
 onBeforeUnmount(() => {
   viewportEl.value?.removeEventListener('touchmove', onTouchMoveGuard)
-  viewportEl.value?.removeEventListener('wheel', onWheel)
 })
 
 // 轨道盒宽 = 一个视口宽（面板是溢出撑开的），故每切换一屏位移 100%
