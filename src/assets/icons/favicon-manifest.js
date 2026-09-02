@@ -12,6 +12,7 @@ export const favicons = {
   '傲梅分区助手': new URL('./favicon-disktool-cn.ico', import.meta.url).href,
   'Excalidraw': new URL('./favicon-excalidraw-com.png', import.meta.url).href,
   'Drawio': new URL('./favicon-app-diagrams-net.png', import.meta.url).href,
+  '故宫名画记': new URL('./favicon-minghuaji-dpm-org-cn.ico', import.meta.url).href,
   'iconfont': new URL('./favicon-iconfont-cn.png', import.meta.url).href,
   'iconpark': new URL('./favicon-iconpark-oceanengine-com.png', import.meta.url).href,
 }

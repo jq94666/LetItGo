@@ -45,6 +45,11 @@ export const directoryGroups = [
       { name: 'Excalidraw', href: 'https://excalidraw.com/' },
       { name: 'Drawio', href: 'https://app.diagrams.net/' }
     ]
+  },
+  {
+    id: 'famous-painting',
+    label: '名画',
+    sites: [{ name: '故宫名画记', href: 'https://minghuaji.dpm.org.cn/' }]
   }
 ]
 
