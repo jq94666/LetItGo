@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { markRaw, ref } from 'vue'
 import { PDFDocument } from 'pdf-lib'
 import * as pdfjsLib from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
@@ -63,7 +63,8 @@ async function loadPdfList(list) {
       files.value.push({
         id,
         name: f.name.replace(/\.pdf$/i, ''),
-        doc,
+        // markRaw：pdf.js 的文档对象带有私有字段，被 Vue 代理后读写私有成员会报错
+        doc: markRaw(doc),
         pageCount: doc.numPages,
         pages,
         thumbs

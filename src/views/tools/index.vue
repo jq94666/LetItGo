@@ -7,6 +7,7 @@ import ExcelMergeTool from './components/ExcelMergeTool.vue'
 import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
 import ImageCompressTool from './components/ImageCompressTool.vue'
 import ImgToPdfTool from './components/ImgToPdfTool.vue'
+import PdfRotateTool from './components/PdfRotateTool.vue'
 import PdfScanTool from './components/PdfScanTool.vue'
 import PdfToExcelTool from './components/PdfToExcelTool.vue'
 import PdfToWordTool from './components/PdfToWordTool.vue'
@@ -41,6 +42,7 @@ const groups = [
     id: 'pdf',
     label: 'PDF',
     tools: [
+      { id: 'pdfRotate', label: '旋转', icon: '🔄', tint: 'from-cyan-400 to-sky-400' },
       { id: 'pdfScan', label: '转扫描件', icon: '🖨️', tint: 'from-orange-400 to-rose-400' },
       { id: 'pdfToExcel', label: '转Excel', icon: '📊', tint: 'from-emerald-400 to-teal-400' },
       { id: 'pdfToWord', label: '转Word', icon: '📝', tint: 'from-blue-400 to-indigo-400' },
@@ -64,6 +66,7 @@ const toolComponents = {
   uppercase: UppercaseAmountTool,
   excelMerge: ExcelMergeTool,
   wordDraft: WordDraftPaperTool,
+  pdfRotate: PdfRotateTool,
   pdfScan: PdfScanTool,
   pdfToExcel: PdfToExcelTool,
   pdfToWord: PdfToWordTool,
