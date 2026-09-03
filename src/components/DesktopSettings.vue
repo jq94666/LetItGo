@@ -10,11 +10,6 @@ const emit = defineEmits(['reset'])
 const open = ref(false)
 const rootEl = ref(null)
 
-function step(key, delta, min, max) {
-  const next = Math.min(max, Math.max(min, props.settings[key] + delta))
-  props.settings[key] = next
-}
-
 function reset() {
   emit('reset')
   open.value = false
@@ -86,15 +81,6 @@ onBeforeUnmount(() => cleanup?.())
               :class="settings.auto ? 'left-[22px]' : 'left-[2px]'"
             />
           </button>
-        </div>
-
-        <div class="mt-apple-md flex items-center justify-between">
-          <span class="text-caption text-ink-muted-80">列数</span>
-          <span class="flex items-center gap-apple-xs">
-            <button type="button" aria-label="减少列数" class="flex h-7 w-7 items-center justify-center rounded-full bg-canvas-parchment text-ink transition hover:bg-hairline active:scale-[0.9]" @click="step('cols', -1, 3, 12)">−</button>
-            <span class="w-6 text-center text-caption-strong text-ink">{{ settings.cols }}</span>
-            <button type="button" aria-label="增加列数" class="flex h-7 w-7 items-center justify-center rounded-full bg-canvas-parchment text-ink transition hover:bg-hairline active:scale-[0.9]" @click="step('cols', 1, 3, 12)">+</button>
-          </span>
         </div>
 
         <button

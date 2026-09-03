@@ -4,6 +4,7 @@ import { useDesktop } from '../../composables/useDesktop.js'
 import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
 import DesktopFolderTile from '../../components/DesktopFolderTile.vue'
 import AnalogClockTool from './components/AnalogClockTool.vue'
+import BasicColorTool from './components/BasicColorTool.vue'
 import ExcelMergeTool from './components/ExcelMergeTool.vue'
 import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
 import ImageCompressTool from './components/ImageCompressTool.vue'
@@ -69,6 +70,11 @@ const groups = [
     tools: [{ id: 'imageCompress', label: '压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' }]
   },
   {
+    id: 'color',
+    label: '色卡',
+    tools: [{ id: 'basicColor', label: '基础色卡', icon: '🎨', tint: 'from-fuchsia-500 to-purple-600' }]
+  },
+  {
     id: 'simulate',
     label: '模拟',
     tools: [{ id: 'analogClock', label: '模拟时钟', icon: '🕰️', tint: 'from-amber-400 to-orange-500' }]
@@ -90,6 +96,7 @@ const toolComponents = {
   imgToPdf: ImgToPdfTool,
   urlToQrCode: UrlToQrCodeTool,
   imageCompress: ImageCompressTool,
+  basicColor: BasicColorTool,
   analogClock: AnalogClockTool
 }
 

@@ -20,7 +20,10 @@ export const directoryGroups = [
   {
     id: 'file-transfer',
     label: '文件传输',
-    sites: [{ name: 'localsend', href: 'https://localsend.org/zh-CN/download' }]
+    sites: [
+      { name: 'localsend', href: 'https://localsend.org/zh-CN/download' },
+      { name: 'Syncthing', href: 'https://syncthing.net/' }
+    ]
   },
   {
     id: 'cloud-docs',
@@ -49,7 +52,16 @@ export const directoryGroups = [
       { name: 'I Tell You', href: 'https://next.itellyou.cn' },
       { name: 'DLL-FILES', href: 'https://www.dll-files.com/n/' },
       { name: '向日葵', href: 'https://sunlogin.oray.com/download' },
-      { name: '360（认准极速）', href: 'https://www.360.cn/download/' }
+      { name: '360（认准极速）', href: 'https://www.360.cn/download/' },
+      { name: 'PotPlayer', href: 'https://potplayer.tv/?lang=zh_CN' }
+    ]
+  },
+  {
+    id: 'mirror',
+    label: '镜像站',
+    sites: [
+      { name: '华为云镜像', href: 'https://mirrors.huaweicloud.com/home' },
+      { name: 'NPM Mirror', href: 'https://npmmirror.com/' }
     ]
   },
   {
@@ -113,10 +125,18 @@ export const directoryGroups = [
     ]
   },
   {
+    id: 'video-record',
+    label: '视频录制',
+    sites: [
+      { name: 'OBS', href: 'https://obsproject.com/' },
+      { name: 'EV录屏', href: 'https://www.ieway.cn/evcapture.html' }
+    ]
+  },
+  {
     id: 'forum',
     label: '论坛',
     sites: [
-      { name: '豆瓣网', href: 'https://www.douban.com/' },
+      { name: '豆瓣电影', href: 'https://movie.douban.com/' },
       { name: '知乎', href: 'https://www.zhihu.com/' }
     ]
   },
@@ -126,6 +146,24 @@ export const directoryGroups = [
     sites: [
       { name: 'Gitee', href: 'https://gitee.com/' },
       { name: 'GitHub', href: 'https://github.com/' }
+    ]
+  },
+  {
+    id: 'terminal',
+    label: 'Terminal',
+    sites: [
+      { name: 'XShell', href: 'https://www.xshell.com/zh/xshell-download/' },
+      { name: 'MobaXterm', href: 'https://mobaxterm.mobatek.net/' },
+      { name: 'Linux网页模拟器', href: 'https://bellard.org/jslinux/' }
+    ]
+  },
+  {
+    id: 'server',
+    label: '服务器',
+    sites: [
+      { name: 'FileZilla', href: 'https://filezilla-project.org/' },
+      { name: 'Nginx', href: 'https://nginx.org/' },
+      { name: 'Caddy', href: 'https://caddyserver.com/' }
     ]
   },
   {
@@ -149,7 +187,10 @@ export const directoryGroups = [
       { name: '终身教育平台', href: 'https://le.ouchn.cn/home' },
       { name: '学堂在线', href: 'https://www.xuetangx.com/' },
       { name: '中国大学MOOC', href: 'https://www.icourse163.org/' },
-      { name: 'WPS学堂', href: 'https://www.wps.cn/learning?chan=pc_web_official' }
+      { name: 'WPS学堂', href: 'https://www.wps.cn/learning?chan=pc_web_official' },
+      { name: 'Qwerty', href: 'https://qwerty.kaiyi.cool/' },
+      { name: '全历史', href: 'https://www.allhistory.com/' },
+      { name: 'PDF教材', href: 'https://github.com/TapXWorld/ChinaTextbook?tab=readme-ov-file' }
     ]
   },
   {

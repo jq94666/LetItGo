@@ -2,15 +2,21 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useDesktopStore } from '../stores/desktop.js'
 
 /* 桌面布局：网格排布、拖拽摆放、自动排列、长按重排文件夹顺序
-   网站页与工具页共用同一套逻辑；列数/行数/位置/顺序等设置由 Pinia store 统一持久化，
-   以便底部导航里的设置按钮与页面共享同一份状态。 */
+   网站页与工具页共用同一套逻辑；位置/顺序等设置由 Pinia store 统一持久化，
+   以便底部导航里的设置按钮与页面共享同一份状态。
+
+   网格列数不提供手动设置：移动端（<768px）固定 4 列，PC 端默认 12 列，
+   当屏宽不足以容纳最小图标时按需自动减少列数。 */
 
 const TILE_MAX = 120 // 图标/文件夹最大边长（px）
 const TILE_GAP = 20 // 图标之间的固定间距（px）
 const LABEL_H = 22 // 图标下方文字高度（px）
 const EDGE_PAD = 20 // 网格左右内边距（px）
 const TOP_PAD = 16 // 网格顶部留白（px）
-const MIN_TILE = 80 // 单格最小图标边长（px）：低于此值则自动减少列数（移动端换行）
+const MIN_TILE = 80 // 桌面端单格最小图标边长（px）：低于此值则自动减少列数
+const COLS_MOBILE = 4 // 移动端列数
+const COLS_DESKTOP = 12 // PC 端列数
+const COLS_BREAK = 768 // 低于该宽度视为移动端
 const LONG_PRESS = 380 // 自动排列模式下，长按进入「重排」的阈值（ms）
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
@@ -26,7 +32,6 @@ export function useDesktop({ storageKey, itemCount = 0, defaultOrder = [] }) {
   const screenSize = reactive({ w: 0, h: 0 })
 
   // 以 computed 代理共享状态，保持页面内 v-model / watch 的用法不变
-  const cols = computed({ get: () => s.cols, set: (v) => (s.cols = clamp(Number(v) || 4, 3, 12)) })
   const auto = computed({ get: () => s.auto, set: (v) => (s.auto = v) })
   const positions = s.pos
 
@@ -58,7 +63,11 @@ export function useDesktop({ storageKey, itemCount = 0, defaultOrder = [] }) {
     const { w, h } = screenSize
     const availW = w ? w - EDGE_PAD * 2 : 0
     const availH = h ? h - TOP_PAD : 0
-    const effCols = clamp(Math.floor((availW + TILE_GAP) / (MIN_TILE + TILE_GAP)), 3, cols.value)
+    // 移动端固定 4 列；桌面端默认 12 列，屏宽不足以容纳最小图标时自动减少列数
+    const isNarrow = w > 0 && w < COLS_BREAK
+    const effCols = isNarrow
+      ? COLS_MOBILE
+      : Math.max(1, Math.min(COLS_DESKTOP, Math.floor((availW + TILE_GAP) / (MIN_TILE + TILE_GAP))))
     const effRows = Math.max(2, Math.ceil(itemCount / effCols))
     const cellW = availW > 0 ? Math.min(availW / effCols, TILE_MAX + TILE_GAP) : TILE_MAX + TILE_GAP
     const cellH = availH > 0 ? Math.min(availH / effRows, TILE_MAX + LABEL_H + TILE_GAP) : TILE_MAX + LABEL_H + TILE_GAP
@@ -252,7 +261,6 @@ export function useDesktop({ storageKey, itemCount = 0, defaultOrder = [] }) {
 
   return {
     screenEl,
-    cols,
     auto,
     positions,
     order,
