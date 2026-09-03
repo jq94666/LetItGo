@@ -8,14 +8,17 @@ import ExcelMergeTool from './components/ExcelMergeTool.vue'
 import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
 import ImageCompressTool from './components/ImageCompressTool.vue'
 import ImgToPdfTool from './components/ImgToPdfTool.vue'
+import PdfMergeTool from './components/PdfMergeTool.vue'
 import PdfRotateTool from './components/PdfRotateTool.vue'
 import PdfScanTool from './components/PdfScanTool.vue'
+import PdfSplitTool from './components/PdfSplitTool.vue'
 import PdfToExcelTool from './components/PdfToExcelTool.vue'
 import PdfToWordTool from './components/PdfToWordTool.vue'
 import ToolTile from './components/ToolTile.vue'
 import UppercaseAmountTool from './components/UppercaseAmountTool.vue'
 import UrlToQrCodeTool from './components/UrlToQrCodeTool.vue'
 import WordDraftPaperTool from './components/WordDraftPaperTool.vue'
+import WordExtractPagesTool from './components/WordExtractPagesTool.vue'
 
 // 同分类的工具合并为一个文件夹
 const groups = [
@@ -37,13 +40,18 @@ const groups = [
   {
     id: 'word',
     label: 'Word',
-    tools: [{ id: 'wordDraft', label: '草稿纸', icon: '📘', tint: 'from-sky-400 to-blue-500' }]
+    tools: [
+      { id: 'wordDraft', label: '草稿纸', icon: '📘', tint: 'from-sky-400 to-blue-500' },
+      { id: 'wordExtract', label: '提取页面', icon: '✂️', tint: 'from-blue-400 to-indigo-500' }
+    ]
   },
   {
     id: 'pdf',
     label: 'PDF',
     tools: [
       { id: 'pdfRotate', label: '旋转', icon: '🔄', tint: 'from-cyan-400 to-sky-400' },
+      { id: 'pdfSplit', label: '拆分', icon: '📑', tint: 'from-slate-400 to-cyan-500' },
+      { id: 'pdfMerge', label: '合并', icon: '📚', tint: 'from-teal-400 to-cyan-400' },
       { id: 'pdfScan', label: '转扫描件', icon: '🖨️', tint: 'from-orange-400 to-rose-400' },
       { id: 'pdfToExcel', label: '转Excel', icon: '📊', tint: 'from-emerald-400 to-teal-400' },
       { id: 'pdfToWord', label: '转Word', icon: '📝', tint: 'from-blue-400 to-indigo-400' },
@@ -72,7 +80,10 @@ const toolComponents = {
   uppercase: UppercaseAmountTool,
   excelMerge: ExcelMergeTool,
   wordDraft: WordDraftPaperTool,
+  wordExtract: WordExtractPagesTool,
   pdfRotate: PdfRotateTool,
+  pdfSplit: PdfSplitTool,
+  pdfMerge: PdfMergeTool,
   pdfScan: PdfScanTool,
   pdfToExcel: PdfToExcelTool,
   pdfToWord: PdfToWordTool,
