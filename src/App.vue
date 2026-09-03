@@ -2,7 +2,7 @@
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Wallpaper from './components/Wallpaper.vue'
-import DesktopSettings from './components/DesktopSettings.vue'
+import MoreMenu from './components/MoreMenu.vue'
 import { useDesktopStore } from './stores/desktop.js'
 
 const route = useRoute()
@@ -186,7 +186,7 @@ const settings = computed(() => {
         </div>
 
         <!-- 设置按钮：与主页按钮同一排，位于最右侧，样式参考主页按钮 -->
-        <DesktopSettings v-if="settings" :settings="settings" @reset="settings.resetLayout()" />
+        <MoreMenu v-if="settings" :settings="settings" @reset="settings.resetLayout()" />
       </div>
       <span class="pointer-events-none absolute bottom-[7px] left-1/2 h-[4px] w-[104px] -translate-x-1/2 rounded-full bg-ink/25" />
     </nav>

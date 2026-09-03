@@ -11,7 +11,7 @@ defineProps({
     :href="site.href"
     target="_blank"
     rel="noopener noreferrer"
-    class="group flex flex-col items-center gap-apple-xs no-underline"
+    class="group flex flex-col items-center gap-apple-xs no-underline max-[767px]:gap-[4px]"
   >
     <!-- APP 图标：方形圆角（类 iOS 超级椭圆） -->
     <span
@@ -25,6 +25,6 @@ defineProps({
       />
       <span v-else class="text-body-strong text-ink-muted-48">{{ site.name.charAt(0).toUpperCase() }}</span>
     </span>
-    <span class="line-clamp-2 w-full text-center text-fine-print text-ink-muted-80">{{ site.name }}</span>
+    <span class="line-clamp-2 w-full text-center text-fine-print text-ink-muted-80 max-[767px]:text-[10px]">{{ site.name }}</span>
   </a>
 </template>

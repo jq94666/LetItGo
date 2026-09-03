@@ -25,7 +25,7 @@ function iconText(item) {
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-apple-xs">
+  <div class="flex flex-col items-center gap-apple-xs max-[767px]:gap-[4px]">
     <!-- 文件夹：方形圆角，内部铺 mini 图标（尺寸与工具页完全一致） -->
     <div class="aspect-square w-full rounded-[24%] bg-white/70 p-[10%] shadow-hairline ring-1 ring-black/5 backdrop-blur-apple">
       <div class="flex h-full w-full flex-wrap content-center items-center justify-center" :style="{ gap: GAP + '%' }">
@@ -40,6 +40,6 @@ function iconText(item) {
         </span>
       </div>
     </div>
-    <p class="w-full truncate text-center text-fine-print text-ink-muted-80">{{ title }}</p>
+    <p class="w-full truncate text-center text-fine-print text-ink-muted-80 max-[767px]:text-[10px]">{{ title }}</p>
   </div>
 </template>

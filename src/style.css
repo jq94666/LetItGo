@@ -146,3 +146,18 @@
     overflow: hidden;
   }
 }
+
+/* 移动端：纵向滚动不显示右侧滚动条（触摸/惯性手势本身可滚动） */
+@media (max-width: 767px) {
+  .overflow-y-auto,
+  .overflow-y-scroll,
+  .overflow-auto {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* 旧版 Edge / IE */
+  }
+  .overflow-y-auto::-webkit-scrollbar,
+  .overflow-y-scroll::-webkit-scrollbar,
+  .overflow-auto::-webkit-scrollbar {
+    display: none; /* Chrome / Safari */
+  }
+}

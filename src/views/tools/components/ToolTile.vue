@@ -9,7 +9,7 @@ defineEmits(['launch'])
 <template>
   <button
     type="button"
-    class="group flex w-full flex-col items-center gap-apple-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus rounded-apple-md"
+    class="group flex w-full flex-col items-center gap-apple-xs max-[767px]:gap-[4px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus rounded-apple-md"
     :aria-label="tool.label"
     @click="$emit('launch', tool)"
   >
@@ -18,6 +18,6 @@ defineEmits(['launch'])
       class="flex aspect-square w-full items-center justify-center rounded-[24%] bg-linear-to-br text-[22px] leading-none shadow-hairline ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]"
       :class="tool.tint"
     >{{ tool.icon }}</span>
-    <span class="w-full truncate text-center text-fine-print text-ink-muted-80">{{ tool.label }}</span>
+    <span class="w-full truncate text-center text-fine-print text-ink-muted-80 max-[767px]:text-[10px]">{{ tool.label }}</span>
   </button>
 </template>

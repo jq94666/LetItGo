@@ -70,8 +70,11 @@ export function useDesktop({ storageKey, itemCount = 0, defaultOrder = [] }) {
       : Math.max(1, Math.min(COLS_DESKTOP, Math.floor((availW + TILE_GAP) / (MIN_TILE + TILE_GAP))))
     const effRows = Math.max(2, Math.ceil(itemCount / effCols))
     const cellW = availW > 0 ? Math.min(availW / effCols, TILE_MAX + TILE_GAP) : TILE_MAX + TILE_GAP
-    const cellH = availH > 0 ? Math.min(availH / effRows, TILE_MAX + LABEL_H + TILE_GAP) : TILE_MAX + LABEL_H + TILE_GAP
-    const tile = Math.max(56, Math.min(TILE_MAX, cellW - TILE_GAP, cellH - LABEL_H - TILE_GAP))
+    // 行高按「图标实际宽度 → 图标 + 标签文字 + 行距」得出，行距取紧凑值，
+    // 避免此前用「可用高度/行数」撑出行高，导致移动端行与行之间留白过大
+    const rowGap = isNarrow ? 12 : 24
+    const tile = availW > 0 ? Math.max(56, Math.min(TILE_MAX, cellW - TILE_GAP)) : TILE_MAX
+    const cellH = tile + LABEL_H + rowGap
     const deskH = Math.max(availH, TOP_PAD + effRows * cellH)
     return {
       w,
