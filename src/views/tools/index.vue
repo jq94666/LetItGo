@@ -1,25 +1,9 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, markRaw, nextTick, ref, watch } from 'vue'
 import { useDesktop } from '../../composables/useDesktop.js'
 import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
 import DesktopFolderTile from '../../components/DesktopFolderTile.vue'
-import AnalogClockTool from './components/AnalogClockTool.vue'
-import BasicColorTool from './components/BasicColorTool.vue'
-import ExcelMergeTool from './components/ExcelMergeTool.vue'
-import FamilyRelativesTool from './components/FamilyRelativesTool.vue'
-import ImageCompressTool from './components/ImageCompressTool.vue'
-import ImgToPdfTool from './components/ImgToPdfTool.vue'
-import PdfMergeTool from './components/PdfMergeTool.vue'
-import PdfRotateTool from './components/PdfRotateTool.vue'
-import PdfScanTool from './components/PdfScanTool.vue'
-import PdfSplitTool from './components/PdfSplitTool.vue'
-import PdfToExcelTool from './components/PdfToExcelTool.vue'
-import PdfToWordTool from './components/PdfToWordTool.vue'
 import ToolTile from './components/ToolTile.vue'
-import UppercaseAmountTool from './components/UppercaseAmountTool.vue'
-import UrlToQrCodeTool from './components/UrlToQrCodeTool.vue'
-import WordDraftPaperTool from './components/WordDraftPaperTool.vue'
-import WordExtractPagesTool from './components/WordExtractPagesTool.vue'
 
 // 同分类的工具合并为一个文件夹
 const groups = [
@@ -81,23 +65,25 @@ const groups = [
   }
 ]
 
-const toolComponents = {
-  relatives: FamilyRelativesTool,
-  uppercase: UppercaseAmountTool,
-  excelMerge: ExcelMergeTool,
-  wordDraft: WordDraftPaperTool,
-  wordExtract: WordExtractPagesTool,
-  pdfRotate: PdfRotateTool,
-  pdfSplit: PdfSplitTool,
-  pdfMerge: PdfMergeTool,
-  pdfScan: PdfScanTool,
-  pdfToExcel: PdfToExcelTool,
-  pdfToWord: PdfToWordTool,
-  imgToPdf: ImgToPdfTool,
-  urlToQrCode: UrlToQrCodeTool,
-  imageCompress: ImageCompressTool,
-  basicColor: BasicColorTool,
-  analogClock: AnalogClockTool
+// 工具改为按需加载：进入工具页只加载页面骨架，
+// 点开某个工具时才动态拉取其代码与依赖（pdf.js、pdf-lib、docx 等不再进首屏）
+const toolLoaders = {
+  relatives: () => import('./components/FamilyRelativesTool.vue'),
+  uppercase: () => import('./components/UppercaseAmountTool.vue'),
+  excelMerge: () => import('./components/ExcelMergeTool.vue'),
+  wordDraft: () => import('./components/WordDraftPaperTool.vue'),
+  wordExtract: () => import('./components/WordExtractPagesTool.vue'),
+  pdfRotate: () => import('./components/PdfRotateTool.vue'),
+  pdfSplit: () => import('./components/PdfSplitTool.vue'),
+  pdfMerge: () => import('./components/PdfMergeTool.vue'),
+  pdfScan: () => import('./components/PdfScanTool.vue'),
+  pdfToExcel: () => import('./components/PdfToExcelTool.vue'),
+  pdfToWord: () => import('./components/PdfToWordTool.vue'),
+  imgToPdf: () => import('./components/ImgToPdfTool.vue'),
+  urlToQrCode: () => import('./components/UrlToQrCodeTool.vue'),
+  imageCompress: () => import('./components/ImageCompressTool.vue'),
+  basicColor: () => import('./components/BasicColorTool.vue'),
+  analogClock: () => import('./components/AnalogClockTool.vue')
 }
 
 const {
@@ -133,14 +119,28 @@ const openedGroup = computed(() => groups.find((g) => g.id === openedId.value) ?
 // 桌面滚动容器（供滚动定位等用途）
 const deskScroller = ref(null)
 
-// 工具组件以弹窗形式存在，这里集中挂载并通过 ref 调用其 open()
+// 工具组件以弹窗形式存在；用过的工具会挂载并驻留，之后再次打开直接复用
 const toolRefs = {}
+const activeTools = ref([]) // [{ id, comp }]，首次打开时才加入
 function setToolRef(id, el) {
   if (el) toolRefs[id] = el
 }
-function launch(tool) {
+async function launch(tool) {
   openedId.value = null
-  toolRefs[tool.id]?.open?.()
+  if (toolRefs[tool.id]) {
+    toolRefs[tool.id].open?.()
+    return
+  }
+  const loader = toolLoaders[tool.id]
+  if (!loader) return
+  try {
+    const mod = await loader()
+    activeTools.value.push({ id: tool.id, comp: markRaw(mod.default) })
+    await nextTick()
+    toolRefs[tool.id]?.open?.()
+  } catch (e) {
+    console.error('工具加载失败：', tool.id, e)
+  }
 }
 </script>
 
@@ -193,12 +193,12 @@ function launch(tool) {
     </Transition>
 
 
-    <!-- 各工具的弹窗统一挂在此处 -->
+    <!-- 各工具的弹窗统一挂在此处（按需动态挂载，用过的工具驻留复用） -->
     <component
-      v-for="(comp, id) in toolComponents"
-      :key="id"
-      :is="comp"
-      :ref="(el) => setToolRef(id, el)"
+      v-for="t in activeTools"
+      :key="t.id"
+      :is="t.comp"
+      :ref="(el) => setToolRef(t.id, el)"
     />
   </div>
 </template>

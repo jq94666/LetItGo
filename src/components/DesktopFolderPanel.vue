@@ -61,4 +61,13 @@ const emit = defineEmits(['close'])
   transform: translate(-50%, -50%) scale(0.25);
   opacity: 0;
 }
+
+/* 文件夹弹窗卡片隐藏右侧滚动条，保留滚动能力 */
+.folder-card {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* 旧版 Edge / IE */
+}
+.folder-card::-webkit-scrollbar {
+  display: none; /* Chrome / Safari */
+}
 </style>
