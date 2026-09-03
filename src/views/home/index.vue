@@ -16,8 +16,8 @@ function onSubmit(e) {
 <template>
   <!-- 背景：单一 parchment 表面，无大色块对比，靠磨砂卡片自身提供层次 -->
   <div class="relative min-h-full w-full">
-    <!-- 内容：搜索框靠上（距顶 apple-xxl 48px） -->
-    <div class="relative z-10 mx-auto w-full max-w-apple-content px-apple-xl pb-apple-section pt-apple-xxl">
+    <!-- 内容：搜索框桌面端靠上；移动端下移（thumb 友好），避开顶部 -->
+    <div class="relative z-10 mx-auto w-full max-w-apple-content px-apple-xl pb-apple-section pt-apple-xl sm:pt-apple-xxl max-[767px]:mt-[48vh]">
       <!-- 搜索框 -->
       <div class="mx-auto w-full max-w-[680px]">
         <form
@@ -51,8 +51,8 @@ function onSubmit(e) {
               v-model="query"
               type="search"
               name="q"
-              placeholder="使用必应搜索…"
-              class="h-[44px] w-full rounded-pill border border-black/[0.08] bg-canvas pl-[44px] pr-apple-md text-apple-body text-ink placeholder:text-ink-muted-48 transition-colors duration-200 focus:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
+              aria-label="搜索"
+              class="h-[44px] w-full rounded-pill border border-black/[0.08] bg-canvas pl-[44px] pr-apple-md text-apple-body text-ink transition-colors duration-200 focus:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
               autocomplete="off"
             />
           </label>
