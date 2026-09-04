@@ -23,6 +23,7 @@ const toolLoaders = {
   pdfToWord: () => import('./components/PdfToWordTool.vue'),
   imgToPdf: () => import('./components/ImgToPdfTool.vue'),
   urlToQrCode: () => import('./components/UrlToQrCodeTool.vue'),
+  qrCodeScan: () => import('./components/QrCodeScanTool.vue'),
   imageCompress: () => import('./components/ImageCompressTool.vue'),
   basicColor: () => import('./components/BasicColorTool.vue'),
   analogClock: () => import('./components/AnalogClockTool.vue')

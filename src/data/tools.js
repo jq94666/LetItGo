@@ -42,7 +42,10 @@ export const toolGroups = [
   {
     id: 'qrcode',
     label: '二维码',
-    tools: [{ id: 'urlToQrCode', label: '网址转码', icon: '🔳', tint: 'from-indigo-400 to-blue-500' }]
+    tools: [
+      { id: 'urlToQrCode', label: '二维码生成', icon: '🔳', tint: 'from-indigo-400 to-blue-500' },
+      { id: 'qrCodeScan', label: '扫描识码', icon: '📷', tint: 'from-violet-400 to-indigo-500' }
+    ]
   },
   {
     id: 'image',

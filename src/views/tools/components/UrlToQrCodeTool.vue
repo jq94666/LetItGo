@@ -4,6 +4,16 @@ import QRCode from 'qrcode'
 
 /* ---------- 输入与选项 ---------- */
 const input = ref('')
+const content = computed(() => input.value) // 直接编码用户输入，支持任意文本
+
+// 若内容为网址，返回可直接跳转的链接（缺协议时补 https://）；否则为 null
+const urlInfo = computed(() => {
+  const text = input.value.trim()
+  if (!text) return null
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) return text
+  if (/^\S+$/.test(text) && /^[\w-]+(\.[\w-]+)+([\w./?=&%#+-]*)?$/.test(text)) return `https://${text}`
+  return null
+})
 const level = ref('M')
 const size = ref(512)
 const dataUrl = ref('')
@@ -19,38 +29,18 @@ const levels = [
 
 const sizes = [256, 512, 1024]
 
-// 未带协议时自动补全 https://
-const url = computed(() => {
-  const text = input.value.trim()
-  if (!text) return ''
-  return /^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text : `https://${text}`
-})
-
+// 文件名：取输入做安全化裁剪，最长 40 个字符；空输入回退为 qrcode
 const fileName = computed(() => {
-  let host = 'qrcode'
-  try {
-    host = new URL(url.value).hostname || 'qrcode'
-  } catch {
-    host = 'qrcode'
-  }
-  return `${host}-${size.value}.png`
+  const raw = input.value.trim().replace(/[\\/:*?"<>|]+/g, '_').slice(0, 40)
+  return `${raw || 'qrcode'}-${size.value}.png`
 })
 
 /* ---------- 生成二维码 ---------- */
 async function generate() {
-  const text = url.value
+  const text = content.value
   if (!text) {
     dataUrl.value = ''
     error.value = ''
-    generating.value = false
-    return
-  }
-  try {
-    // 仅做格式校验，不发起网络请求
-    new URL(text)
-  } catch {
-    dataUrl.value = ''
-    error.value = '网址格式不正确，请检查后重试'
     generating.value = false
     return
   }
@@ -75,7 +65,7 @@ async function generate() {
 
 // 输入/选项变化后防抖重新生成
 let timer = null
-watch([url, level, size], () => {
+watch([content, level, size], () => {
   clearTimeout(timer)
   timer = setTimeout(generate, 260)
 })
@@ -121,14 +111,14 @@ defineExpose({ open: openTool })
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="网址转二维码"
+          aria-label="二维码生成"
           class="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-apple-lg bg-canvas shadow-product"
         >
           <!-- 头部 -->
           <div class="flex items-start justify-between gap-apple-md border-b border-divider-soft p-apple-md sm:p-apple-lg">
             <div>
-              <p class="text-body-strong text-ink">网址转二维码</p>
-              <p class="text-fine-print text-ink-muted-48">输入网址生成二维码 · 支持下载图片</p>
+              <p class="text-body-strong text-ink">二维码生成</p>
+              <p class="text-fine-print text-ink-muted-48">输入文本或网址生成二维码 · 支持下载图片</p>
             </div>
             <button
               type="button"
@@ -148,16 +138,15 @@ defineExpose({ open: openTool })
               <!-- 左：输入与选项 -->
               <section class="flex flex-col gap-apple-md">
                 <div>
-                  <label for="qr-url-input" class="text-caption-strong text-ink-muted-80">网址</label>
+                  <label for="qr-url-input" class="text-caption-strong text-ink-muted-80">文本或网址</label>
                   <div class="mt-apple-xs flex gap-apple-sm">
                     <input
                       id="qr-url-input"
                       v-model="input"
                       type="text"
-                      inputmode="url"
                       autocomplete="off"
                       spellcheck="false"
-                      placeholder="例如：www.apple.com 或 https://www.apple.com"
+                      placeholder="例如：一段文字，或 https://www.apple.com"
                       class="min-w-0 flex-1 rounded-apple-md border border-hairline bg-surface-pearl px-apple-md py-apple-sm text-apple-body text-ink placeholder:text-ink-muted-48 focus:border-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
                       @keyup.enter="generate"
                     />
@@ -169,9 +158,6 @@ defineExpose({ open: openTool })
                       清空
                     </button>
                   </div>
-                  <p v-if="url && url !== input.trim()" class="mt-apple-xs break-all text-fine-print text-ink-muted-48">
-                    将按 {{ url }} 生成
-                  </p>
                   <p v-if="error" class="mt-apple-xs text-fine-print text-red-600">{{ error }}</p>
                 </div>
 
@@ -230,13 +216,13 @@ defineExpose({ open: openTool })
                   <img
                     v-if="dataUrl"
                     :src="dataUrl"
-                    :alt="`${url} 的二维码`"
+                    :alt="`${input} 的二维码`"
                     class="h-full w-full object-contain"
                   />
                   <div v-else class="flex flex-col items-center gap-apple-xs text-center">
                     <span class="text-[28px] opacity-40">🔳</span>
                     <p class="text-fine-print text-ink-muted-48">
-                      {{ generating ? '生成中…' : '输入网址后自动生成二维码' }}
+                      {{ generating ? '生成中…' : '输入文本或网址后自动生成二维码' }}
                     </p>
                   </div>
                 </div>
@@ -249,6 +235,13 @@ defineExpose({ open: openTool })
                 >
                   下载二维码图片
                 </button>
+                <a
+                  v-if="urlInfo"
+                  :href="urlInfo"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="w-full max-w-[320px] rounded-apple-md border border-hairline px-apple-md py-apple-sm text-center text-button-utility text-ink-muted-80 transition hover:bg-surface-pearl hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.98]"
+                >打开链接</a>
                 <p class="text-fine-print text-ink-muted-48">{{ fileName }}</p>
               </section>
             </div>
