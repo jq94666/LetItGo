@@ -6,3 +6,6 @@
 - 涉及修改/删除**用户已有**文件、运行有副作用的命令（如 git push、安装全局包、删除仓库内既有文件）时，仍应先确认或走正常审批流程。
 - **新增网站必须同步抓取 favicon**：在 `src/data/sites.js` 新增任何站点（含空文件夹首次加站点）后，运行 `npm run fetch:favicons`（`scripts/fetch-favicons.mjs` 读取 sites.js 自动下载图标并更新 `src/assets/icons/favicon-manifest.js`），否则页面会用首字母占位图标。favicon 按站点 `name` 作为 manifest 的 key，文件名按 `href` 域名生成（如 dbeaver.io → `favicon-dbeaver-io.png`）。
   - **增量抓取**：脚本已改为「已抓取过且本地图标文件仍在则跳过、不再重新下载」，只抓取新增站点。所以每次加网站跑一遍即可，不会重复下载旧图标。
+
+## 项目常识
+- **自定义壁纸数据结构（2026-09-04）**：`workmate.settings` 存 `searchEngine`；`workmate.wallpaper` 存壁纸 JSON `{ src: dataURL, zoom: 1~8, tx, ty }`（旧版本直接存 dataURL，读取时自动转为 `{src, zoom:1, tx:0, ty:0}` 兼容）。壁纸渲染在 `src/components/Wallpaper.vue`（`object-cover` 图片 + `translate(tx,ty) scale(zoom)`），上传压缩与「拖动平移 / 缩放」交互在 `MoreMenu.vue` 的 wallpaper 子面板（预览区与屏幕同宽高比等比缩放）。

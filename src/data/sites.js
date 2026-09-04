@@ -57,6 +57,11 @@ export const directoryGroups = [
     ]
   },
   {
+    id: 'xinchuan',
+    label: '信创',
+    sites: [{ name: '统信打印机驱动', href: 'https://www.chinauos.com/resource/download-drivers' }]
+  },
+  {
     id: 'mirror',
     label: '镜像站',
     sites: [
@@ -160,11 +165,12 @@ export const directoryGroups = [
   },
   {
     id: 'server',
-    label: '服务器',
+    label: '建站',
     sites: [
       { name: 'FileZilla', href: 'https://filezilla-project.org/' },
       { name: 'Nginx', href: 'https://nginx.org/' },
-      { name: 'Caddy', href: 'https://caddyserver.com/' }
+      { name: 'Caddy', href: 'https://caddyserver.com/' },
+      { name: 'CFP', href: 'https://www.cloudflare-cn.com/developer-platform/products/pages/' }
     ]
   },
   {
