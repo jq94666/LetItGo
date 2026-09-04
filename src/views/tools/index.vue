@@ -1,69 +1,11 @@
 <script setup>
 import { computed, markRaw, nextTick, ref, watch } from 'vue'
 import { useDesktop } from '../../composables/useDesktop.js'
+import { toolGroups, allTools } from '../../data/tools.js'
+import { useLauncherStore } from '../../stores/launcher.js'
 import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
 import DesktopFolderTile from '../../components/DesktopFolderTile.vue'
 import ToolTile from './components/ToolTile.vue'
-
-// 同分类的工具合并为一个文件夹
-const groups = [
-  {
-    id: 'family',
-    label: '家庭',
-    tools: [{ id: 'relatives', label: '亲戚计算', icon: '👨‍👩‍👧', tint: 'from-violet-400 to-fuchsia-400' }]
-  },
-  {
-    id: 'finance',
-    label: '财务',
-    tools: [{ id: 'uppercase', label: '大写金额', icon: '¥', tint: 'from-emerald-400 to-teal-400' }]
-  },
-  {
-    id: 'excel',
-    label: 'Excel',
-    tools: [{ id: 'excelMerge', label: '合并', icon: '📗', tint: 'from-green-400 to-emerald-400' }]
-  },
-  {
-    id: 'word',
-    label: 'Word',
-    tools: [
-      { id: 'wordDraft', label: '草稿纸', icon: '📘', tint: 'from-sky-400 to-blue-500' },
-      { id: 'wordExtract', label: '提取页面', icon: '✂️', tint: 'from-blue-400 to-indigo-500' }
-    ]
-  },
-  {
-    id: 'pdf',
-    label: 'PDF',
-    tools: [
-      { id: 'pdfRotate', label: '旋转', icon: '🔄', tint: 'from-cyan-400 to-sky-400' },
-      { id: 'pdfSplit', label: '拆分', icon: '📑', tint: 'from-slate-400 to-cyan-500' },
-      { id: 'pdfMerge', label: '合并', icon: '📚', tint: 'from-teal-400 to-cyan-400' },
-      { id: 'pdfScan', label: '转扫描件', icon: '🖨️', tint: 'from-orange-400 to-rose-400' },
-      { id: 'pdfToExcel', label: '转Excel', icon: '📊', tint: 'from-emerald-400 to-teal-400' },
-      { id: 'pdfToWord', label: '转Word', icon: '📝', tint: 'from-blue-400 to-indigo-400' },
-      { id: 'imgToPdf', label: '图片转PDF', icon: '🖼️', tint: 'from-fuchsia-400 to-pink-400' }
-    ]
-  },
-  {
-    id: 'qrcode',
-    label: '二维码',
-    tools: [{ id: 'urlToQrCode', label: '网址转码', icon: '🔳', tint: 'from-indigo-400 to-blue-500' }]
-  },
-  {
-    id: 'image',
-    label: '图片',
-    tools: [{ id: 'imageCompress', label: '压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' }]
-  },
-  {
-    id: 'color',
-    label: '色卡',
-    tools: [{ id: 'basicColor', label: '基础色卡', icon: '🎨', tint: 'from-fuchsia-500 to-purple-600' }]
-  },
-  {
-    id: 'simulate',
-    label: '模拟',
-    tools: [{ id: 'analogClock', label: '模拟时钟', icon: '🕰️', tint: 'from-amber-400 to-orange-500' }]
-  }
-]
 
 // 工具改为按需加载：进入工具页只加载页面骨架，
 // 点开某个工具时才动态拉取其代码与依赖（pdf.js、pdf-lib、docx 等不再进首屏）
@@ -89,7 +31,7 @@ const toolLoaders = {
 const {
   screenEl, auto, positions, openedId, order, dragId, dragX, dragY, tileWidth, deskHeight, slotPos,
   onDown, onMove, onUp, onCancel, onClick
-} = useDesktop({ storageKey: 'workmate.tools.screen', itemCount: groups.length, defaultOrder: groups.map((g) => g.id) })
+} = useDesktop({ storageKey: 'workmate.tools.screen', itemCount: toolGroups.length, defaultOrder: toolGroups.map((g) => g.id) })
 
 // 打开弹窗后，首帧内禁止遮罩捕获指针事件：移动端点按按钮后浏览器会合成一次 click，
 // 此时遮罩恰好覆盖按钮，该 click 会落在遮罩上触发关闭（phantom click），导致弹窗一开即关。
@@ -104,7 +46,7 @@ watch(openedId, (val, old) => {
 
 // 自动排列：按「持久化的文件夹顺序」紧凑落位；手动：优先使用拖动记录的位置
 const tiles = computed(() => {
-  const map = Object.fromEntries(groups.map((g) => [g.id, g]))
+  const map = Object.fromEntries(toolGroups.map((g) => [g.id, g]))
   const ordered = order.value.map((id) => map[id]).filter(Boolean)
   return ordered.map((group, i) => {
     const base = auto.value ? slotPos(i) : (positions[group.id] ?? slotPos(i))
@@ -115,7 +57,7 @@ const tiles = computed(() => {
   })
 })
 
-const openedGroup = computed(() => groups.find((g) => g.id === openedId.value) ?? null)
+const openedGroup = computed(() => toolGroups.find((g) => g.id === openedId.value) ?? null)
 // 桌面滚动容器（供滚动定位等用途）
 const deskScroller = ref(null)
 
@@ -142,6 +84,20 @@ async function launch(tool) {
     console.error('工具加载失败：', tool.id, e)
   }
 }
+
+// 响应主页搜索的直达请求：进入指定应用。
+// 必须位于 launch 之后；immediate 用于覆盖「从主页导航过来、工具页首次挂载」的场景
+const launcher = useLauncherStore()
+watch(
+  () => launcher.pendingToolId,
+  (id) => {
+    if (!id) return
+    const tool = allTools.find((t) => t.id === id)
+    launcher.clearTool()
+    if (tool) launch(tool)
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

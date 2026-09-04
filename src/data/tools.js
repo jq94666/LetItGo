@@ -1,0 +1,67 @@
+/* 工具（应用）数据中心：工具页渲染与本地搜索共用同一份元数据。
+   工具组件本身仍由 views/tools/index.vue 按需动态 import，
+   这里只保留 id / 名称 / 图标等展示信息，避免搜索时拉取全部工具代码。 */
+
+export const toolGroups = [
+  {
+    id: 'family',
+    label: '家庭',
+    tools: [{ id: 'relatives', label: '亲戚计算', icon: '👨‍👩‍👧', tint: 'from-violet-400 to-fuchsia-400' }]
+  },
+  {
+    id: 'finance',
+    label: '财务',
+    tools: [{ id: 'uppercase', label: '大写金额', icon: '¥', tint: 'from-emerald-400 to-teal-400' }]
+  },
+  {
+    id: 'excel',
+    label: 'Excel',
+    tools: [{ id: 'excelMerge', label: '合并', icon: '📗', tint: 'from-green-400 to-emerald-400' }]
+  },
+  {
+    id: 'word',
+    label: 'Word',
+    tools: [
+      { id: 'wordDraft', label: '草稿纸', icon: '📘', tint: 'from-sky-400 to-blue-500' },
+      { id: 'wordExtract', label: '提取页面', icon: '✂️', tint: 'from-blue-400 to-indigo-500' }
+    ]
+  },
+  {
+    id: 'pdf',
+    label: 'PDF',
+    tools: [
+      { id: 'pdfRotate', label: '旋转', icon: '🔄', tint: 'from-cyan-400 to-sky-400' },
+      { id: 'pdfSplit', label: '拆分', icon: '📑', tint: 'from-slate-400 to-cyan-500' },
+      { id: 'pdfMerge', label: '合并', icon: '📚', tint: 'from-teal-400 to-cyan-400' },
+      { id: 'pdfScan', label: '转扫描件', icon: '🖨️', tint: 'from-orange-400 to-rose-400' },
+      { id: 'pdfToExcel', label: '转Excel', icon: '📊', tint: 'from-emerald-400 to-teal-400' },
+      { id: 'pdfToWord', label: '转Word', icon: '📝', tint: 'from-blue-400 to-indigo-400' },
+      { id: 'imgToPdf', label: '图片转PDF', icon: '🖼️', tint: 'from-fuchsia-400 to-pink-400' }
+    ]
+  },
+  {
+    id: 'qrcode',
+    label: '二维码',
+    tools: [{ id: 'urlToQrCode', label: '网址转码', icon: '🔳', tint: 'from-indigo-400 to-blue-500' }]
+  },
+  {
+    id: 'image',
+    label: '图片',
+    tools: [{ id: 'imageCompress', label: '压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' }]
+  },
+  {
+    id: 'color',
+    label: '色卡',
+    tools: [{ id: 'basicColor', label: '基础色卡', icon: '🎨', tint: 'from-fuchsia-500 to-purple-600' }]
+  },
+  {
+    id: 'simulate',
+    label: '模拟',
+    tools: [{ id: 'analogClock', label: '模拟时钟', icon: '🕰️', tint: 'from-amber-400 to-orange-500' }]
+  }
+]
+
+// 扁平化的工具列表（供搜索与跨页启动按 id 查找）
+export const allTools = toolGroups.flatMap((g) =>
+  g.tools.map((t) => ({ ...t, groupLabel: g.label, groupId: g.id }))
+)

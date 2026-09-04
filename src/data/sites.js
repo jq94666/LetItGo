@@ -207,3 +207,11 @@ export const designSiteGroups = {
     { name: 'iconpark', href: 'https://iconpark.oceanengine.com/home' }
   ]
 }
+
+/* 网站页的完整文件夹列表：页面渲染与本地搜索共用同一份数据，
+   新增分组时改这里即可，两边同步生效 */
+export const siteFolders = [
+  { id: 'pdf', label: 'PDF', sites: pdfSites },
+  ...directoryGroups.map((g) => ({ id: g.id, label: g.label, sites: g.sites })),
+  { id: 'icons', label: '图标', sites: designSiteGroups.icons }
+]

@@ -1,18 +1,14 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 
-import { designSiteGroups, directoryGroups, pdfSites } from '../../data/sites.js'
+import { siteFolders } from '../../data/sites.js'
 import { useDesktop } from '../../composables/useDesktop.js'
 import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
 import DesktopFolderTile from '../../components/DesktopFolderTile.vue'
 import AppTile from './components/AppTile.vue'
 
-// 同一菜单下的站点合并为一个文件夹
-const folders = [
-  { id: 'pdf', label: 'PDF', sites: pdfSites },
-  ...directoryGroups.map((g) => ({ id: g.id, label: g.label, sites: g.sites })),
-  { id: 'icons', label: '图标', sites: designSiteGroups.icons }
-]
+// 同一菜单下的站点合并为一个文件夹（数据与主页本地搜索共用）
+const folders = siteFolders
 
 const {
   screenEl, auto, positions, openedId, order, dragId, dragX, dragY, tileWidth, deskHeight, slotPos,

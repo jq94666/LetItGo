@@ -1,17 +1,106 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { siteFolders } from '../../data/sites.js'
 import { useSettingsStore } from '../../stores/settings.js'
+import { useLauncherStore } from '../../stores/launcher.js'
+import { highlightParts, searchLocal, TYPE_LABEL } from '../../data/localSearch.js'
+import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
+import AppTile from '../sites/components/AppTile.vue'
 
-// 搜索引擎由「更多 → 设置」统一配置，默认必应
+const router = useRouter()
+// 搜索引擎由「更多 → 设置」统一配置，默认必应；本地无命中时才用到
 const settingsStore = useSettingsStore()
-const query = ref('')
-const placeholder = computed(() => `在${settingsStore.currentEngine().label}中搜索`)
+const launcher = useLauncherStore()
 
-function onSubmit(e) {
-  e.preventDefault()
+const query = ref('')
+const listOpen = ref(false) // 下拉是否展开（Esc / 失焦 / 选中后关闭）
+const NONE = -1 // 未选中任何行：默认不预选，回车仍然走搜索引擎
+const activeIndex = ref(NONE) // 键盘高亮项
+const placeholder = computed(() => `搜本地文件夹与应用，或${settingsStore.currentEngine().label}一下`)
+
+const hasQuery = computed(() => !!query.value.trim())
+// 本地命中项：文件夹 / 应用 / 网站
+const localHits = computed(() => (hasQuery.value ? searchLocal(query.value, 8) : []))
+// 下拉行 = 本地命中 + 兜底的「用引擎搜索」
+const rows = computed(() => [
+  ...localHits.value,
+  {
+    type: 'web',
+    key: 'web',
+    label: query.value.trim(),
+    sub: settingsStore.currentEngine().label,
+    icon: '🔍',
+    iconSrc: null
+  }
+])
+const showList = computed(() => listOpen.value && hasQuery.value)
+
+// 输入变化后重新展开，且默认不预选任何行
+watch(query, () => {
+  listOpen.value = true
+  activeIndex.value = NONE
+})
+
+/* 命中文件夹：直接在当前页弹窗展示内容，不再滑到网站 tab。
+   用 fixed 铺满视口，避免页面纵向滚动时弹窗随内容偏移。 */
+const openedFolderId = ref(null)
+const openedFolder = computed(() => siteFolders.find((f) => f.id === openedFolderId.value) ?? null)
+// 首帧内让遮罩不响应指针：移动端点按搜索结果后浏览器会合成一次 click，
+// 该 click 若落在刚出现的遮罩上会立刻关闭弹窗（与网站页同款处理）
+const armed = ref(true)
+watch(openedFolderId, (val, old) => {
+  if (val && !old) {
+    armed.value = false
+    requestAnimationFrame(() => requestAnimationFrame(() => { armed.value = true }))
+  }
+})
+
+function move(step) {
+  if (!showList.value) return
+  const n = rows.value.length
+  // 未预选时：↓ 进入首项，↑ 进入末项（末项即搜索引擎兜底）
+  if (activeIndex.value === NONE) {
+    activeIndex.value = step > 0 ? 0 : n - 1
+    return
+  }
+  activeIndex.value = (activeIndex.value + step + n) % n
+}
+
+function close() {
+  listOpen.value = false
+}
+
+function openWeb() {
   const q = query.value.trim()
   if (!q) return
   window.open(settingsStore.searchUrl(q), '_blank', 'noopener,noreferrer')
+}
+
+function choose(i) {
+  const row = rows.value[i]
+  if (!row) return
+  close()
+  if (row.type === 'web') {
+    openWeb()
+  } else if (row.type === 'folder') {
+    // 直接在当前页弹出文件夹内容，不切到网站页
+    openedFolderId.value = row.id
+  } else if (row.type === 'tool') {
+    // 切到工具页并进入该应用
+    launcher.requestTool(row.id)
+    router.push('/tools')
+  } else if (row.type === 'site') {
+    window.open(row.href, '_blank', 'noopener,noreferrer')
+  }
+}
+
+function onSubmit(e) {
+  e.preventDefault()
+  if (!hasQuery.value) return
+  // 有高亮项时执行该项；默认未预选（或下拉已关闭）时回落到搜索引擎
+  if (showList.value && activeIndex.value !== NONE) choose(activeIndex.value)
+  else openWeb()
 }
 </script>
 
@@ -20,8 +109,8 @@ function onSubmit(e) {
   <div class="relative min-h-full w-full">
     <!-- 内容：搜索框桌面端靠上；移动端下移（thumb 友好），避开顶部 -->
     <div class="relative z-10 mx-auto w-full max-w-apple-content px-apple-xl pb-apple-section pt-apple-xl sm:pt-apple-xxl max-[767px]:mt-[48vh]">
-      <!-- 搜索框 -->
-      <div class="mx-auto w-full max-w-[680px]">
+      <!-- 搜索框：relative 作为下拉的定位容器 -->
+      <div class="relative mx-auto w-full max-w-[680px]">
         <form
           role="search"
           class="rounded-apple-lg bg-canvas/70 p-apple-sm shadow-hairline backdrop-blur-apple saturate-[180%] transition-all duration-200 focus-within:shadow-product"
@@ -55,13 +144,68 @@ function onSubmit(e) {
               name="q"
               aria-label="搜索"
               :placeholder="placeholder"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-controls="search-suggest"
+              :aria-expanded="showList"
               class="h-[44px] w-full rounded-pill border border-black/[0.08] bg-canvas pl-[44px] pr-apple-md text-apple-body text-ink transition-colors duration-200 focus:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
               autocomplete="off"
+              @focus="listOpen = true"
+              @blur="close"
+              @keydown.down.prevent="move(1)"
+              @keydown.up.prevent="move(-1)"
+              @keydown.esc.prevent="close"
             />
           </label>
         </form>
-      </div>
 
+        <!-- 本地命中下拉：本地优先，末行固定为搜索引擎兜底 -->
+        <ul
+          v-if="showList"
+          id="search-suggest"
+          role="listbox"
+          aria-label="搜索建议"
+          class="absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[52vh] overflow-y-auto overscroll-contain rounded-apple-lg bg-canvas/95 p-apple-xs shadow-product ring-1 ring-black/5 backdrop-blur-apple"
+        >
+          <li v-for="(row, i) in rows" :key="row.key">
+            <button
+              type="button"
+              role="option"
+              :aria-selected="i === activeIndex"
+              class="flex w-full items-center gap-apple-sm rounded-apple-md px-apple-md py-apple-sm text-left transition-colors"
+              :class="i === activeIndex ? 'bg-canvas-parchment' : 'hover:bg-canvas-parchment/60'"
+              @mouseenter="activeIndex = i"
+              @mousedown.prevent
+              @click="choose(i)"
+            >
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-canvas-parchment text-[15px]">
+                <img v-if="row.iconSrc" :src="row.iconSrc" :alt="row.label" class="h-4 w-4 object-contain" />
+                <span v-else>{{ row.icon || row.label.charAt(0).toUpperCase() }}</span>
+              </span>
+
+              <!-- 名称完整展示（不截断），命中的字符高亮 -->
+              <span class="min-w-0 flex-1 break-words text-[14px] leading-snug text-ink">
+                <template v-if="row.type === 'web'">用{{ row.sub }}搜索「{{ row.label }}」</template>
+                <template v-else>
+                  <span v-for="(seg, si) in highlightParts(row.label, query)" :key="si" :class="seg.hit ? 'font-semibold text-primary' : ''">{{ seg.text }}</span>
+                </template>
+              </span>
+
+              <!-- 次级信息（网站所属文件夹 / 应用所属分组）同样高亮命中字符 -->
+              <span v-if="row.type !== 'web'" class="shrink-0 text-[11px] text-ink-muted-48">{{ TYPE_LABEL[row.type] }} · <span v-for="(seg, si) in highlightParts(row.sub, query)" :key="si" :class="seg.hit ? 'font-semibold text-primary' : ''">{{ seg.text }}</span></span>
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
+
+    <!-- 命中文件夹：当前页直接弹窗展示内容，不切换 tab -->
+    <Transition name="folder">
+      <div v-if="openedFolder" class="fixed inset-0 z-40" :class="{ 'pointer-events-none': !armed }">
+        <DesktopFolderPanel :title="openedFolder.label" @close="openedFolderId = null">
+          <AppTile v-for="site in openedFolder.sites" :key="site.name" :site="site" />
+        </DesktopFolderPanel>
+      </div>
+    </Transition>
   </div>
 </template>
