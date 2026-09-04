@@ -1,15 +1,17 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useSettingsStore } from '../../stores/settings.js'
 
+// 搜索引擎由「更多 → 设置」统一配置，默认必应
+const settingsStore = useSettingsStore()
 const query = ref('')
+const placeholder = computed(() => `在${settingsStore.currentEngine().label}中搜索`)
 
 function onSubmit(e) {
   e.preventDefault()
   const q = query.value.trim()
   if (!q) return
-  // 默认使用必应搜索
-  const url = `https://www.bing.com/search?q=${encodeURIComponent(q)}`
-  window.open(url, '_blank', 'noopener,noreferrer')
+  window.open(settingsStore.searchUrl(q), '_blank', 'noopener,noreferrer')
 }
 </script>
 
@@ -52,6 +54,7 @@ function onSubmit(e) {
               type="search"
               name="q"
               aria-label="搜索"
+              :placeholder="placeholder"
               class="h-[44px] w-full rounded-pill border border-black/[0.08] bg-canvas pl-[44px] pr-apple-md text-apple-body text-ink transition-colors duration-200 focus:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
               autocomplete="off"
             />

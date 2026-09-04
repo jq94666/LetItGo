@@ -1,6 +1,7 @@
 # 长期记忆（MEMORY.md）
 
 ## 用户偏好 / 协作约定
+- **记忆只记永久内容，不建每日 md（2026-09-04）**：`MEMORY.md` 只沉淀长期有效的偏好、协作约定、项目常识；不创建以日期为单位的日志文件（如 `2026-09-04.md`、daily notes 等），也不写入一次性进展、临时调试信息。落笔前判断「半年后是否仍然成立」，否则不记。
 - **临时文件一律直接删除（2026-09-03 再次确认）**：由我（AI）自己创建的临时/调试文件（如测试脚本 `.xxx-test.mjs`、诊断日志、`.tmp-*` 目录、启动的临时 dev/preview 进程等），清理时直接删除即可，不要询问或等批准。
 - 涉及修改/删除**用户已有**文件、运行有副作用的命令（如 git push、安装全局包、删除仓库内既有文件）时，仍应先确认或走正常审批流程。
 - **新增网站必须同步抓取 favicon**：在 `src/data/sites.js` 新增任何站点（含空文件夹首次加站点）后，运行 `npm run fetch:favicons`（`scripts/fetch-favicons.mjs` 读取 sites.js 自动下载图标并更新 `src/assets/icons/favicon-manifest.js`），否则页面会用首字母占位图标。favicon 按站点 `name` 作为 manifest 的 key，文件名按 `href` 域名生成（如 dbeaver.io → `favicon-dbeaver-io.png`）。

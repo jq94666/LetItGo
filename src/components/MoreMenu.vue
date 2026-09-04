@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import pkg from '../../package.json'
+import { SEARCH_ENGINES, useSettingsStore } from '../stores/settings.js'
 
 // 底部导航的「更多」按钮：点击弹出上拉菜单，内含「设置 / 关于」
 const props = defineProps({
@@ -10,6 +11,10 @@ const emit = defineEmits(['reset'])
 
 const open = ref(false)
 const view = ref('menu') // menu | settings | about
+
+// 全局偏好（默认搜索引擎等），与传入的桌面布局设置相互独立
+const settingsStore = useSettingsStore()
+const engines = SEARCH_ENGINES
 
 function openMenu() {
   view.value = 'menu'
@@ -138,6 +143,25 @@ const aboutText =
 
               <!-- 设置面板 -->
               <div v-else-if="view === 'settings'" class="flex flex-col gap-apple-md px-apple-md py-apple-md">
+                <!-- 默认搜索引擎（全局偏好，跨页面生效） -->
+                <div class="flex flex-col gap-apple-sm">
+                  <div class="min-w-0">
+                    <p class="text-[14px] text-ink-muted-80">默认搜索引擎</p>
+                    <p class="text-[12px] text-ink-muted-48">主页搜索框使用 · 当前「{{ settingsStore.currentEngine().label }}」</p>
+                  </div>
+                  <div class="flex gap-apple-sm">
+                    <button
+                      v-for="eng in engines"
+                      :key="eng.id"
+                      type="button"
+                      class="flex-1 rounded-pill py-apple-xs text-[13px] font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.97]"
+                      :class="settingsStore.searchEngine === eng.id ? 'bg-primary text-on-primary' : 'bg-canvas-parchment text-ink-muted-80 hover:text-ink'"
+                      :aria-pressed="settingsStore.searchEngine === eng.id"
+                      @click="settingsStore.searchEngine = eng.id"
+                    >{{ eng.label }}</button>
+                  </div>
+                </div>
+
                 <div class="flex items-center justify-between gap-apple-sm">
                   <div class="min-w-0">
                     <p class="text-[14px] text-ink-muted-80">自动排列</p>
