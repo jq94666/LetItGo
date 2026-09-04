@@ -82,6 +82,37 @@ function pick(e) {
   e.target.value = ''
 }
 
+/* ---------- 拖拽上传 ---------- */
+const dragActive = ref(false)
+let dragDepth = 0
+
+function onDragEnter(e) {
+  e.preventDefault()
+  if (cropItem()) return
+  dragDepth += 1
+  dragActive.value = true
+}
+function onDragOver(e) {
+  e.preventDefault()
+}
+function onDragLeave(e) {
+  e.preventDefault()
+  if (cropItem()) return
+  dragDepth -= 1
+  if (dragDepth <= 0) {
+    dragDepth = 0
+    dragActive.value = false
+  }
+}
+function onDrop(e) {
+  e.preventDefault()
+  dragDepth = 0
+  dragActive.value = false
+  if (cropItem()) return
+  const files = e.dataTransfer ? [...e.dataTransfer.files] : []
+  if (files.length) loadImages(files)
+}
+
 // 裁剪区域随显示旋转变换（归一化坐标）
 function rotateRect(r, dir) {
   if (dir > 0) return { x: 1 - r.y - r.h, y: r.x, w: r.h, h: r.w }
@@ -190,7 +221,20 @@ async function generate() {
             </div>
 
             <!-- 内容 -->
-            <div class="flex flex-1 flex-col gap-apple-md overflow-y-auto p-apple-md sm:p-apple-lg">
+            <div
+              class="relative flex flex-1 flex-col gap-apple-md overflow-y-auto p-apple-md sm:p-apple-lg"
+              @dragenter="onDragEnter"
+              @dragover="onDragOver"
+              @dragleave="onDragLeave"
+              @drop="onDrop"
+            >
+              <!-- 拖拽上传高亮 -->
+              <div
+                v-if="dragActive"
+                class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-apple-lg border-2 border-dashed border-primary bg-primary/10"
+              >
+                <span class="text-caption-strong text-primary">松开以上传图片</span>
+              </div>
               <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="pick" />
               <button
                 v-if="!cropItem()"
@@ -199,7 +243,7 @@ async function generate() {
                 @click="fileInput.click()"
               >
                 <span class="text-2xl">📥</span>
-                点击选择图片（可多选，上传顺序即页面顺序）
+                点击选择图片，或将图片拖拽到此处（可多选，顺序即页面顺序）
               </button>
 
               <p v-for="(err, i) in errors" :key="i" role="alert" class="rounded-apple-md bg-red-50 p-apple-sm text-caption text-red-600">{{ err }}</p>
