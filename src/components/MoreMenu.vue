@@ -34,9 +34,10 @@ function resetLayout() {
   close()
 }
 
-const aboutTitle = 'LuLu 导航'
+const aboutTitle = '随它导航'
+const aboutSlogan = '随它导航，不止于导航'
 const aboutText =
-  '个人网址与工具导航页：整理常用站点与日常小工具，全部在浏览器本地运行，数据保存在本机。'
+  '整理常用网站与日常小工具，让每一次打开都直抵目的地。全部在浏览器本地运行，数据保存在本机。'
 
 // 弹窗内容区高度：随 menu/settings/about 内容平滑过渡（WAAPI 动画），
 // 避免切换时弹窗忽大忽小；离场内容改为绝对定位，不再把布局塌缩到只剩标题栏。
@@ -260,10 +261,11 @@ onBeforeUnmount(() => resizeObs?.disconnect())
               <div v-else key="about" class="flex flex-col items-center gap-apple-sm px-apple-md py-apple-lg text-center">
                 <span class="flex h-16 w-16 items-center justify-center rounded-[24%] bg-linear-to-br from-primary to-indigo-500 text-3xl shadow-hairline">🗂️</span>
                 <div>
-                  <p class="text-[17px] font-semibold text-ink">{{ aboutTitle }}</p>
-                  <p class="text-[12px] text-ink-muted-48">v{{ pkg.version }} · {{ pkg.name }}</p>
+                  <p class="text-[19px] font-semibold text-ink">{{ aboutTitle }}</p>
+                  <p class="text-[13px] text-primary">{{ aboutSlogan }}</p>
                 </div>
                 <p class="max-w-[280px] text-[14px] leading-normal text-ink-muted-80">{{ aboutText }}</p>
+                <p class="text-[12px] text-ink-muted-48">v{{ pkg.version }} · {{ pkg.name }}</p>
               </div>
                   </Transition>
                 </div>
