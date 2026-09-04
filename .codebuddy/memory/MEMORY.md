@@ -8,4 +8,6 @@
   - **增量抓取**：脚本已改为「已抓取过且本地图标文件仍在则跳过、不再重新下载」，只抓取新增站点。所以每次加网站跑一遍即可，不会重复下载旧图标。
 
 ## 项目常识
-- **自定义壁纸数据结构（2026-09-04）**：`workmate.settings` 存 `searchEngine`；`workmate.wallpaper` 存壁纸 JSON `{ src: dataURL, zoom: 1~8, tx, ty }`（旧版本直接存 dataURL，读取时自动转为 `{src, zoom:1, tx:0, ty:0}` 兼容）。壁纸渲染在 `src/components/Wallpaper.vue`（`object-cover` 图片 + `translate(tx,ty) scale(zoom)`），上传压缩与「拖动平移 / 缩放」交互在 `MoreMenu.vue` 的 wallpaper 子面板（预览区与屏幕同宽高比等比缩放）。
+- **Vue ref 存对象返回 reactive 代理（2026-09-05 排查教训）**：`ref()` 深度响应，`.value` 存对象时读出的是 **reactive proxy**，与原始对象 `===` 恒为 false。长按拖拽里若用 `drag.value !== st` 判断「定时器是否过期」会永久拦截、导致拖拽永不激活。正确做法：给手势对象加自增 `seq` + `cancelled` 标记，定时器回调只认 `st.seq !== dragSeq || st.cancelled`，不要在定时器里对响应式 ref 值与原始对象做引用比较。
+- **自定义壁纸数据结构（2026-09-04）**：`workmate.settings` 存 `searchEngine`；`workmate.wallpaper` 存壁纸 JSON `{ src: dataURL, zoom: 1~8, tx, ty }`（旧版本直接存 dataURL，读取时自动转为 `{src, zoom:1, tx:0, ty:0}` 兼容）。壁纸渲染在 `src/components/Wallpaper.vue`（`object-contain` 完整显示 + 同图模糊铺底；按 `translate(tx,ty) scale(zoom)` 变换），上传压缩与「拖动平移 / 缩放」交互在 `MoreMenu.vue` 的 wallpaper 子面板（预览区与屏幕同宽高比等比缩放）。
+- **网站页桌面（文件夹模式，2026-09-04 收敛定稿）**：`workmate.sites.screen` 状态 `layout`（文件夹布局快照；`{kind:'folder', id, label, items:[siteName...]}`，站点一律放在文件夹内、**不允许桌面独立站点**）与 `v2` 标记；读取时若有 `kind:'site'` 遗留自动收拢回其默认分类文件夹并补齐缺失默认分组。交互：桌面仅文件夹，长按文件夹拖动即时让位排序；文件夹弹窗 `views/sites/components/FolderPanelV2.vue` 内长按站点拖动排序、标题可改名、点击打开；文件夹名/站点顺序等修改前先经 `liveOpenedFolder`/`mutableLayout` 固化快照。图标按下 `stopPropagation` 避免与 App 整屏滑动冲突。工具页(tools)仍为 v1 静态分组逻辑不受影响。

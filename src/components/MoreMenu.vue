@@ -239,19 +239,21 @@ function resetLayout() {
   emit('reset')
   close()
 }
+// v2 网站页：清空用户主屏定制（排序/合并/改名），回到默认分类布局
+function resetV2Layout() {
+  props.settings.resetLayout?.()
+}
 
-// 「恢复默认设置」：二次点击确认后，重置全局偏好（搜索引擎/壁纸）与当前屏幕布局
-const resetConfirm = ref(false)
-let resetTimer = null
-function onResetDefaults() {
-  if (!resetConfirm.value) {
-    resetConfirm.value = true
-    clearTimeout(resetTimer)
-    resetTimer = setTimeout(() => (resetConfirm.value = false), 3000)
-    return
-  }
-  clearTimeout(resetTimer)
-  resetConfirm.value = false
+// 「恢复默认设置」：弹窗二次确认后，重置全局偏好（搜索引擎/壁纸）与当前屏幕布局
+const resetAsk = ref(false)
+function askReset() {
+  resetAsk.value = true
+}
+function cancelReset() {
+  resetAsk.value = false
+}
+function doResetDefaults() {
+  resetAsk.value = false
   settingsStore.resetDefaults()
   const s = props.settings
   s.auto = true
@@ -487,16 +489,14 @@ onBeforeUnmount(() => {
                 <button
                   type="button"
                   class="mt-apple-xs flex w-full items-center justify-center gap-apple-xs rounded-apple-md bg-canvas-parchment py-apple-xs text-[14px] font-medium transition hover:bg-hairline active:scale-[0.98]"
-                  :class="resetConfirm ? 'text-[#e11d48]' : 'text-ink-muted-80 hover:text-[#e11d48]'"
-                  @click="onResetDefaults"
+                  @click="askReset"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                     <path d="M3 3v5h5" />
                   </svg>
-                  {{ resetConfirm ? '再次点击确认恢复' : '恢复默认设置' }}
+                  恢复默认设置
                 </button>
-                <p v-if="resetConfirm" class="text-center text-[12px] leading-normal text-[#e11d48]">将重置默认搜索引擎、壁纸与当前屏幕的图标布局</p>
               </div>
 
               <!-- 壁纸设置面板：设置 → 壁纸（壁纸为全局偏好），预览可拖动平移 / 缩放 -->
@@ -634,44 +634,63 @@ onBeforeUnmount(() => {
 
               <!-- 自动排列设置面板：当前屏幕的桌面布局 -->
               <div v-else-if="view === 'layout'" key="layout" class="flex flex-col gap-apple-md px-apple-md py-apple-md">
-                <div class="flex items-center justify-between gap-apple-sm">
+                <!-- v2 网站页：iOS 主屏模式（始终自动排列，长按可排序/合并建夹/改名） -->
+                <template v-if="settings.v2">
                   <div class="min-w-0">
-                    <p class="text-[14px] text-ink-muted-80">自动排列</p>
-                    <p class="text-[12px] text-ink-muted-48">{{ settings.auto ? '按行列顺序紧凑排布' : '可拖动到任意位置' }}</p>
+                    <p class="text-[14px] text-ink-muted-80">图标布局</p>
+                    <p class="text-[12px] leading-normal text-ink-muted-48">网站页按文件夹整理所有网站：桌面只排列文件夹，长按文件夹可拖动调整顺序；网站始终保存在文件夹内，文件夹内长按可调整顺序，文件夹名称可修改。恢复默认图标布局可回到默认分类。</p>
                   </div>
                   <button
                     type="button"
-                    role="switch"
-                    :aria-checked="settings.auto"
-                    aria-label="自动排列"
-                    class="relative h-6 w-11 shrink-0 rounded-pill transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
-                    :class="settings.auto ? 'bg-primary' : 'bg-hairline'"
-                    @click="settings.auto = !settings.auto"
+                    class="w-full rounded-apple-md bg-canvas-parchment py-apple-xs text-[14px] text-ink-muted-80 transition hover:text-ink active:scale-[0.98]"
+                    @click="resetV2Layout"
                   >
-                    <span
-                      class="absolute top-[2px] h-5 w-5 rounded-full bg-white shadow-hairline transition-all duration-200"
-                      :class="settings.auto ? 'left-[22px]' : 'left-[2px]'"
-                    />
+                    恢复默认图标布局
                   </button>
-                </div>
+                  <p class="text-[12px] leading-normal text-ink-muted-48">恢复后将回到默认的网站分类文件夹，你自定义的排序、新建/合并的文件夹会被清除。</p>
+                </template>
 
-                <button
-                  v-if="settings.auto"
-                  type="button"
-                  :disabled="!settings.order || settings.order.length === 0"
-                  class="w-full rounded-apple-md bg-canvas-parchment py-apple-xs text-[14px] text-ink-muted-80 transition hover:text-ink active:scale-[0.98] disabled:cursor-default disabled:opacity-40 disabled:active:scale-100"
-                  @click="restoreOrder"
-                >
-                  恢复默认顺序
-                </button>
-                <button
-                  v-else
-                  type="button"
-                  class="w-full rounded-apple-md bg-canvas-parchment py-apple-xs text-[14px] text-ink-muted-80 transition hover:text-ink active:scale-[0.98]"
-                  @click="resetLayout"
-                >
-                  整理图标（恢复网格排列）
-                </button>
+                <!-- v1 桌面（工具页等）：自动排列开关与整理 -->
+                <template v-else>
+                  <div class="flex items-center justify-between gap-apple-sm">
+                    <div class="min-w-0">
+                      <p class="text-[14px] text-ink-muted-80">自动排列</p>
+                      <p class="text-[12px] text-ink-muted-48">{{ settings.auto ? '按行列顺序紧凑排布' : '可拖动到任意位置' }}</p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      :aria-checked="settings.auto"
+                      aria-label="自动排列"
+                      class="relative h-6 w-11 shrink-0 rounded-pill transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
+                      :class="settings.auto ? 'bg-primary' : 'bg-hairline'"
+                      @click="settings.auto = !settings.auto"
+                    >
+                      <span
+                        class="absolute top-[2px] h-5 w-5 rounded-full bg-white shadow-hairline transition-all duration-200"
+                        :class="settings.auto ? 'left-[22px]' : 'left-[2px]'"
+                      />
+                    </button>
+                  </div>
+
+                  <button
+                    v-if="settings.auto"
+                    type="button"
+                    :disabled="!settings.order || settings.order.length === 0"
+                    class="w-full rounded-apple-md bg-canvas-parchment py-apple-xs text-[14px] text-ink-muted-80 transition hover:text-ink active:scale-[0.98] disabled:cursor-default disabled:opacity-40 disabled:active:scale-100"
+                    @click="restoreOrder"
+                  >
+                    恢复默认顺序
+                  </button>
+                  <button
+                    v-else
+                    type="button"
+                    class="w-full rounded-apple-md bg-canvas-parchment py-apple-xs text-[14px] text-ink-muted-80 transition hover:text-ink active:scale-[0.98]"
+                    @click="resetLayout"
+                  >
+                    整理图标（恢复网格排列）
+                  </button>
+                </template>
               </div>
 
               <!-- 关于 -->
@@ -684,6 +703,42 @@ onBeforeUnmount(() => {
                 <p class="max-w-[280px] text-[14px] leading-normal text-ink-muted-80">{{ aboutText }}</p>
               </div>
                   </Transition>
+                </div>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- 恢复默认设置：弹窗二次确认 -->
+          <Transition name="confirm">
+            <div
+              v-if="resetAsk"
+              class="absolute inset-0 z-40 flex items-center justify-center bg-black/35 p-apple-md backdrop-blur-[1px]"
+              role="presentation"
+              @click.self="cancelReset"
+            >
+              <div
+                class="w-full max-w-[300px] rounded-apple-lg bg-canvas p-apple-md shadow-product ring-1 ring-black/5"
+                role="alertdialog"
+                aria-modal="true"
+                aria-label="确认恢复默认设置"
+              >
+                <p class="text-[15px] font-semibold text-ink">恢复默认设置？</p>
+                <p class="mt-1 text-[13px] leading-normal text-ink-muted-80">将重置默认搜索引擎与壁纸，并清除当前屏幕的自定义排序、新建文件夹与改名。</p>
+                <div class="mt-apple-md flex gap-apple-xs">
+                  <button
+                    type="button"
+                    class="flex-1 rounded-apple-md bg-canvas-parchment py-apple-xs text-[14px] text-ink-muted-80 transition hover:text-ink active:scale-[0.98]"
+                    @click="cancelReset"
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="button"
+                    class="flex-1 rounded-apple-md bg-[#e11d48] py-apple-xs text-[14px] text-white transition hover:opacity-90 active:scale-[0.98]"
+                    @click="doResetDefaults"
+                  >
+                    恢复默认
+                  </button>
                 </div>
               </div>
             </div>
@@ -717,5 +772,15 @@ onBeforeUnmount(() => {
 .pane-leave-to {
   opacity: 0;
   transform: translateY(-6px);
+}
+
+/* 恢复默认设置确认弹窗 */
+.confirm-enter-active,
+.confirm-leave-active {
+  transition: opacity 0.18s ease;
+}
+.confirm-enter-from,
+.confirm-leave-to {
+  opacity: 0;
 }
 </style>

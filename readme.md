@@ -13,6 +13,4 @@
 
 持续开发优化工具和导航界面。优化速度取决于免费Token的额度，当月额度用完了，当月开发停止😂。
 # 项目速览
-![alt text](image.png)
-![alt text](image-1.png)
-![alt text](image-2.png)
+请访问：https://workmate.lulufans.online/
