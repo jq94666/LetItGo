@@ -1,5 +1,6 @@
 <script setup>
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import mainIcon from '../assets/images/main.png'
 import { SEARCH_ENGINES, useSettingsStore } from '../stores/settings.js'
 
 // 底部导航的「更多」按钮：点击弹出上拉菜单，内含「设置 / 关于」
@@ -34,7 +35,6 @@ function resetLayout() {
 }
 
 const aboutTitle = '随它导航'
-const aboutIcon = new URL('../../assets/images/main.png', import.meta.url).href
 const aboutText =
   '整理常用网站与日常小工具，让每一次打开都直抵目的地。全部在浏览器本地运行，数据保存在本机。'
 
@@ -258,7 +258,7 @@ onBeforeUnmount(() => resizeObs?.disconnect())
 
               <!-- 关于 -->
               <div v-else key="about" class="flex flex-col items-center gap-apple-sm px-apple-md py-apple-lg text-center">
-                <img :src="aboutIcon" alt="随它导航" class="h-24 w-24 rounded-[24%] object-cover shadow-hairline ring-1 ring-black/5" />
+                <img :src="mainIcon" alt="随它导航" class="h-32 w-32 rounded-[24%] object-cover shadow-hairline ring-1 ring-black/5" />
                 <div>
                   <p class="text-[19px] font-semibold text-ink">{{ aboutTitle }}</p>
                   <p class="text-[13px] text-primary">{{ aboutSlogan }}</p>
