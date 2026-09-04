@@ -99,7 +99,8 @@ export const directoryGroups = [
     label: '文本编辑器',
     sites: [
       { name: 'VSCode', href: 'https://code.visualstudio.com/' },
-      { name: 'Sublime', href: 'https://www.sublimetext.com/' }
+      { name: 'Sublime', href: 'https://www.sublimetext.com/' },
+      { name: 'NotePad--', href: 'https://gitee.com/cxasm/notepad--/releases' }
     ]
   },
   {

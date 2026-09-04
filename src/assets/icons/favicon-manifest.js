@@ -32,6 +32,7 @@ export const favicons = {
   '潮流周刊': new URL('./favicon-weekly-tw93-fun.png', import.meta.url).href,
   'VSCode': new URL('./favicon-code-visualstudio-com.png', import.meta.url).href,
   'Sublime': new URL('./favicon-sublimetext-com.png', import.meta.url).href,
+  'NotePad--': new URL('./favicon-gitee-com.ico', import.meta.url).href,
   '游民星空': new URL('./favicon-gamersky-com.ico', import.meta.url).href,
   '3DM': new URL('./favicon-3dmgame-com.ico', import.meta.url).href,
   '奇趣电玩': new URL('./favicon-qqarc-com.png', import.meta.url).href,

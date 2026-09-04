@@ -159,14 +159,15 @@ function onSubmit(e) {
           </label>
         </form>
 
-        <!-- 本地命中下拉：本地优先，末行固定为搜索引擎兜底 -->
-        <ul
-          v-if="showList"
-          id="search-suggest"
-          role="listbox"
-          aria-label="搜索建议"
-          class="absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[52vh] overflow-y-auto overscroll-contain rounded-apple-lg bg-canvas/95 p-apple-xs shadow-product ring-1 ring-black/5 backdrop-blur-apple"
-        >
+        <!-- 本地命中下拉：本地优先，末行固定为搜索引擎兜底；展开/收起附丝滑动画（见底部 <style scoped> 的 suggest-*） -->
+        <Transition name="suggest">
+          <ul
+            v-if="showList"
+            id="search-suggest"
+            role="listbox"
+            aria-label="搜索建议"
+            class="absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[52vh] overflow-y-auto overscroll-contain rounded-apple-lg bg-canvas/95 p-apple-xs shadow-product ring-1 ring-black/5 backdrop-blur-apple"
+          >
           <li v-for="(row, i) in rows" :key="row.key">
             <button
               type="button"
@@ -196,6 +197,7 @@ function onSubmit(e) {
             </button>
           </li>
         </ul>
+        </Transition>
       </div>
     </div>
 
@@ -209,3 +211,19 @@ function onSubmit(e) {
     </Transition>
   </div>
 </template>
+
+<style scoped>
+/* 搜索下拉的丝滑动画：淡入 + 自顶部轻微下移并收一点，收起时反向 */
+.suggest-enter-active,
+.suggest-leave-active {
+  transition:
+    opacity 0.2s ease-out,
+    transform 0.2s ease-out;
+}
+.suggest-enter-from,
+.suggest-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transform-origin: top;
+}
+</style>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import pkg from '../../package.json'
 import { SEARCH_ENGINES, useSettingsStore } from '../stores/settings.js'
 
@@ -37,6 +37,53 @@ function resetLayout() {
 const aboutTitle = 'LuLu 导航'
 const aboutText =
   '个人网址与工具导航页：整理常用站点与日常小工具，全部在浏览器本地运行，数据保存在本机。'
+
+// 弹窗内容区高度：随 menu/settings/about 内容平滑过渡（WAAPI 动画），
+// 避免切换时弹窗忽大忽小；离场内容改为绝对定位，不再把布局塌缩到只剩标题栏。
+// 注意：弹窗由 v-if="open" 控制，挂载时机晚于组件 onMounted，故在 open 变 true 后再初始化。
+const contentWrap = ref(null)
+const sheetBox = ref(null)
+let resizeObs = null
+let heightAnim = null
+
+function setupSheetHeight() {
+  const sb = sheetBox.value
+  const cw = contentWrap.value
+  if (!sb || !cw || resizeObs) return
+  // 初始固定为当前内容高度，避免首次从 0 撑开
+  sb.style.height = cw.offsetHeight + 'px'
+  resizeObs = new ResizeObserver(() => {
+    const s = sheetBox.value
+    const c = contentWrap.value
+    if (!s || !c) return
+    const next = c.offsetHeight
+    const start = s.getBoundingClientRect().height
+    if (Math.abs(next - start) < 1) return
+    heightAnim?.cancel()
+    heightAnim = s.animate(
+      [{ height: start + 'px' }, { height: next + 'px' }],
+      { duration: 200, easing: 'ease-out' }
+    )
+    s.style.height = next + 'px'
+    heightAnim.onfinish = () => {
+      heightAnim = null
+    }
+  })
+  resizeObs.observe(cw)
+}
+
+watch(open, async (v) => {
+  if (v) {
+    await nextTick()
+    setupSheetHeight()
+  } else {
+    resizeObs?.disconnect()
+    resizeObs = null
+    heightAnim?.cancel()
+    heightAnim = null
+  }
+})
+onBeforeUnmount(() => resizeObs?.disconnect())
 </script>
 
 <template>
@@ -79,7 +126,7 @@ const aboutText =
               role="dialog"
               aria-modal="true"
               :aria-label="view === 'menu' ? '更多' : view === 'settings' ? '设置' : '关于'"
-              class="mx-apple-sm flex w-[calc(100%-2*var(--spacing-apple-sm))] max-w-md flex-col overflow-hidden rounded-apple-lg bg-canvas shadow-product ring-1 ring-black/5 pb-[max(10px,env(safe-area-inset-bottom))] sm:mx-0"
+              class="mx-apple-sm block w-[calc(100%-2*var(--spacing-apple-sm))] max-w-md overflow-hidden rounded-apple-lg bg-canvas shadow-product ring-1 ring-black/5 pb-[max(10px,env(safe-area-inset-bottom))] sm:mx-0"
             >
               <!-- 顶部拖动指示条 -->
               <div class="mx-auto mt-apple-xs h-[4px] w-9 shrink-0 rounded-full bg-black/15" />
@@ -91,7 +138,7 @@ const aboutText =
                   type="button"
                   aria-label="返回"
                   class="-ml-1 flex h-8 w-8 items-center justify-center rounded-full text-ink-muted-80 transition hover:bg-black/5 hover:text-ink active:scale-[0.9]"
-                  @click="view = 'menu'"
+                  @click="go('menu')"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m15 18-6-6 6-6" /></svg>
                 </button>
@@ -108,12 +155,19 @@ const aboutText =
                 </button>
               </div>
 
-              <!-- 主菜单 -->
-              <div v-if="view === 'menu'" class="flex flex-col gap-apple-xs px-apple-md py-apple-md">
+              <!-- 主菜单 / 设置 / 关于：进入子面板左滑，返回右滑（见底部 pane-* 命名过渡） -->
+              <!-- 内容区：高度随内容平滑过渡（避免弹窗忽大忽小）；内层 contentWrap 用于测量自然高度 -->
+              <div
+                ref="sheetBox"
+                class="sheet-box relative overflow-hidden"
+              >
+                <div ref="contentWrap" class="relative">
+                  <Transition name="pane">
+              <div v-if="view === 'menu'" key="menu" class="flex flex-col gap-apple-xs px-apple-md py-apple-md">
                 <button
                   type="button"
                   class="flex w-full items-center gap-apple-sm rounded-apple-md bg-canvas-parchment p-apple-sm text-left transition hover:bg-hairline active:scale-[0.99]"
-                  @click="view = 'settings'"
+                  @click="go('settings')"
                 >
                   <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-apple-md bg-canvas text-ink shadow-hairline ring-1 ring-black/5">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
@@ -128,7 +182,7 @@ const aboutText =
                 <button
                   type="button"
                   class="flex w-full items-center gap-apple-sm rounded-apple-md bg-canvas-parchment p-apple-sm text-left transition hover:bg-hairline active:scale-[0.99]"
-                  @click="view = 'about'"
+                  @click="go('about')"
                 >
                   <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-apple-md bg-canvas text-ink shadow-hairline ring-1 ring-black/5">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
@@ -142,7 +196,7 @@ const aboutText =
               </div>
 
               <!-- 设置面板 -->
-              <div v-else-if="view === 'settings'" class="flex flex-col gap-apple-md px-apple-md py-apple-md">
+              <div v-else-if="view === 'settings'" key="settings" class="flex flex-col gap-apple-md px-apple-md py-apple-md">
                 <!-- 默认搜索引擎（全局偏好，跨页面生效） -->
                 <div class="flex flex-col gap-apple-sm">
                   <div class="min-w-0">
@@ -203,13 +257,16 @@ const aboutText =
               </div>
 
               <!-- 关于 -->
-              <div v-else class="flex flex-col items-center gap-apple-sm px-apple-md py-apple-lg text-center">
+              <div v-else key="about" class="flex flex-col items-center gap-apple-sm px-apple-md py-apple-lg text-center">
                 <span class="flex h-16 w-16 items-center justify-center rounded-[24%] bg-linear-to-br from-primary to-indigo-500 text-3xl shadow-hairline">🗂️</span>
                 <div>
                   <p class="text-[17px] font-semibold text-ink">{{ aboutTitle }}</p>
                   <p class="text-[12px] text-ink-muted-48">v{{ pkg.version }} · {{ pkg.name }}</p>
                 </div>
                 <p class="max-w-[280px] text-[14px] leading-normal text-ink-muted-80">{{ aboutText }}</p>
+              </div>
+                  </Transition>
+                </div>
               </div>
             </div>
           </Transition>
@@ -218,3 +275,29 @@ const aboutText =
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+/* 更多菜单内子面板切换：用轻柔的淡入 + 轻微上移替代原来的左右大幅滑动，
+   避免方向切换带来的眩晕感；位移幅度参考搜索下拉的 suggest-*（8px）。 */
+.pane-enter-active,
+.pane-leave-active {
+  transition:
+    opacity 0.18s ease-out,
+    transform 0.18s ease-out;
+}
+/* 离场内容改为绝对定位：脱离文档流，内容区高度只跟随新内容，弹窗不再塌缩到标题栏 */
+.pane-leave-active {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+.pane-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.pane-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+</style>
