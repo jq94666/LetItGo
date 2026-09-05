@@ -29,6 +29,7 @@ const toolLoaders = {
   urlToQrCode: () => import('./components/UrlToQrCodeTool.vue'),
   qrCodeScan: () => import('./components/QrCodeScanTool.vue'),
   imageCompress: () => import('./components/ImageCompressTool.vue'),
+  drawPad: () => import('./components/DrawPadTool.vue'),
   basicColor: () => import('./components/BasicColorTool.vue'),
   analogClock: () => import('./components/AnalogClockTool.vue'),
   bsod: () => import('./components/BsodTool.vue'),

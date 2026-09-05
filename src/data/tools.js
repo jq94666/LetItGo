@@ -61,7 +61,10 @@ export const toolGroups = [
   {
     id: 'image',
     label: '图片',
-    tools: [{ id: 'imageCompress', label: '压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' }]
+    tools: [
+      { id: 'imageCompress', label: '压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' },
+      { id: 'drawPad', label: '简易画板', icon: '✏️', tint: 'from-emerald-400 to-teal-500' }
+    ]
   },
   {
     id: 'color',
