@@ -58,8 +58,13 @@ export const directoryGroups = [
   },
   {
     id: 'xinchuan',
-    label: '信创',
-    sites: [{ name: '统信打印机驱动', href: 'https://www.chinauos.com/resource/download-drivers' }]
+    label: '打印机驱动',
+    legacyLabel: '信创',
+    sites: [
+      { name: '统信打印机驱动', href: 'https://www.chinauos.com/resource/download-drivers' },
+      { name: '立思辰', href: 'https://www.cgprintech.com/download_1/2.html' },
+      { name: '惠普打印机', href: 'https://support.hp.com/cn-zh/drivers/printers' }
+    ]
   },
   {
     id: 'mirror',
@@ -255,7 +260,7 @@ export const designSiteGroups = {
    新增分组时改这里即可，两边同步生效 */
 export const siteFolders = [
   { id: 'pdf', label: 'PDF', sites: pdfSites },
-  ...directoryGroups.map((g) => ({ id: g.id, label: g.label, sites: g.sites })),
+  ...directoryGroups.map((g) => ({ id: g.id, label: g.label, legacyLabel: g.legacyLabel, sites: g.sites })),
   { id: 'design', label: '设计', sites: designSiteGroups.design },
   { id: 'icons', label: '图标', sites: designSiteGroups.icons },
   {

@@ -42,6 +42,8 @@ function ensureFoldersOnly() {
   // 并把历史遗留的桌面独立站点收拢回其分类文件夹。
   const defaults = defaultLayout()
   const defById = new Map(defaults.map((f) => [f.id, f]))
+  // 分组改名迁移：快照里仍是旧默认名（legacyLabel）时跟随改名，自定义过的名字不动
+  const legacyById = new Map(siteFolders.filter((f) => f.legacyLabel).map((f) => [f.id, f.legacyLabel]))
   const seen = new Set()
   const out = []
   for (const it of list) {
@@ -53,6 +55,8 @@ function ensureFoldersOnly() {
     if (def) {
       // 默认新增站点追加到该文件夹末尾（已存在的不动）
       for (const name of def.items) if (!it.items.includes(name)) it.items.push(name)
+      // 旧默认名 → 新默认名（例：信创 → 打印机驱动）
+      if (it.label === legacyById.get(it.id)) it.label = def.label
     }
     seen.add(it.id)
     out.push(it)

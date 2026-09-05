@@ -21,6 +21,8 @@ export const favicons = {
   '360（认准极速）': new URL('./favicon-360-cn.ico', import.meta.url).href,
   'PotPlayer': new URL('./favicon-potplayer-tv.ico', import.meta.url).href,
   '统信打印机驱动': new URL('./favicon-chinauos-com.png', import.meta.url).href,
+  '立思辰': new URL('./favicon-cgprintech-com.ico', import.meta.url).href,
+  '惠普打印机': new URL('./favicon-support-hp-com.png', import.meta.url).href,
   '华为云镜像': new URL('./favicon-mirrors-huaweicloud-com.ico', import.meta.url).href,
   'NPM Mirror': new URL('./favicon-npmmirror-com.ico', import.meta.url).href,
   '花瓣网': new URL('./favicon-huaban-com.png', import.meta.url).href,
