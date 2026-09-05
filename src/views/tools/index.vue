@@ -31,6 +31,7 @@ const toolLoaders = {
   imageCompress: () => import('./components/ImageCompressTool.vue'),
   basicColor: () => import('./components/BasicColorTool.vue'),
   analogClock: () => import('./components/AnalogClockTool.vue'),
+  bsod: () => import('./components/BsodTool.vue'),
   textMarquee: () => import('./components/TextMarqueeTool.vue'),
   textShow: () => import('./components/TextShowTool.vue')
 }
