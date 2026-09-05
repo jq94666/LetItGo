@@ -68,10 +68,12 @@ export const directoryGroups = [
   },
   {
     id: 'mirror',
-    label: '镜像站',
+    label: '镜像仓库',
+    legacyLabel: ['镜像站', '镜像'],
     sites: [
       { name: '华为云镜像', href: 'https://mirrors.huaweicloud.com/home' },
-      { name: 'NPM Mirror', href: 'https://npmmirror.com/' }
+      { name: 'NPM Mirror', href: 'https://npmmirror.com/' },
+      { name: '阿里云Maven', href: 'https://maven.aliyun.com/mvn/guide' }
     ]
   },
   {
@@ -83,6 +85,13 @@ export const directoryGroups = [
       { name: 'pixabay', href: 'https://pixabay.com/' },
       { name: 'unsplash', href: 'https://unsplash.com/' },
       { name: 'pexels', href: 'https://www.pexels.com/zh-cn/' }
+    ]
+  },
+  {
+    id: 'wallpaper',
+    label: '壁纸',
+    sites: [
+      { name: 'coolbackgrounds', href: 'https://coolbackgrounds.io/' }
     ]
   },
   {
@@ -115,7 +124,15 @@ export const directoryGroups = [
       { name: 'dbeaver', href: 'https://dbeaver.io/' },
       { name: 'HeidiSQL', href: 'https://www.heidisql.com/' },
       { name: 'DataGrip', href: 'https://www.jetbrains.com/zh-cn/datagrip/' },
-      { name: 'SSMS', href: 'https://learn.microsoft.com/zh-cn/ssms/release-history' }
+      { name: 'SSMS', href: 'https://learn.microsoft.com/zh-cn/ssms/release-history' },
+      { name: 'dbx', href: 'https://github.com/t8y2/dbx' }
+    ]
+  },
+  {
+    id: 'data-viz',
+    label: '数据可视化',
+    sites: [
+      { name: 'sive', href: 'https://sive.antv.antgroup.com/' }
     ]
   },
   {
@@ -161,10 +178,20 @@ export const directoryGroups = [
   },
   {
     id: 'video-record',
-    label: '视频录制',
+    label: '视频录制剪辑',
+    legacyLabel: '视频录制',
     sites: [
       { name: 'OBS', href: 'https://obsproject.com/' },
-      { name: 'EV录屏', href: 'https://www.ieway.cn/evcapture.html' }
+      { name: 'EV录屏', href: 'https://www.ieway.cn/evcapture.html' },
+      { name: 'OpenCut', href: 'https://github.com/OpenCut-app/OpenCut' },
+      { name: '剪映', href: 'https://www.capcut.cn/' }
+    ]
+  },
+  {
+    id: 'file-convert',
+    label: '文件格式转换',
+    sites: [
+      { name: 'Vert', href: 'https://github.com/VERT-sh/VERT' }
     ]
   },
   {
@@ -270,7 +297,8 @@ export const designSiteGroups = {
   ],
   icons: [
     { name: 'iconfont', href: 'https://www.iconfont.cn/' },
-    { name: 'iconpark', href: 'https://iconpark.oceanengine.com/home' }
+    { name: 'iconpark', href: 'https://iconpark.oceanengine.com/home' },
+    { name: 'iconstore', href: 'https://iconstore.co/' }
   ]
 }
 
