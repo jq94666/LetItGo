@@ -109,7 +109,8 @@ export const directoryGroups = [
   },
   {
     id: 'database',
-    label: '数据库',
+    label: '数据库管理',
+    legacyLabel: ['数据库', '数据库管理工具'],
     sites: [
       { name: 'dbeaver', href: 'https://dbeaver.io/' },
       { name: 'HeidiSQL', href: 'https://www.heidisql.com/' },
@@ -233,14 +234,24 @@ export const directoryGroups = [
       { name: '中国大学MOOC', href: 'https://www.icourse163.org/' },
       { name: 'WPS学堂', href: 'https://www.wps.cn/learning?chan=pc_web_official' },
       { name: 'Qwerty', href: 'https://qwerty.kaiyi.cool/' },
+      { name: 'w3schools', href: 'https://www.w3schools.com/' },
+      { name: 'photoshop', href: 'https://helpx.adobe.com/cn/photoshop/desktop.html' },
       { name: '全历史', href: 'https://www.allhistory.com/' },
       { name: 'PDF教材', href: 'https://github.com/TapXWorld/ChinaTextbook?tab=readme-ov-file' }
     ]
   },
   {
+    id: 'excel',
+    label: 'Excel',
+    sites: [{ name: '方方格子', href: 'http://www.ffcell.com/home/ffcell.aspx' }]
+  },
+  {
     id: 'ppt',
     label: 'PPT',
-    sites: [{ name: '第一PPT', href: 'https://www.1ppt.com/' }]
+    sites: [
+      { name: '第一PPT', href: 'https://www.1ppt.com/' },
+      { name: '2ppt', href: 'https://www.2ppt.com/' }
+    ]
   },
   {
     id: 'office',
@@ -253,7 +264,9 @@ export const directoryGroups = [
 export const designSiteGroups = {
   design: [
     { name: '奇迹秀', href: 'https://www.qijishow.com/' },
-    { name: '好拼', href: 'https://img.ops-coffee.com/' }
+    { name: '好拼', href: 'https://img.ops-coffee.com/' },
+    { name: '鲜艺AI抠图', href: 'https://kt.94xy.com/' },
+    { name: '物言卡片', href: 'https://mono.cards/zh-CN' }
   ],
   icons: [
     { name: 'iconfont', href: 'https://www.iconfont.cn/' },
