@@ -22,7 +22,8 @@ export const directoryGroups = [
     label: '文件传输',
     sites: [
       { name: 'localsend', href: 'https://localsend.org/zh-CN/download' },
-      { name: 'Syncthing', href: 'https://syncthing.net/' }
+      { name: 'Syncthing', href: 'https://syncthing.net/' },
+      { name: 'freefilesync', href: 'https://freefilesync.org/' }
     ]
   },
   {
@@ -225,7 +226,8 @@ export const directoryGroups = [
     sites: [
       { name: 'XShell', href: 'https://www.xshell.com/zh/xshell-download/' },
       { name: 'MobaXterm', href: 'https://mobaxterm.mobatek.net/' },
-      { name: 'Linux网页模拟器', href: 'https://bellard.org/jslinux/' }
+      { name: 'Linux网页模拟器', href: 'https://bellard.org/jslinux/' },
+      { name: 'warp', href: 'https://github.com/warpdotdev/warp' }
     ]
   },
   {

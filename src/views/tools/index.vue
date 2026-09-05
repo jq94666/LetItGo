@@ -11,6 +11,7 @@ import ToolTile from './components/ToolTile.vue'
 // 点开某个工具时才动态拉取其代码与依赖（pdf.js、pdf-lib、docx 等不再进首屏）
 const toolLoaders = {
   publicIp: () => import('./components/PublicIpTool.vue'),
+  baseConvert: () => import('./components/BaseConvertTool.vue'),
   calculator: () => import('./components/CalculatorTool.vue'),
   chineseColors: () => import('./components/ChineseColorsTool.vue'),
   relatives: () => import('./components/FamilyRelativesTool.vue'),

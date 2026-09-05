@@ -6,7 +6,10 @@ export const toolGroups = [
   {
     id: 'network',
     label: '网络',
-    tools: [{ id: 'publicIp', label: '我的公网IP', icon: '🌐', tint: 'from-sky-400 to-indigo-500' }]
+    tools: [
+      { id: 'publicIp', label: '我的公网IP', icon: '🌐', tint: 'from-sky-400 to-indigo-500' },
+      { id: 'baseConvert', label: '进制转换', icon: '🔢', tint: 'from-slate-500 to-cyan-600' }
+    ]
   },
   {
     id: 'family',
