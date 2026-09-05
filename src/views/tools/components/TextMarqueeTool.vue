@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useTouchExit } from '../../../composables/useTouchExit.js'
 
 /* ---------- 工具弹窗 ---------- */
 const open = ref(false)
@@ -17,6 +18,7 @@ const playing = ref(false) // 播放层是否可见
 const snapshot = ref('') // 点击播放时冻结的文字，防止退出后编辑影响播放内容
 const fsNote = ref('') // 浏览器不支持/拒绝系统全屏时的降级提示
 const stageEl = ref(null)
+const { showExit, ping } = useTouchExit() // 移动端退出按钮 3 秒后自动隐藏，点屏再显
 const fontPx = ref(160)
 const durSec = ref(10)
 
@@ -53,6 +55,7 @@ async function play() {
   snapshot.value = trimmed.value.replace(/\s+/g, ' ')
   playing.value = true
   fsNote.value = ''
+  ping() // 进入播放即让退出按钮可见（移动端 3 秒后自动隐藏）
   refreshLayout()
   await nextTick()
   const el = stageEl.value
@@ -158,6 +161,7 @@ onBeforeUnmount(() => {
       v-show="playing"
       ref="stageEl"
       class="fullscreen-stage"
+      @click="ping"
     >
       <div class="mq-viewport">
         <div
@@ -171,7 +175,12 @@ onBeforeUnmount(() => {
       <!-- 顶部说明与退出 -->
       <div class="stage-hud">
         <p v-if="fsNote" class="stage-note">{{ fsNote }}</p>
-        <button type="button" class="stage-exit" @click="stop">✕ 退出</button>
+        <button
+          v-show="showExit"
+          type="button"
+          class="stage-exit"
+          @click.stop="stop"
+        >✕ 退出</button>
       </div>
     </div>
   </Teleport>

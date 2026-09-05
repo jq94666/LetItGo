@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useTouchExit } from '../../../composables/useTouchExit.js'
 
 /* ---------- 工具弹窗 ---------- */
 const open = ref(false)
@@ -17,6 +18,7 @@ const playing = ref(false) // 展示层是否可见
 const snapshot = ref('') // 播放时冻结的文字
 const fsNote = ref('')
 const stageEl = ref(null)
+const { showExit, ping } = useTouchExit() // 移动端退出按钮 3 秒后自动隐藏，点屏再显
 const boxEl = ref(null)
 const textEl = ref(null)
 
@@ -59,6 +61,7 @@ async function play() {
   snapshot.value = trimmed.value
   playing.value = true
   fsNote.value = ''
+  ping() // 进入展示即让退出按钮可见（移动端 3 秒后自动隐藏）
   await nextTick()
   // 文本真正渲染后再自适应字号（内容较短时可放大到非常大）
   requestAnimationFrame(() => fitFont())
@@ -160,14 +163,19 @@ onBeforeUnmount(() => {
 
   <!-- 全屏展示层：黑底白字，静止不滚动 -->
   <Teleport to="body">
-    <div v-show="playing" ref="stageEl" class="fullscreen-stage">
+    <div v-show="playing" ref="stageEl" class="fullscreen-stage" @click="ping">
       <div ref="boxEl" class="center-box">
         <p ref="textEl" class="show-text">{{ snapshot }}</p>
       </div>
 
       <div class="stage-hud">
         <p v-if="fsNote" class="stage-note">{{ fsNote }}</p>
-        <button type="button" class="stage-exit" @click="stop">✕ 退出</button>
+        <button
+          v-show="showExit"
+          type="button"
+          class="stage-exit"
+          @click.stop="stop"
+        >✕ 退出</button>
       </div>
     </div>
   </Teleport>
