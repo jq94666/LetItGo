@@ -106,7 +106,7 @@ async function copy(key) {
             <div class="flex flex-1 flex-col gap-apple-md overflow-y-auto p-apple-md sm:p-apple-lg">
               <!-- 进制选择 -->
               <div class="flex flex-wrap items-center gap-x-apple-md gap-y-apple-xs">
-                <p class="shrink-0 text-[20px] font-semibold text-ink">选择进制</p>
+                <p class="shrink-0 text-tagline text-ink">选择进制</p>
                 <div class="flex flex-wrap gap-apple-xs" role="group" aria-label="选择进制">
                   <button
                     v-for="b in allBases"
