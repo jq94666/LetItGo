@@ -30,7 +30,9 @@ const toolLoaders = {
   qrCodeScan: () => import('./components/QrCodeScanTool.vue'),
   imageCompress: () => import('./components/ImageCompressTool.vue'),
   basicColor: () => import('./components/BasicColorTool.vue'),
-  analogClock: () => import('./components/AnalogClockTool.vue')
+  analogClock: () => import('./components/AnalogClockTool.vue'),
+  textMarquee: () => import('./components/TextMarqueeTool.vue'),
+  textShow: () => import('./components/TextShowTool.vue')
 }
 
 const {

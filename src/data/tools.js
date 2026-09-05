@@ -75,6 +75,14 @@ export const toolGroups = [
     id: 'simulate',
     label: '模拟',
     tools: [{ id: 'analogClock', label: '模拟时钟', icon: '🕰️', tint: 'from-amber-400 to-orange-500' }]
+  },
+  {
+    id: 'fullscreen',
+    label: '全屏',
+    tools: [
+      { id: 'textMarquee', label: '文字跑马灯', icon: '📣', tint: 'from-rose-400 to-orange-400' },
+      { id: 'textShow', label: '文字展示', icon: '📺', tint: 'from-sky-400 to-indigo-500' }
+    ]
   }
 ]
 
