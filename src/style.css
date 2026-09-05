@@ -156,6 +156,11 @@
   }
 }
 
+/* 搜索框（type=search）自带的「清除」按钮：显示手型光标 */
+input[type='search']::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
 /* 移动端：纵向滚动不显示右侧滚动条（触摸/惯性手势本身可滚动） */
 @media (max-width: 767px) {
   .overflow-y-auto,

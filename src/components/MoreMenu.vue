@@ -321,7 +321,7 @@ onBeforeUnmount(() => {
   <div class="relative shrink-0">
     <button
       type="button"
-      class="glass-pill flex flex-col items-center gap-[3px] rounded-pill px-apple-sm py-[7px] text-ink-muted-80 transition hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.95]"
+      class="glass-pill flex flex-col cursor-pointer items-center gap-[3px] rounded-pill px-apple-sm py-[7px] text-ink-muted-80 transition hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.95]"
       aria-label="更多"
       @click="openMenu"
     >

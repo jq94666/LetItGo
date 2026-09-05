@@ -259,12 +259,16 @@ export const directoryGroups = [
     sites: [
       { name: '国家中小学教育平台', href: 'https://basic.smartedu.cn/' },
       { name: '终身教育平台', href: 'https://le.ouchn.cn/home' },
-      { name: '学堂在线', href: 'https://www.xuetangx.com/' },
       { name: '中国大学MOOC', href: 'https://www.icourse163.org/' },
       { name: 'WPS学堂', href: 'https://www.wps.cn/learning?chan=pc_web_official' },
       { name: 'Qwerty', href: 'https://qwerty.kaiyi.cool/' },
       { name: 'w3schools', href: 'https://www.w3schools.com/' },
       { name: 'photoshop', href: 'https://helpx.adobe.com/cn/photoshop/desktop.html' },
+      { name: 'WebDev', href: 'https://web.dev/learn/css' },
+      { name: 'WangDoc', href: 'https://wangdoc.com/' },
+      { name: 'Oracle', href: 'https://docs.oracle.com/en/database/oracle/oracle-database/index.html' },
+      { name: 'SQLServer', href: 'https://learn.microsoft.com/zh-cn/sql' },
+      { name: '力扣', href: 'https://leetcode.cn/' },
       { name: '全历史', href: 'https://www.allhistory.com/' },
       { name: 'PDF教材', href: 'https://github.com/TapXWorld/ChinaTextbook?tab=readme-ov-file' }
     ]

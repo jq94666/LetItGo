@@ -189,7 +189,7 @@ const settings = computed(() => {
             type="button"
             role="tab"
             :aria-selected="i === tabIndex"
-            class="flex flex-1 flex-col items-center gap-[3px] rounded-pill px-apple-sm py-[7px] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.96]"
+            class="flex flex-1 cursor-pointer flex-col items-center gap-[3px] rounded-pill px-apple-sm py-[7px] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.96]"
             :class="i === tabIndex ? 'bg-primary text-on-primary' : 'text-ink-muted-80 hover:text-ink'"
             @click="go(i, false)"
           >
