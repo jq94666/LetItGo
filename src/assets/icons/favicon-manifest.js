@@ -36,6 +36,8 @@ export const favicons = {
   '故宫名画记': new URL('./favicon-minghuaji-dpm-org-cn.ico', import.meta.url).href,
   'dbeaver': new URL('./favicon-dbeaver-io.png', import.meta.url).href,
   'HeidiSQL': new URL('./favicon-heidisql-com.ico', import.meta.url).href,
+  'DataGrip': new URL('./favicon-jetbrains-com.png', import.meta.url).href,
+  'SSMS': new URL('./favicon-learn-microsoft-com.ico', import.meta.url).href,
   '阮一峰': new URL('./favicon-ruanyifeng-com.ico', import.meta.url).href,
   '廖雪峰': new URL('./favicon-liaoxuefeng-com.ico', import.meta.url).href,
   '潮流周刊': new URL('./favicon-weekly-tw93-fun.png', import.meta.url).href,

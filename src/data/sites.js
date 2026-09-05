@@ -107,7 +107,9 @@ export const directoryGroups = [
     label: '数据库',
     sites: [
       { name: 'dbeaver', href: 'https://dbeaver.io/' },
-      { name: 'HeidiSQL', href: 'https://www.heidisql.com/' }
+      { name: 'HeidiSQL', href: 'https://www.heidisql.com/' },
+      { name: 'DataGrip', href: 'https://www.jetbrains.com/zh-cn/datagrip/' },
+      { name: 'SSMS', href: 'https://learn.microsoft.com/zh-cn/ssms/release-history' }
     ]
   },
   {
@@ -239,6 +241,10 @@ export const directoryGroups = [
 
 // 设计：按子菜单分组
 export const designSiteGroups = {
+  design: [
+    { name: '奇迹秀', href: 'https://www.qijishow.com/' },
+    { name: '好拼', href: 'https://img.ops-coffee.com/' }
+  ],
   icons: [
     { name: 'iconfont', href: 'https://www.iconfont.cn/' },
     { name: 'iconpark', href: 'https://iconpark.oceanengine.com/home' }
@@ -250,6 +256,7 @@ export const designSiteGroups = {
 export const siteFolders = [
   { id: 'pdf', label: 'PDF', sites: pdfSites },
   ...directoryGroups.map((g) => ({ id: g.id, label: g.label, sites: g.sites })),
+  { id: 'design', label: '设计', sites: designSiteGroups.design },
   { id: 'icons', label: '图标', sites: designSiteGroups.icons },
   {
     id: 'emoji',
