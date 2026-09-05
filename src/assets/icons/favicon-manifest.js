@@ -83,6 +83,7 @@ export const favicons = {
   'Qwerty': new URL('./favicon-qwerty-kaiyi-cool.png', import.meta.url).href,
   '全历史': new URL('./favicon-allhistory-com.ico', import.meta.url).href,
   'PDF教材': new URL('./favicon-github-com.svg', import.meta.url).href,
+  '第一PPT': new URL('./favicon-1ppt-com.ico', import.meta.url).href,
   'WPS': new URL('./favicon-wps-cn.ico', import.meta.url).href,
   '奇迹秀': new URL('./favicon-qijishow-com.png', import.meta.url).href,
   '好拼': new URL('./favicon-img-ops-coffee-com.ico', import.meta.url).href,

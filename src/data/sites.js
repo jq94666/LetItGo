@@ -238,6 +238,11 @@ export const directoryGroups = [
     ]
   },
   {
+    id: 'ppt',
+    label: 'PPT',
+    sites: [{ name: '第一PPT', href: 'https://www.1ppt.com/' }]
+  },
+  {
     id: 'office',
     label: 'Office',
     sites: [{ name: 'WPS', href: 'https://www.wps.cn/' }]
