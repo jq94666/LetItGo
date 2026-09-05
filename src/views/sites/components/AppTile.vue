@@ -15,7 +15,7 @@ defineProps({
   >
     <!-- APP 图标：方形圆角（类 iOS 超级椭圆） -->
     <span
-      class="flex aspect-square w-full items-center justify-center rounded-[24%] bg-white/85 shadow-hairline ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-[1.05] group-focus-visible:ring-2 group-focus-visible:ring-primary-focus group-active:scale-[0.95]"
+      class="glass-tile flex aspect-square w-full items-center justify-center rounded-[24%] transition-transform duration-200 group-hover:scale-[1.05] group-focus-visible:ring-2 group-focus-visible:ring-primary-focus group-active:scale-[0.95]"
     >
       <img
         v-if="!site.icon && favicons[site.name]"

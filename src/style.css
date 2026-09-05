@@ -54,6 +54,13 @@
   --shadow-product: rgba(0, 0, 0, 0.22) 3px 5px 30px 0;
   --shadow-hairline: 0 0 0 1px rgba(0, 0, 0, 0.08);
 
+  /* Liquid Glass 材质变量（iOS 26 液态玻璃，DESIGN-apple.md v2） */
+  --color-glass-tint: rgba(255, 255, 255, 0.55);
+  --color-glass-edge: rgba(255, 255, 255, 0.85);
+  --color-glass-rim: rgba(255, 255, 255, 0.35);
+  --color-glass-shadow: rgba(31, 38, 135, 0.25);
+  --shadow-glass: 0 24px 48px -12px rgba(31, 38, 135, 0.22);
+
   /* Backdrop blur */
   --backdrop-blur-apple: 20px;
 
@@ -161,5 +168,52 @@
   .overflow-y-scroll::-webkit-scrollbar,
   .overflow-auto::-webkit-scrollbar {
     display: none; /* Chrome / Safari */
+  }
+}
+
+/* ============ Liquid Glass 玻璃层工具类（iOS 26） ============
+   DESIGN-apple.md v2 材料规格：
+   - 半透明白渐变 + backdrop blur + saturate 折射背后内容
+   - 顶部高光边缘（inset 顶）+ 内侧 0.5px 白 rim，替代外描边
+   - 蓝调轻柔投影表达“离屏”，不做卡片间重阴影
+   使用：把 glass-* 类直接加到浮层 / 图标 / Dock 容器，前景文字另设不透明色。 */
+@layer components {
+  /* 玻璃面板：文件夹面板、更多弹层、搜索卡片、工具弹窗 */
+  .glass-panel {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.76));
+    -webkit-backdrop-filter: blur(28px) saturate(185%);
+    backdrop-filter: blur(28px) saturate(185%);
+    box-shadow:
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.6),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.92),
+      0 24px 48px -12px rgba(31, 38, 135, 0.22);
+  }
+
+  /* 玻璃胶囊：底部 Dock、文件夹图标外壳、胶囊按钮 */
+  .glass-pill {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.58));
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    box-shadow:
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.55),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.9),
+      0 6px 16px -6px rgba(31, 38, 135, 0.16);
+  }
+
+  /* 玻璃图标层：应用 / 文件夹单图标（较实，保证 favicon/emoji 对比） */
+  .glass-tile {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.84));
+    -webkit-backdrop-filter: blur(20px) saturate(175%);
+    backdrop-filter: blur(20px) saturate(175%);
+    box-shadow:
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.5),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.95),
+      0 10px 24px -10px rgba(31, 38, 135, 0.18);
   }
 }

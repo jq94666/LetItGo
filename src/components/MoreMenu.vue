@@ -321,7 +321,7 @@ onBeforeUnmount(() => {
   <div class="relative shrink-0">
     <button
       type="button"
-      class="flex flex-col items-center gap-[3px] rounded-pill bg-white/70 px-apple-sm py-[7px] text-ink-muted-80 shadow-hairline ring-1 ring-black/5 backdrop-blur-apple transition hover:bg-white hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.95]"
+      class="glass-pill flex flex-col items-center gap-[3px] rounded-pill px-apple-sm py-[7px] text-ink-muted-80 transition hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus active:scale-[0.95]"
       aria-label="更多"
       @click="openMenu"
     >
@@ -357,7 +357,7 @@ onBeforeUnmount(() => {
               role="dialog"
               aria-modal="true"
               :aria-label="viewAria"
-              class="mx-apple-sm block w-[calc(100%-2*var(--spacing-apple-sm))] max-w-md overflow-hidden rounded-apple-lg bg-canvas shadow-product ring-1 ring-black/5 pb-[max(10px,env(safe-area-inset-bottom))] sm:mx-0"
+              class="glass-panel mx-apple-sm block w-[calc(100%-2*var(--spacing-apple-sm))] max-w-md overflow-hidden rounded-apple-lg pb-[max(10px,env(safe-area-inset-bottom))] sm:mx-0"
             >
               <!-- 顶部拖动指示条 -->
               <div class="mx-auto mt-apple-xs h-[4px] w-9 shrink-0 rounded-full bg-black/15" />

@@ -1,7 +1,13 @@
 ---
-version: alpha
-name: Apple-design-analysis
-description: A photography-first interface that turns marketing into a museum gallery. Edge-to-edge product tiles alternate light and dark canvases, framed by SF Pro Display headlines with negative letter-spacing and a single Action Blue (#0066cc) interactive color. UI chrome recedes so the product can speak — no decorative gradients, no shadows on chrome, only the one signature drop-shadow under product imagery resting on a surface.
+version: ios26-liquid-glass
+name: workmate-design-system
+description: >-
+  Workmate 的界面设计真源，以 iOS 26「Liquid Glass（液态玻璃）」为视觉语言基准，
+  继承 Apple 官网 v1 分析（摄影克制、单一 Action Blue、SF 字阶、8pt 间距）后，
+  将“表面”从扁平卡片升级为「承载于壁纸之上的玻璃浮层」。
+  玻璃通过 backdrop-blur + saturate 折射背后内容，以顶部高光边缘与细内描边定义形状，
+  用材质透明度（而非边框/阴影）表达层级；阴影只用于“玻璃浮离表面”的轻柔深度。
+  本文档同步驱动 src/style.css 的 Tailwind v4 @theme 令牌与全部全局组件外观。
 
 colors:
   primary: "#0066cc"
@@ -25,106 +31,53 @@ colors:
   surface-chip-translucent: "#d2d2d7"
   on-primary: "#ffffff"
   on-dark: "#ffffff"
+  glass-tint: "rgba(255,255,255,0.55)"
+  glass-edge: "rgba(255,255,255,0.85)"
+  glass-rim: "rgba(255,255,255,0.35)"
+  glass-shadow: "rgba(31,38,135,0.22)"
+  scrim: "rgba(15,23,42,0.32)"
+
+materials:
+  # 玻璃基础 = 半透明白 + 模糊 + 高饱和 + 顶部高光 + 细内描边
+  # 层级越高透明度越低、模糊半径越大；前景文字一律不透明 ink
+  glass-panel:
+    background: "linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.75))"
+    backdropFilter: "blur(28px) saturate(185%)"
+    rim: "inset 0 0 0 0.5px rgba(255,255,255,0.6)"
+    topHighlight: "inset 0 0.5px 0 rgba(255,255,255,0.9)"
+    shadow: "0 24px 48px -12px rgba(31,38,135,0.25)"
+  glass-pill:
+    background: "linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.6))"
+    backdropFilter: "blur(24px) saturate(180%)"
+    rim: "inset 0 0 0 0.5px rgba(255,255,255,0.6)"
+    topHighlight: "inset 0 0.5px 0 rgba(255,255,255,0.9)"
+    shadow: "0 6px 16px -6px rgba(31,38,135,0.18)"
+  glass-tile:
+    background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.86))"
+    backdropFilter: "blur(20px) saturate(175%)"
+    rim: "inset 0 0 0 0.5px rgba(255,255,255,0.5)"
+    topHighlight: "inset 0 0.5px 0 rgba(255,255,255,0.95)"
+    shadow: "0 10px 24px -10px rgba(31,38,135,0.2)"
 
 typography:
-  hero-display:
-    fontFamily: "SF Pro Display, system-ui, -apple-system, sans-serif"
-    fontSize: 56px
-    fontWeight: 600
-    lineHeight: 1.07
-    letterSpacing: -0.28px
-  display-lg:
-    fontFamily: "SF Pro Display, system-ui, -apple-system, sans-serif"
-    fontSize: 40px
-    fontWeight: 600
-    lineHeight: 1.1
-    letterSpacing: 0
-  display-md:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 34px
-    fontWeight: 600
-    lineHeight: 1.47
-    letterSpacing: -0.374px
-  lead:
-    fontFamily: "SF Pro Display, system-ui, -apple-system, sans-serif"
-    fontSize: 28px
-    fontWeight: 400
-    lineHeight: 1.14
-    letterSpacing: 0.196px
-  lead-airy:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 24px
-    fontWeight: 300
-    lineHeight: 1.5
-    letterSpacing: 0
-  tagline:
-    fontFamily: "SF Pro Display, system-ui, -apple-system, sans-serif"
-    fontSize: 21px
-    fontWeight: 600
-    lineHeight: 1.19
-    letterSpacing: 0.231px
-  body-strong:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 17px
-    fontWeight: 600
-    lineHeight: 1.24
-    letterSpacing: -0.374px
-  body:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 17px
-    fontWeight: 400
-    lineHeight: 1.47
-    letterSpacing: -0.374px
-  dense-link:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 17px
-    fontWeight: 400
-    lineHeight: 2.41
-    letterSpacing: 0
-  caption:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.43
-    letterSpacing: -0.224px
-  caption-strong:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 14px
-    fontWeight: 600
-    lineHeight: 1.29
-    letterSpacing: -0.224px
-  button-large:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 18px
-    fontWeight: 300
-    lineHeight: 1.0
-    letterSpacing: 0
-  button-utility:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.29
-    letterSpacing: -0.224px
-  fine-print:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 12px
-    fontWeight: 400
-    lineHeight: 1.0
-    letterSpacing: -0.12px
-  micro-legal:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 10px
-    fontWeight: 400
-    lineHeight: 1.3
-    letterSpacing: -0.08px
-  nav-link:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
-    fontSize: 12px
-    fontWeight: 400
-    lineHeight: 1.0
-    letterSpacing: -0.12px
+  # 与 src/style.css @theme 一一对应（--text-* 主变量 + --*-- 子属性）
+  hero-display: { fontFamily: "SF Pro Display, system-ui, -apple-system, sans-serif", fontSize: 56px, fontWeight: 600, lineHeight: 1.07, letterSpacing: -0.28px }
+  display-lg: { fontFamily: "SF Pro Display, system-ui, -apple-system, sans-serif", fontSize: 40px, fontWeight: 600, lineHeight: 1.1, letterSpacing: 0 }
+  display-md: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 34px, fontWeight: 600, lineHeight: 1.47, letterSpacing: -0.374px }
+  lead: { fontFamily: "SF Pro Display, system-ui, -apple-system, sans-serif", fontSize: 28px, fontWeight: 400, lineHeight: 1.14, letterSpacing: 0.196px }
+  lead-airy: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 24px, fontWeight: 300, lineHeight: 1.5, letterSpacing: 0 }
+  tagline: { fontFamily: "SF Pro Display, system-ui, -apple-system, sans-serif", fontSize: 21px, fontWeight: 600, lineHeight: 1.19, letterSpacing: 0.231px }
+  body-strong: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 17px, fontWeight: 600, lineHeight: 1.24, letterSpacing: -0.374px }
+  body: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 17px, fontWeight: 400, lineHeight: 1.47, letterSpacing: -0.374px }
+  caption: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 14px, fontWeight: 400, lineHeight: 1.43, letterSpacing: -0.224px }
+  caption-strong: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 14px, fontWeight: 600, lineHeight: 1.29, letterSpacing: -0.224px }
+  button-large: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 18px, fontWeight: 300, lineHeight: 1.0, letterSpacing: 0 }
+  button-utility: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 14px, fontWeight: 400, lineHeight: 1.29, letterSpacing: -0.224px }
+  fine-print: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 12px, fontWeight: 400, lineHeight: 1.0, letterSpacing: -0.12px }
+  micro-legal: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 10px, fontWeight: 400, lineHeight: 1.3, letterSpacing: -0.08px }
+  nav-link: { fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif", fontSize: 12px, fontWeight: 400, lineHeight: 1.0, letterSpacing: -0.12px }
 
-rounded:
+radius:
   none: 0px
   xs: 5px
   sm: 8px
@@ -132,6 +85,9 @@ rounded:
   lg: 18px
   pill: 9999px
   full: 9999px
+  # iOS 应用图标超级椭圆（squircle）近似
+  app-icon: 24%
+  app-icon-mini: 28%
 
 spacing:
   xxs: 4px
@@ -143,420 +99,234 @@ spacing:
   xxl: 48px
   section: 80px
 
+layout:
+  contentMax: 680px   # 主页搜索/单列内容最宽
+  sheetMax: 680px     # 文件夹展开面板最宽
+  gridDesktop: 12     # 网站页桌面列数
+  gridMobile: 4
+
 components:
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.body}"
-    rounded: "{rounded.pill}"
-    padding: 11px 22px
-  button-primary-focus:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.pill}"
-  button-primary-active:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.pill}"
-  button-secondary-pill:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.primary}"
-    typography: "{typography.body}"
-    rounded: "{rounded.pill}"
-    padding: 11px 22px
-  button-dark-utility:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.button-utility}"
-    rounded: "{rounded.sm}"
-    padding: 8px 15px
-  button-pearl-capsule:
-    backgroundColor: "{colors.surface-pearl}"
-    textColor: "{colors.ink-muted-80}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.md}"
-    padding: 8px 14px
-  button-store-hero:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button-large}"
-    rounded: "{rounded.pill}"
-    padding: 14px 28px
-  button-icon-circular:
-    backgroundColor: "{colors.surface-chip-translucent}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.full}"
-    size: 44px
-  text-link:
-    backgroundColor: transparent
-    textColor: "{colors.primary}"
-    typography: "{typography.body}"
-  text-link-on-dark:
-    backgroundColor: transparent
-    textColor: "{colors.primary-on-dark}"
-    typography: "{typography.body}"
-  global-nav:
-    backgroundColor: "{colors.surface-black}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.nav-link}"
-    height: 44px
-  sub-nav-frosted:
-    backgroundColor: "{colors.canvas-parchment}"
-    textColor: "{colors.ink}"
-    typography: "{typography.tagline}"
-    height: 52px
-  product-tile-light:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.display-lg}"
-    rounded: "{rounded.none}"
-    padding: 80px
-  product-tile-parchment:
-    backgroundColor: "{colors.canvas-parchment}"
-    textColor: "{colors.ink}"
-    typography: "{typography.display-lg}"
-    rounded: "{rounded.none}"
-    padding: 80px
-  product-tile-dark:
-    backgroundColor: "{colors.surface-tile-1}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.display-lg}"
-    rounded: "{rounded.none}"
-    padding: 80px
-  product-tile-dark-2:
-    backgroundColor: "{colors.surface-tile-2}"
-    textColor: "{colors.on-dark}"
-    rounded: "{rounded.none}"
-  product-tile-dark-3:
-    backgroundColor: "{colors.surface-tile-3}"
-    textColor: "{colors.on-dark}"
-    rounded: "{rounded.none}"
-  store-utility-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-strong}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  configurator-option-chip:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.pill}"
-    padding: 12px 16px
-  configurator-option-chip-selected:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.pill}"
-  search-input:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.pill}"
-    padding: 12px 20px
-    height: 44px
-  floating-sticky-bar:
-    backgroundColor: "{colors.canvas-parchment}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    height: 64px
-    padding: 12px 32px
-  environment-quote-card:
-    backgroundColor: "{colors.surface-tile-1}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.display-lg}"
-    rounded: "{rounded.none}"
-    padding: 80px
-  footer:
-    backgroundColor: "{colors.canvas-parchment}"
-    textColor: "{colors.ink-muted-80}"
-    typography: "{typography.fine-print}"
-    padding: 64px
+  # —— 全局壳（受本次 Liquid Glass 升级约束）——
+  dock:
+    material: glass-pill
+    radius: pill
+    height: 56px
+    note: 底部标签导航容器：玻璃胶囊 + tab（选中态 = Action Blue 白字胶囊）
+  folder-tile:
+    material: glass-pill
+    radius: app-icon (24%)
+    note: 桌面“文件夹”图标；内部 1–9 个 mini 图标以 parchment 小圆角方格承载
+  folder-panel:
+    material: glass-panel
+    radius: 28px
+    shadow: product + glass
+    note: 文件夹展开面板（DesktopFolderPanel / FolderPanelV2）：玻璃卡片浮于壁纸与遮罩上
+  app-icon:
+    material: glass-tile
+    radius: app-icon (24%)
+    note: 网站/工具单图标（AppTile / ToolTile）；favicon 或 emoji 居中，hover 1.05 / 按下 0.95
+  search-card:
+    material: glass-panel
+    radius: lg (18px)
+    note: 主页搜索框外层：内置白 pill 输入框，focus 时浮起并投影增强
+  more-menu:
+    material: glass-panel
+    radius: lg (18px)
+    note: “更多”底部弹层 / 桌面端居中弹层；移动端从底部上滑
+  tool-modal:
+    material: glass-panel
+    radius: lg (18px)
+    note: 各工具页 Teleport 弹窗（21 个 *Tool.vue 共享的模板副本），本轮不逐个改
+  toggle:
+    track: "bg-primary（开）/ bg-hairline（关），44pt 命中区"
+    knob: "bg-white 圆点，shadow-hairline"
+  # —— 交互原子 ——
+  primary-button:
+    background: colors.primary
+    color: colors.on-primary
+    radius: pill
+    press: "scale(0.95-0.98)"
+  secondary-button:
+    background: canvas-parchment / canvas
+    color: ink / ink-muted-80
+    radius: pill 或 md
+  icon-circle-button:
+    background: "rgba(0,0,0,0.05)"
+    radius: full
+    size: 32px (关闭) / 44px (主浮层)
+
+# —— 手势与动效 ——
+motion:
+  pressScale: "0.95 ~ 0.98"
+  modalIn: "translate-y-4 scale-95 → 1（卡片） + 遮罩淡入"
+  folderOpen: "scale(0.25) → 1，cubic-bezier(0.16,1,0.3,1)"
+  focusRing: "2px solid primary-focus"
 ---
 
-## Overview
+# Workmate 设计系统 · iOS 26 Liquid Glass 基准
 
-Apple's web presence is a masterclass in **reverent product photography framed by near-invisible UI**. Every page is a stack of edge-to-edge product "tiles" — alternating light and dark canvases, each centered on a hero headline, a one-line tagline, two tiny blue pill CTAs, and an impossibly crisp product render. Nothing competes with the product. Typography is confident but quiet; color is either pure white, an off-white parchment, or a near-black tile; interactive elements are a single, quiet blue.
+> 本文件是界面外观的**唯一设计真源**，`src/style.css` 的 `@theme` 令牌、以及所有组件的视觉类，都应按本文档对齐。原 `DESIGN-apple.md` v1（Apple 官网摄影驱动页面分析）的完整分析保留在文末附录，其色彩 / 字阶 / 间距 / 圆角 token 继续作为本系统的继承底座。
 
-Density is unusually low even by contemporary SaaS standards. Each tile occupies roughly one viewport, and there is no decorative chrome — no borders, no gradients, no decorative frames, no shadows on headlines. Elevation appears only when a product image rests on a surface (a single soft `rgba(0, 0, 0, 0.22) 3px 5px 30px` drop for visual weight). The result is a catalog that feels more like a museum gallery: the wall disappears and the artifact takes over.
+## 一、视觉定位
 
-Store and shop surfaces retain the same chassis but switch modes. The product configurator (iPhone 17 Pro, accessories grid) introduces a tight grid of white utility cards at `{rounded.lg}` (18px) radius with a thin border, paired with a persistent thin sub-nav strip. The environment page leans darker and more editorial. Across all five surfaces the typographic system, spacing rhythm, and the single blue accent are consistent — this is one design language expressed at different volumes.
+Workmate 是一个**运行在浏览器里的“随身桌面”**：默认/自定义壁纸铺满整屏，三页内容（主页 / 网站 / 工具）与底部 Dock 悬浮其上。iOS 26 的 **Liquid Glass（液态玻璃）** 恰好定义了这种形态的材质语言：
 
-**Key Characteristics:**
-- Photography-first presentation; UI recedes so the product can speak.
-- Alternating full-bleed tile sections: white/parchment ↔ near-black, with the color change itself acting as the section divider.
-- Single blue accent (`{colors.primary}` — #0066cc) carries every interactive element. No second brand color exists.
-- Two button grammars: tiny blue pill CTAs (`{rounded.pill}`) and compact utility rects (`{rounded.sm}`).
-- SF Pro Display + SF Pro Text — negative letter-spacing at display sizes for the signature "Apple tight" headline feel.
-- Whisper-soft elevation used only when a product image needs to breathe — exactly one drop-shadow in the entire system.
-- Tight two-row nav: slim `{component.global-nav}` + product-specific `{component.sub-nav-frosted}` with persistent right-aligned primary CTA.
-- Section rhythm across multiple pages: light hero → dark product tile → light utility tile → dark tile → parchment footer — a predictable pulse.
+- **玻璃承载内容，不画边框**：一切浮层（Dock、文件夹图标、文件夹面板、弹窗、搜索卡片）都是“玻璃板”，背后壁纸经 `backdrop-filter: blur() saturate()` 折射成柔和色斑，层级由**玻璃的透过程度**表达，而不是描边粗细。
+- **高光即形状**：每块玻璃顶部有一条**细高光边缘**（`inset 0 0.5px 0 rgba(255,255,255,.9)`），叠加内侧 0.5px 白色 rim，玻璃边缘因此“亮起来”，这是液态玻璃区别于普通毛玻璃的核心。
+- **颜色延伸（Color wash）**：玻璃不必涂满白，而是让壁纸色彩透过玻璃成为自身色调——前景文字、图标始终不透明，保证可读。
+- **单点强调色不变**：所有可点信号仍只用 Action Blue `#0066cc`（选中态、链接、焦点环）。玻璃是“承载”，蓝色是“动作”。
 
-## Colors
+### 与 v1 的关系
+v1（Apple 官网）用“浅色 / 深色 tile 交替 + 一条产品阴影”制造节奏；Liquid Glass 版用“玻璃透明度 + 高光 + 壁纸色透出”制造节奏。二者共用：SF 字阶、8pt 间距体系、`rounded.app-icon` 圆角语法、单一 Action Blue。
 
-> **Source pages analyzed:** homepage, environment, store, iPhone 17 Pro buy page, accessories index. The color system is identical across all five surfaces; only the surface-mode mix differs.
+## 二、颜色令牌
 
-### Brand & Accent
-- **Action Blue** (`{colors.primary}` — #0066cc): The single brand-level interactive color. All text links, all blue pill CTAs ("Learn more", "Buy"), and the focus ring root. This is Apple's quiet but universal "click me" signal. Press state shifts to a slightly darker variant via the active scale transform rather than a hex change.
-- **Focus Blue** (`{colors.primary-focus}` — #0071e3): A marginally brighter sibling of Action Blue, reserved for the keyboard focus ring on buttons (`outline: 2px solid`).
-- **Sky Link Blue** (`{colors.primary-on-dark}` — #2997ff): A brighter blue used on dark surfaces for in-copy links and inline callouts, where Action Blue would disappear against the tile background.
-
-### Surface
-- **Pure White** (`{colors.canvas}` — #ffffff): The dominant canvas. Content, utility cards, store tiles, configurator grids.
-- **Parchment** (`{colors.canvas-parchment}` — #f5f5f7): The signature Apple off-white. Used for alternating light tiles, footer region, and the default page canvas in store utility sections. Just different enough from white to create rhythm.
-- **Pearl Button** (`{colors.surface-pearl}` — #fafafc): A near-white used as the fill for secondary "ghost" buttons — lighter than the parchment canvas so the button still reads as a button against `{colors.canvas-parchment}`.
-- **Near-Black Tile 1** (`{colors.surface-tile-1}` — #272729): The primary dark-tile surface on the homepage product grid.
-- **Near-Black Tile 2** (`{colors.surface-tile-2}` — #2a2a2c): A micro-step lighter — used where a dark tile sits directly above or below Tile 1 to create the faintest separation.
-- **Near-Black Tile 3** (`{colors.surface-tile-3}` — #252527): A micro-step darker — used at the bottom of the stack and in embedded video/player frames.
-- **Pure Black** (`{colors.surface-black}` — #000000): Reserved for true void — video player backgrounds, edge-to-edge photographic overlays, the global nav bar background.
-- **Translucent Chip Gray** (`{colors.surface-chip-translucent}` — #d2d2d7): The base hex of the translucent gray chip used over photography for circular control buttons. In production, applied at ~64% alpha as `rgba(210, 210, 215, 0.64)`.
-
-### Text
-- **Near-Black Ink** (`{colors.ink}` — #1d1d1f): The voice of every headline, every body paragraph, and the dark utility button's fill. Chosen instead of pure black to keep the page feeling photographic rather than printed.
-- **Body** (`{colors.body}` — #1d1d1f): Same hex as ink — Apple uses one near-black tone for all text on light surfaces.
-- **Body On Dark** (`{colors.body-on-dark}` — #ffffff): All text on dark tiles and on the global nav bar.
-- **Body Muted** (`{colors.body-muted}` — #cccccc): Secondary copy on dark tiles where pure white would be too loud.
-- **Ink Muted 80** (`{colors.ink-muted-80}` — #333333): Body text on the white Pearl Button surface — slightly softer than pure black.
-- **Ink Muted 48** (`{colors.ink-muted-48}` — #7a7a7a): Disabled button text and legal fine-print.
-
-### Hairlines & Borders
-- **Divider Soft** (`{colors.divider-soft}` — #f0f0f0): The "border" tone on secondary buttons — functions as a ring shadow rather than a hard line. In production, often applied as `rgba(0, 0, 0, 0.04)`.
-- **Hairline** (`{colors.hairline}` — #e0e0e0): The 1px hairline border on store utility cards and configurator chips.
-
-### Brand Gradient
-**No decorative gradients.** Atmospheric depth on product photography (the iPhone 17 Pro camera plate, the Apple Watch bands, AirPods reflections) is inherent to the imagery, not a CSS gradient overlay. The environment page's hero uses photographic atmosphere (mountain vista at dawn) but no gradient tokens are defined. Apple is the rare luxury-brand site with zero gradient-based design tokens.
-
-## Typography
-
-### Font Family
-- **Display**: `SF Pro Display, system-ui, -apple-system, sans-serif` — Apple's proprietary display face, optimized for sizes ≥ 19px. Defines the voice of every headline.
-- **Body / UI**: `SF Pro Text, system-ui, -apple-system, sans-serif` — the text-optimized variant used for body copy, captions, buttons, and links below 20px.
-- **OpenType features**: `font-variant-numeric: numerator` is enabled on numeric links (pricing tables, spec sheets). Display sizes rely on tight tracking rather than contextual ligatures.
-
-### Hierarchy
-
-| Token | Size | Weight | Line Height | Letter Spacing | Use |
-|---|---|---|---|---|---|
-| `{typography.hero-display}` | 56px | 600 | 1.07 | -0.28px | Hero headline; the signature "Apple tight" tracking |
-| `{typography.display-lg}` | 40px | 600 | 1.10 | 0 | Tile headlines atop every product tile |
-| `{typography.display-md}` | 34px | 600 | 1.47 | -0.374px | Section heads (SF Pro Text at display proportions) |
-| `{typography.lead}` | 28px | 400 | 1.14 | 0.196px | Product tile subcopy |
-| `{typography.lead-airy}` | 24px | 300 | 1.5 | 0 | Environment-page lead paragraphs (the rare weight 300) |
-| `{typography.tagline}` | 21px | 600 | 1.19 | 0.231px | Sub-tile tagline; sub-nav category name |
-| `{typography.body-strong}` | 17px | 600 | 1.24 | -0.374px | Inline strong emphasis |
-| `{typography.body}` | 17px | 400 | 1.47 | -0.374px | Default paragraph |
-| `{typography.dense-link}` | 17px | 400 | 2.41 | 0 | Footer / store utility link lists (relaxed leading) |
-| `{typography.caption}` | 14px | 400 | 1.43 | -0.224px | Secondary captions, button text |
-| `{typography.caption-strong}` | 14px | 600 | 1.29 | -0.224px | Emphasized captions |
-| `{typography.button-large}` | 18px | 300 | 1.0 | 0 | Store hero CTAs (the rare weight 300) |
-| `{typography.button-utility}` | 14px | 400 | 1.29 | -0.224px | Utility/nav button labels |
-| `{typography.fine-print}` | 12px | 400 | 1.0 | -0.12px | Fine-print, footer body |
-| `{typography.micro-legal}` | 10px | 400 | 1.3 | -0.08px | Micro legal disclaimers |
-| `{typography.nav-link}` | 12px | 400 | 1.0 | -0.12px | Global nav menu items |
-
-### Principles
-
-- **Negative letter-spacing at display sizes.** Every headline at 17px and up carries a slight tracking tighten (`-0.12 → -0.374px`). This produces the iconic "Apple tight" headline cadence. Never used at 12px or below.
-- **Body copy at 17px, not 16px.** Apple breaks the SaaS convention and runs paragraph text at 17px. The extra pixel gives the page an unmistakable "reading, not scanning" pace.
-- **Weight 300 is real and rare.** Used deliberately on a handful of large-size reads (`{typography.button-large}` at 18px/300 and `{typography.lead-airy}` at 24px/300). It's not an accident — it's a light-atmosphere cue reserved for moments where the content should feel airy.
-- **Weight 600, not 700, for headlines.** Apple's headlines sit at weight 600. Weight 700 is used sparingly for `{typography.tagline}` (21px) when a touch more assertion is needed.
-- **Line-height is context-specific.** Display sizes use 1.07–1.19 (tight). Body uses 1.47. Utility link stacks in the footer/store use an unusually relaxed 2.41 (`{typography.dense-link}`). The 2.41 is not a bug — it's how the footer's dense link columns breathe.
-- **Weight 500 is deliberately absent.** The ladder is 300 / 400 / 600 / 700. Mid-weight readings always use 600.
-
-### Note on Font Substitutes
-SF Pro is Apple's proprietary system font. When building off-system:
-
-- Use `system-ui, -apple-system, BlinkMacSystemFont` as the first stack entry — on macOS/iOS/Safari this resolves to the real SF Pro.
-- For non-Apple platforms, **Inter** (Google Fonts, variable) is the closest open-source equivalent. Inter at weight 600 with `font-feature-settings: "ss03"` approximates SF Pro's rounded "a" character.
-- Nudge `letter-spacing` down by `-0.01em` on display sizes to re-create the Apple tight feel; Inter's default tracking runs slightly wider than SF Pro.
-- For body text, tighten line-height by `0.03` (from 1.47 → 1.44) when substituting Inter — Inter's taller x-height needs less leading.
-
-## Layout
-
-### Spacing System
-- **Base unit:** 8px. Sub-base values (2, 4, 5, 6, 7) are used for tight typographic adjustments; structural layout snaps to 8/12/16/20/24.
-- **Tokens:** `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 17px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.xxl}` 48px · `{spacing.section}` 80px.
-- **Section vertical padding:** `{spacing.section}` (80px) inside a product tile; tiles stack edge-to-edge with 0 gap (the color change provides the break).
-- **Card padding:** `{spacing.lg}` (24px) inside utility grid cards.
-- **Button padding:** 8–11px vertical, 15–22px horizontal.
-- **Universal rhythm constants:** the 17px body line-height multiplier (~25px line) and 21px tagline size show up on every analyzed page.
-
-### Grid & Container
-- **Max content width:** ~980px on text-heavy sections (environment), ~1440px on product grids (store, accessories), full-bleed for product tiles (homepage).
-- **Column patterns:** 3 to 5 column utility card grid on store/accessories; 2-column side-by-side tiles on homepage occasional sections; single-column centered stack on product tile heroes.
-- **Gutters:** 20–24px between cards in a utility grid.
-
-### Whitespace Philosophy
-Apple's whitespace is the product's pedestal. Every tile begins with at least 64px of air above its headline and 48–64px below. Product renders are never crowded; the nearest content to a product image is at least 40px away. The footer is the only area that breaks this — there, Apple goes deliberately dense to make the full information architecture visible at a glance.
-
-## Elevation & Depth
-
-| Level | Treatment | Use |
+| Token | 值 | 用途 |
 |---|---|---|
-| Flat | No shadow, no border | Full-bleed tiles, global nav, footer, body sections |
-| Soft hairline | 1px `rgba(0, 0, 0, 0.08)` border | Utility cards, sub-nav frosted-glass separator |
-| Backdrop blur | `backdrop-filter: blur(N)` on Parchment 80% | Sub-nav and the iPhone buy floating sticky bar |
-| Product shadow | `rgba(0, 0, 0, 0.22) 3px 5px 30px 0` | Product renders resting on a surface (the only true "shadow" in the system) |
+| `colors.primary` | `#0066cc` | 选中 tab、主按钮、链接、toggle 开、焦点主色 |
+| `colors.primary-focus` | `#0071e3` | `focus-visible` 焦点环（2px） |
+| `colors.primary-on-dark` | `#2997ff` | 深色表面上的链接色（本轮浅色系统预留） |
+| `colors.ink` | `#1d1d1f` | 前景主文字、图标（近黑，非纯黑） |
+| `colors.ink-muted-80` | `#333333` | 次级文字 / 普通按钮字 |
+| `colors.ink-muted-48` | `#7a7a7a` | 辅助说明、禁用 |
+| `colors.canvas` | `#ffffff` | 玻璃内嵌的实底输入框、下拉选项激活底 |
+| `colors.canvas-parchment` | `#f5f5f7` | 玻璃内的“内容坑”底色（列表项、mini 图标底） |
+| `colors.surface-pearl` | `#fafafc` | 更亮按钮底 |
+| `colors.glass-tint/-edge/-rim/-shadow` | 见 frontmatter | 玻璃四件套：底色 / 高光 / 内描边 / 投影像色 |
+| `colors.hairline` | `#e0e0e0` | 输入框细边、开关关态轨道 |
 
-**Shadow philosophy.** Apple uses **exactly one** drop-shadow, and it is applied to photographic product imagery — never to cards, never to buttons, never to text. Elevation in the UI comes from (a) surface-color change (light tile ↔ dark tile) and (b) backdrop-blur on sticky bars. The single shadow is about giving the product weight, not about UI hierarchy.
+> **深色**：本轮不实现 `prefers-color-scheme` 深色，所有 token 为浅色壁纸体系下的常量。
 
-### Decorative Depth
-- **Atmospheric imagery** on the environment page (photographic vista) supplies mood; no CSS gradient involved.
-- **Edge-to-edge tile alternation** creates rhythm without borders or shadows — the color change itself is the divider.
-- **Backdrop-filter blur** on `{component.sub-nav-frosted}` and `{component.floating-sticky-bar}` creates a "floating over content" effect that's functional, not decorative.
+## 三、玻璃材质
 
-## Shapes
+玻璃统一为“**半透明白渐变 + blur + saturate + 顶部高光 + 内 rim**”。三档按层级取用：
 
-### Border Radius Scale
+| 层级 | 透明度 | blur / saturate | 典型位置 |
+|---|---|---|---|
+| `glass-tile` | 96%→86% | 20px / 175% | 应用/文件夹单图标、壁纸小按钮 |
+| `glass-pill` | 82%→60% | 24px / 180% | Dock、胶囊按钮、桌面文件夹图标 |
+| `glass-panel` | 90%→75% | 28px / 185% | 文件夹面板、更多弹层、搜索卡片、工具弹窗 |
 
-| Token | Value | Use |
+通用实现（以 panel 为例）：
+
+```css
+background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.75));
+-webkit-backdrop-filter: blur(28px) saturate(185%);
+backdrop-filter: blur(28px) saturate(185%);
+box-shadow:
+  inset 0 0 0 0.5px rgba(255,255,255,.6),   /* 细内描边 = rim */
+  inset 0 .5px 0 rgba(255,255,255,.9),      /* 顶部高光 */
+  0 24px 48px -12px rgba(31,38,135,.25);    /* 轻柔离屏阴影 */
+```
+
+铁律：
+
+1. **前景文字/图标一律不透明**（`colors.ink` 系），玻璃只透背景，不透前景。
+2. **不加外描边**（旧 `ring-black/5` 移除）：玻璃的形状由 rim + 高光表达，外轮廓用极小透明投影。
+3. **阴影只表达“离屏”**，不在卡片间制造互相压叠；投影统一带一点蓝（`31,38,135`）而不是纯黑。
+4. 玻璃背后若内容复杂（自定义壁纸），可叠加 `colors.canvas/70 → 85` 提高不透明度保证对比（见 home 搜索框与搜索下拉）。
+
+## 四、排版与圆角
+
+字阶沿用 v1（SF 字族 + Apple 负字距），详见 frontmatter `typography`。要点：
+
+- 全局正文 `--text-apple-body`（17px/1.47/-0.374px）；标题与正文同宽时用 600 字重。
+- 名称/说明（文件夹名、应用名、弹窗标签）用 `caption`（14px）/ `caption-strong`；小注 `fine-print`（12px）。
+- **工具弹窗头不再加副标题**（主标题一行）。
+- 圆角：图标 `radius.app-icon`（24% 超级椭圆）、mini 图标 28%、玻璃面板 `lg`（18px）、文件夹面板 28px、动作胶囊 `pill`。
+
+## 五、全局壳规范（本轮实施）
+
+### 5.1 Dock（App.vue 底部导航）
+- 容器：`glass-pill` 玻璃胶囊，宽 `min(420px, 屏宽-2*md)`，圆角 pill，内 `p-4px`。
+- tab：flex-1 竖排 emoji+label；当前 tab = **Action Blue 胶囊**（`bg-primary text-on-primary`），非当前 = `text-ink-muted-80`；按下 `scale(0.96)`；焦点环 `primary-focus`。
+- 右侧“更多”独立小玻璃胶囊，同 Dock 高度。
+- 底部 Home 指示条：`bg-ink/25` 圆角条，居中 4×104px。
+
+### 5.2 桌面图标与文件夹
+- **应用图标**（`AppTile` / `ToolTile`）：`glass-tile`，`radius.app-icon`；favicon（52% 内容区）/ emoji（22px）居中；hover `scale(1.05)`、按下 `scale(0.95)`；站点/工具名称用 `caption`（14px）muted-80，两行截断。
+- **文件夹图标**（`DesktopFolderTile`）：`glass-pill` + `radius.app-icon`，内 `p-[10%]`；mini 图标以 `canvas-parchment` 28% 圆角小格铺 1–9 个，favicon 占小格 62%。
+
+### 5.3 文件夹面板（DesktopFolderPanel / FolderPanelV2）
+- 遮罩：`scrim`（`rgba(15,23,42,.32)`）+ 轻 `backdrop-blur(2-4px)`。
+- 卡片：`glass-panel`，圆角 28px，宽响应式 340→680px，高 `max-h-[78%]`；内部图标网格 `3→5` 列。
+- 打开动画：从文件夹处 `scale(0.25)` 放大 + 淡入（`cubic-bezier(0.16,1,0.3,1)`）。
+- V2 支持标题内联改名（pill 输入框）、长按图标拖拽排序（抓起时 `scale(1.16) translateY(-3px)` + 蓝色投影）。
+
+### 5.4 更多弹层与搜索
+- 更多菜单（`MoreMenu`）：`glass-panel` 圆角 lg；移动端贴底上滑、桌面端居中；顶部拖动指示条 `bg-black/15`。
+- 主页搜索：外层 `glass-panel`（圆角 lg）内含 44px 白 pill 输入框；focus 时外层浮起（`shadow-product`）。搜索下拉 `bg-canvas/95` + blur + 玻璃 rim，选中项 `canvas-parchment` 底。
+
+### 5.5 工具弹窗
+- 21 个 `views/tools/components/*Tool.vue` 共用同一模板副本：Teleport 遮罩 + `glass-panel` 卡片，宽度 `max-w-xl→3xl`，头部无副标题，内容区可滚动。本轮仅以文档约束，不逐文件改（后续如需统一可抽公共 ModalShell）。
+
+## 六、交互原子
+
+| 原子 | 视觉 | 状态 |
 |---|---|---|
-| `{rounded.none}` | 0px | Full-bleed product tiles (no corner rounding) |
-| `{rounded.xs}` | 5px | Inline links when styled as subtle chips (rare) |
-| `{rounded.sm}` | 8px | Dark utility buttons (Sign In, Bag), inline card imagery |
-| `{rounded.md}` | 11px | White Pearl Button capsules |
-| `{rounded.lg}` | 18px | Store utility cards, accessories grid cards |
-| `{rounded.pill}` | 9999px | Primary blue pill CTAs, sub-nav buy button, configurator option chips, search input — the signature Apple pill |
-| `{rounded.full}` | 9999px / 50% | Circular control chips floating over photography |
+| 主动作 pill | `bg-primary text-on-primary rounded-pill` | hover 轻微压暗；按下 scale .97；禁用 50% |
+| 次动作 pill/圆角 | `bg-canvas-parchment text-ink` | hover 变深 5%；按下 scale .97 |
+| 图标圆钮 | `bg-black/5 rounded-full h-8/9` | hover `bg-black/10`；按下 scale .9 |
+| 开关 | 轨道 24×44 pill，关=`hairline` 开=`primary`，白圆点 | 无 |
+| 焦点环 | `ring-2 ring-primary-focus`（focus-visible only） | 键盘导航可达性 |
 
-### Photography Geometry
-- **Hero imagery**: full-bleed, 21:9 or taller on the homepage; 16:9 on environment and shop pages. Product renders are photographic-realistic, often shot on a tinted surface that becomes the tile background.
-- **Product renders**: PNG/WebP with transparency; rest on a surface tile and pick up the system shadow.
-- **Accessory grid**: square 1:1 crops at `{rounded.lg}` (18px) radius, light neutral backgrounds, product centered with 20–40px internal padding.
-- **No rounded imagery in hero tiles** — images are full-bleed rectangular. Rounding (`{rounded.sm}`, `{rounded.lg}`) appears only on inline card imagery.
-- Lazy-loading via responsive `srcset` and `sizes` across all breakpoints; CDN-optimized WebP.
+## 七、动效
 
-## Components
+- 按压统一 `scale(0.95~0.98)`（150-200ms，ease-out）。
+- 弹层进场：遮罩淡入 + 卡片 `translateY(8-16px) scale(.95)→1`；文件夹展开用专用 scale-from-tile 曲线。
+- 内容切换（更多菜单子页）轻微淡入 + `translateY(6-8px)`。
+- 页面横滑：3 面板轨道位移，360ms `cubic-bezier(0.16,1,0.3,1)`（Apple 弹簧感）。
+- 尽量少用 `transition-all`，改列具体属性，减少布局抖动。
 
-### Top Navigation
+## 八、Do / Don't
 
-**`global-nav`** — Persistent, ultra-thin black nav bar pinned to the top of every page. Background `{colors.surface-black}`, height 44px, text `{colors.on-dark}` in `{typography.nav-link}` (12px / 400 / -0.12px tracking). Links are quiet, spaced ~20px apart, running edge-to-edge across the top. Right-aligned cluster: Search, Bag icons — always visible. On mobile, collapses to hamburger at ~834px and the Apple logo centers.
+**Do**
+- 所有浮层先取对应玻璃档位，再决定不透明度；前景永远实色。
+- 保留单一 Action Blue；focus-visible 统一 `primary-focus` 2px 环。
+- 图标统一超级椭圆 24%（含 About 图标）；小内容格 28%。
+- 名称/正文走 token：`caption`(14px) 起，说明文字 `fine-print`。
+- 用材质与高光“画”形状，阴影只表达离屏。
 
-**`sub-nav-frosted`** — Surface-specific nav that sticks below the global nav. Background `{colors.canvas-parchment}` at 80% opacity with backdrop-filter blur, creating a frosted-glass effect. Height 52px. Content on left: product category name ("iPhone", "Store", "Accessories") in `{typography.tagline}` (21px / 600). Content right: inline nav links in `{typography.button-utility}` (14px), ending in a persistent `{component.button-primary}` ("Buy") or a utility link.
+**Don't**
+- 不再给浮层加 `ring-black/5` 等外描边（玻璃自带 rim）。
+- 不引入第二个强调色；不把 `primary-on-dark` 用在浅色玻璃上。
+- 玻璃不压前景：文字对比度不足时提高玻璃白不透明度而非加深文字。
+- 不动 v1 的 SF 字阶与 8pt 间距；深度不用大段黑色。
 
-### Buttons
+## 九、代码对齐（style.css / 组件）
 
-**`button-primary`** — The signature Apple action. Background `{colors.primary}` (Action Blue #0066cc), text `{colors.on-primary}` in `{typography.body}` (SF Pro Text 17px / 400), rounded `{rounded.pill}` (full pill — capsule-shaped), padding 11px × 22px. The full-pill radius IS the brand action signal.
-- Active state: `{component.button-primary-active}` — `transform: scale(0.95)` (the system-wide micro-interaction).
-- Focus state: `{component.button-primary-focus}` — 2px solid `{colors.primary-focus}` outline.
+`src/style.css` 将新增 `@theme` 令牌与 `@utility`/组件类：
 
-**`button-secondary-pill`** — Used as the second CTA when two blue pills appear together ("Learn more" / "Buy"). Background transparent, text `{colors.primary}`, 1px solid `{colors.primary}` border, rounded `{rounded.pill}`, padding 11px × 22px. Reads as a "ghost pill."
+```css
+@theme {
+  --color-glass-tint: rgba(255,255,255,.55);
+  --color-glass-edge: rgba(255,255,255,.85);
+  --color-glass-rim: rgba(255,255,255,.35);
+  --shadow-glass: 0 24px 48px -12px rgba(31,38,135,.25);
+}
+```
 
-**`button-dark-utility`** — Global nav actions (Sign In, Bag, language selector). Background `{colors.ink}` (#1d1d1f), text `{colors.on-dark}` in `{typography.button-utility}` (14px / 400 / -0.224px tracking), rounded `{rounded.sm}` (8px), padding 8px × 15px. Active state shrinks via `transform: scale(0.95)`.
+组件类（`@layer components` 或直接原子组合）：`.glass-panel/.glass-pill/.glass-tile` 会以高光+rim+blur 供全局组件引用。主要组件更新范围：`App.vue`（Dock）、`MoreMenu.vue`、`DesktopFolderTile.vue`、`AppTile.vue`、`ToolTile.vue`、`DesktopFolderPanel.vue`、`FolderPanelV2.vue`、`views/home/index.vue`（搜索）。工具弹窗本轮不逐改，仅套文档约束。
 
-**`button-pearl-capsule`** — Product-card secondary button. Background `{colors.surface-pearl}` (#fafafc), text `{colors.ink-muted-80}` in `{typography.caption}` (14px), 3px solid `{colors.divider-soft}` border (functions as a soft ring rather than a visible line), rounded `{rounded.md}` (11px), padding 8px × 14px.
+---
 
-**`button-store-hero`** — A larger primary CTA used on store hero surfaces. Same Action Blue + Paper White as `{component.button-primary}`, but with `{typography.button-large}` (18px / 300 — note the rare weight 300) and slightly more padding (14px × 28px). Used sparingly on the store landing.
+## 附录 · v1 Apple 官网分析（继承来源）
 
-**`button-icon-circular`** — Floats over photography. 44 × 44px, background `{colors.surface-chip-translucent}` at ~64% alpha, icon in `{colors.ink}`, rounded `{rounded.full}`. Used for carousel controls, close buttons, and in-image controls (product image thumbnails on the iPhone buy page).
+> 以下为原 DESIGN-apple.md v1 的要点摘录，token 已并入本系统 frontmatter；v1 面向“苹果官网营销页”的分析仍作为材质/字阶/间距的推导证据，不再作为界面直接规范。
 
-**`text-link`** — Inline body links in `{colors.primary}` (Action Blue). Underlined or non-underlined per context.
+**v1 关键结论**
+1. **单一强调蓝**：Action Blue #0066cc 是所有交互的唯一信号；Press 用 scale，不用换色。
+2. **摄影克制 / 无装饰梯度**：深度来自表面明暗交替与唯一产品投影。
+3. **SF Pro Display + Text 双字族**：显示字 600 + 负字距（Apple tight）；正文 17px 不是 16px。
+4. **字阶 300/400/600/700**，刻意不用 500。
+5. **圆角语法**：pill=动作，lg=内容卡，sm=紧凑 utility，24%=超级椭圆图标（本系统继承）。
+6. **8pt 间距与节律**：md=17px 由 17px 正文行高派生，显示在每页复现。
+7. 原 v1 的 `product-tile-*`、`global-nav`、`sub-nav-frosted`、`footer` 等营销页组件在本产品不直接使用，token（surface-tile-1/2/3、divider-soft、hairline 等）保留作深色/强调预留。
 
-**`text-link-on-dark`** — Inline body links on dark tiles in `{colors.primary-on-dark}` (Sky Link Blue #2997ff) — Action Blue would disappear against `{colors.surface-tile-1}`.
-
-### Cards & Containers
-
-**`product-tile-light`** — Full-bleed light tile. Background `{colors.canvas}` (white), text `{colors.ink}`, rounded `{rounded.none}` (0 — tiles touch edges), vertical padding `{spacing.section}` (80px). Centered stack: product name in `{typography.display-lg}` (40px / 600) → one-line tagline in `{typography.lead}` (28px / 400) → two `{component.button-primary}` CTAs ("Learn more" / "Buy") → product render resting on the surface with the system shadow.
-
-**`product-tile-parchment`** — Same as `{component.product-tile-light}` but on `{colors.canvas-parchment}` (#f5f5f7). Used to break two consecutive white tiles.
-
-**`product-tile-dark`** — Full-bleed dark tile. Background `{colors.surface-tile-1}` (#272729), text `{colors.on-dark}`, rounded `{rounded.none}`, vertical padding `{spacing.section}` (80px). Same content stack as the light tile but with `{component.text-link-on-dark}` for inline copy and `{component.button-primary}` (Action Blue still works on the dark surface). Used on the homepage product grid as the alternating dark band.
-
-**`product-tile-dark-2`** — Variant on `{colors.surface-tile-2}` (#2a2a2c). Used where a dark tile sits directly above or below `{component.product-tile-dark}` to create the faintest separation through micro-step lightness change.
-
-**`product-tile-dark-3`** — Variant on `{colors.surface-tile-3}` (#252527). Used at the bottom of the stack and in embedded video/player frames.
-
-**`store-utility-card`** — Used in store grid and accessories grid. Background `{colors.canvas}` (white), 1px solid `{colors.hairline}` border, rounded `{rounded.lg}` (18px), padding `{spacing.lg}` (24px). Top: product image (1:1 crop with `{rounded.sm}` (8px) inner image radius). Below: product name in `{typography.body-strong}` (17px / 600), price in `{typography.body}` (17px / 400), and a `{component.text-link}` ("Buy" or "Learn more"). No shadow by default; product render itself carries the system product-shadow.
-
-**`configurator-option-chip`** — Pill-shaped tappable cell used in the iPhone 17 Pro buy page. Background `{colors.canvas}`, text `{colors.ink}` in `{typography.caption}`, rounded `{rounded.pill}`, padding 12px × 16px. Contains a small product thumbnail + label + price delta. Arranged in a grid of 4–5 options per row.
-
-**`configurator-option-chip-selected`** — Selected state. Border upgrades to 2px solid `{colors.primary-focus}`. Same shape, same content.
-
-**`environment-quote-card`** — A photographic-canvas hero specific to the environment page. Dark photographic backdrop (mountain vista at dawn) with `{colors.surface-tile-1}` as the fallback color, centered white-text headline in `{typography.display-lg}` (40px), small green "Apple 2030" pictographic logo above the headline, single `{component.button-primary}` below. Padding `{spacing.section}` (80px).
-
-**`floating-sticky-bar`** — Floats at the bottom of the viewport on the iPhone 17 Pro buy page during scroll. Background `{colors.canvas-parchment}` at 80% opacity with `backdrop-filter: blur(N)`, height 64px, padding 12px × 32px. Left: running price total in `{typography.body}`. Right: `{component.button-primary}` ("Add to Bag").
-
-### Inputs & Forms
-
-**`search-input`** — The accessories search input. Background `{colors.canvas}`, text `{colors.ink}` in `{typography.body}` (17px), 1px solid `rgba(0, 0, 0, 0.08)` border, rounded `{rounded.pill}` (full pill — search is also pill-shaped, matching the CTA grammar), padding 12px × 20px, height 44px. Leading icon: search glyph at 14px, muted tint.
-
-Error and validation states were not surfaced in the analyzed pages.
-
-### Footer
-
-**`footer`** — Background `{colors.canvas-parchment}` (#f5f5f7), text `{colors.ink-muted-80}`. Link columns in `{typography.dense-link}` (17px / 400 / 2.41 line-height — the relaxed leading is what makes the dense columns scannable). Column headings in `{typography.caption-strong}` (14px / 600). Legal row at the very bottom in `{typography.fine-print}` (12px / 400) with `{colors.ink-muted-48}` text. Vertical padding 64px.
-
-## Do's and Don'ts
-
-### Do
-- Use `{colors.primary}` (Action Blue #0066cc) for every interactive element — links, pill CTAs, focus signals — and nothing else. The single accent is non-negotiable.
-- Set headlines in `{typography.hero-display}` or `{typography.display-lg}` with negative letter-spacing (`-0.28 → -0.374px`) to get the signature "Apple tight" cadence.
-- Run body copy at `{typography.body}` (17px / 400 / 1.47 / -0.374px) — not 16px. The extra pixel defines the brand's reading pace.
-- Alternate `{component.product-tile-light}` (or parchment) and `{component.product-tile-dark}` for full-bleed section rhythm. The color change IS the divider.
-- Reserve `{rounded.pill}` for the primary blue CTA and any other element that should read as an "action" (configurator chips, search input, sticky bar CTA).
-- Apply the single product-shadow (`rgba(0, 0, 0, 0.22) 3px 5px 30px`) only to product renders resting on a surface — never on cards, buttons, or text.
-- Use `transform: scale(0.95)` as the active/press state on every button — it's the system-wide micro-interaction.
-- Keep the global nav `{colors.surface-black}` (true black) — it's the only place pure black appears on most pages.
-
-### Don't
-- Don't introduce a second accent color; every "click me" signal is `{colors.primary}` (Action Blue).
-- Don't add shadows to cards, buttons, or text — shadow is reserved for product imagery.
-- Don't use gradients as decorative backgrounds; atmosphere comes from photography.
-- Don't set body copy at weight 500 — Apple's ladder is 300 / 400 / 600 / 700, with 500 deliberately absent. Body is always 400; strong inline is 600; display is 600.
-- Don't round full-bleed tiles — tiles are rectangular and edge-to-edge; the color change is the divider.
-- Don't tighten line-height below 1.47 for body copy — the editorial leading is part of the brand.
-- Don't mix radii grammars — use `{rounded.sm}` for compact utility, `{rounded.lg}` for utility cards, `{rounded.pill}` for pills, and nothing in between (except the rare `{rounded.md}` Pearl Button).
-- Don't use `{colors.primary-on-dark}` (Sky Link Blue) on light surfaces — it's the dark-tile-only variant. Action Blue is for light surfaces.
-
-## Responsive Behavior
-
-### Breakpoints
-
-| Name | Width | Key Changes |
-|---|---|---|
-| Small phone | ≤ 419px | Single-column tiles; sub-nav collapses to category name + primary CTA only; hero typography drops to 28px |
-| Phone | 420–640px | Single-column stack; product renders scale to 80% of tile width; hero h1 drops to 34px |
-| Large phone | 641–735px | Tiles transition to tighter padding (48px vertical vs 80px); fine-print wraps |
-| Tablet portrait | 736–833px | Global nav collapses to hamburger; sub-nav hides category chips, keeps primary CTA |
-| Tablet landscape | 834–1023px | Global nav returns fully expanded; 3-column utility grids become 2-column |
-| Small desktop | 1024–1068px | Product tiles use 2/3 width with margin gutters; hero h1 stays at 40px |
-| Desktop | 1069–1440px | Full layout; 4–5 column store grids; 1440px content max |
-| Wide desktop | ≥ 1441px | Content locks at 1440px, margins absorb extra width |
-
-The structural breakpoints that matter for agents: 1440px (content lock), 1068px (small-desktop), 833px (tablet landscape switch), 734px (tablet portrait), 640px (phone), 480px (small phone).
-
-### Touch Targets
-- Minimum 44 × 44px. `{component.button-primary}` lands at ~44 × 100px (with the full-pill radius making the visible hit area more generous than the label suggests).
-- `{component.button-icon-circular}` is exactly 44 × 44px.
-- Global nav utility links are smaller (~32 × 80px) — they deliberately sit at a tighter target because they're precision desktop actions, and the mobile hamburger replaces them at ≤ 833px.
-
-### Collapsing Strategy
-- **Global nav**: full horizontal link row on desktop → collapses to Apple logo + hamburger + bag icon at 834px and below.
-- **Sub-nav**: category name + inline links + primary CTA → category name + primary CTA only at mobile; inline links move into a hamburger tray.
-- **Product tiles**: stack from 2-column to 1-column at 834px; vertical padding tightens from 80px → 48px at small-phone.
-- **Utility grids** (store, accessories): 5-col → 4-col (1440px) → 3-col (1068px) → 2-col (834px) → 1-col (640px).
-- **Hero typography**: `{typography.hero-display}` (56px) → `{typography.display-lg}` (40px) at 1068px → 34px at 640px → 28px at 419px.
-
-### Image Behavior
-- All product imagery uses responsive `srcset` with breakpoint-matched crops.
-- Hero photography may switch art direction at mobile (e.g., the environment page's vista crops to a taller aspect ratio on mobile, framing the subject differently).
-- Product renders maintain their 1:1 or 4:3 aspect ratios across breakpoints; only scale changes.
-- Lazy-loading is default; the above-fold hero loads eagerly.
-
-## Iteration Guide
-
-1. Focus on ONE component at a time. Reference its YAML key directly (`{component.product-tile-dark}`, `{component.search-input}`).
-2. Variants of an existing component (`-active`, `-focus`, `-2`, `-3`) live as separate entries in `components:`.
-3. Use `{token.refs}` everywhere — never inline hex.
-4. Never document hover. Default and Active/Pressed states only.
-5. Display headlines stay SF Pro Display 600 with negative letter-spacing. Body stays SF Pro Text 400 at 17px. The boundary is unbreakable.
-6. The single drop-shadow (`rgba(0, 0, 0, 0.22) 3px 5px 30px`) is reserved for product photography only.
-7. When in doubt about emphasis: alternate surface (light → dark tile) before adding chrome.
+---
 
 ## Known Gaps
-
-- Form validation and error states were not surfaced on the analyzed pages; only the neutral search input is documented.
-- The homepage's embedded video/player frame uses `{colors.surface-black}`; interior player controls are not documented (they're a platform widget, not a web-design token).
-- Some component imagery is dynamic (rotating product hero) and its specific copy varies per surface — component specs name the structure, not the rotating content.
-- Dark-mode counterparts for store and accessories utility cards were not surfaced on the analyzed pages; the system documented is the daytime/light-dominant variant Apple ships by default.
-- Atmospheric photography (environment page mountain vista) is a content asset, not a design token; the documented `{component.environment-quote-card}` describes the structural surface only.
-- The exact backdrop-filter blur radius on `{component.sub-nav-frosted}` and `{component.floating-sticky-bar}` is platform-dependent; production CSS uses `saturate(180%) blur(20px)` as a typical baseline but the value isn't formalized as a token.
+- Liquid Glass 的“背景折射畸变”（真液态折射）无法纯 CSS 完整模拟，本系统以“blur + saturate + 高光”作 Web 近似。
+- 传感器驱动的动态高光（iOS 真机陀螺仪）不在 Web 范围，维持静态高光。
+- 深色模式、动态色彩（Dynamic Color）留待下一迭代。
+- 21 个工具弹窗仍是模板副本，未来建议抽公共 `ModalShell` 组件后再统一批量应用本轮玻璃规范。

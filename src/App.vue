@@ -182,7 +182,7 @@ const settings = computed(() => {
     <!-- 屏幕底部：三个按钮 + 右侧设置 + Home 指示条 -->
     <nav class="relative z-20 shrink-0 px-apple-md pb-[16px] pt-apple-xs" role="tablist" aria-label="主导航">
       <div class="mx-auto flex max-w-[420px] items-center gap-apple-xs">
-        <div class="flex flex-1 items-center gap-[2px] rounded-pill bg-white/70 p-[4px] shadow-hairline ring-1 ring-black/5 backdrop-blur-apple">
+        <div class="glass-pill flex flex-1 items-center gap-[2px] rounded-pill p-[4px]">
           <button
             v-for="(tab, i) in tabs"
             :key="tab.path"

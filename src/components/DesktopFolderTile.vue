@@ -29,7 +29,7 @@ function iconText(item) {
 <template>
   <div class="flex flex-col items-center gap-apple-xs max-[767px]:gap-[4px]">
     <!-- 文件夹：方形圆角，内部铺 mini 图标（尺寸与工具页完全一致） -->
-    <div class="aspect-square w-full rounded-[24%] bg-white/70 p-[10%] shadow-hairline ring-1 ring-black/5 backdrop-blur-apple">
+    <div class="glass-pill aspect-square w-full rounded-[24%] p-[10%]">
       <div class="flex h-full w-full flex-wrap content-center items-center justify-center" :style="{ gap: GAP + '%' }">
         <span
           v-for="item in preview"

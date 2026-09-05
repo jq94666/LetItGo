@@ -11,10 +11,10 @@ const emit = defineEmits(['close'])
 
 <template>
   <div class="absolute inset-0 z-20">
-    <div class="absolute inset-0 bg-ink/10 backdrop-blur-[2px]" @click="emit('close')" />
+    <div class="absolute inset-0 bg-black/25 backdrop-blur-[3px]" @click="emit('close')" />
 
     <div
-      class="folder-card absolute left-1/2 top-1/2 max-h-[78%] w-[min(340px,86%)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[28px] bg-white/90 p-apple-md shadow-product ring-1 ring-black/5 backdrop-blur-apple sm:w-[min(440px,86%)] md:w-[min(560px,88%)] lg:w-[min(680px,90%)]"
+      class="folder-card glass-panel absolute left-1/2 top-1/2 max-h-[78%] w-[min(340px,86%)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[28px] p-apple-md sm:w-[min(440px,86%)] md:w-[min(560px,88%)] lg:w-[min(680px,90%)]"
       role="dialog"
       aria-modal="true"
       :aria-label="title"

@@ -113,7 +113,7 @@ function onSubmit(e) {
       <div class="relative mx-auto w-full max-w-[680px]">
         <form
           role="search"
-          class="rounded-apple-lg bg-canvas/70 p-apple-sm shadow-hairline backdrop-blur-apple saturate-[180%] transition-all duration-200 focus-within:shadow-product"
+          class="glass-panel rounded-apple-lg p-apple-sm transition-shadow duration-200 focus-within:shadow-glass"
           @submit="onSubmit"
         >
           <label class="relative block">
@@ -166,7 +166,7 @@ function onSubmit(e) {
             id="search-suggest"
             role="listbox"
             aria-label="搜索建议"
-            class="absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[52vh] overflow-y-auto overscroll-contain rounded-apple-lg bg-canvas/95 p-apple-xs shadow-product ring-1 ring-black/5 backdrop-blur-apple max-[767px]:top-auto max-[767px]:bottom-full max-[767px]:mb-[6px]"
+            class="glass-panel absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[52vh] overflow-y-auto overscroll-contain rounded-apple-lg p-apple-xs max-[767px]:top-auto max-[767px]:bottom-full max-[767px]:mb-[6px]"
           >
           <li v-for="(row, i) in rows" :key="row.key">
             <button
