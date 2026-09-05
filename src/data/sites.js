@@ -70,6 +70,26 @@ export const directoryGroups = [
     ]
   },
   {
+    id: 'image',
+    label: '图片',
+    sites: [
+      { name: '花瓣网', href: 'https://huaban.com/discovery' },
+      { name: 'cocomaterial', href: 'https://cocomaterial.com/' },
+      { name: 'pixabay', href: 'https://pixabay.com/' },
+      { name: 'unsplash', href: 'https://unsplash.com/' },
+      { name: 'pexels', href: 'https://www.pexels.com/zh-cn/' }
+    ]
+  },
+  {
+    id: 'color',
+    label: '色彩',
+    sites: [
+      { name: 'colorhunt', href: 'https://colorhunt.co/palettes/popular' },
+      { name: 'mycolor', href: 'https://mycolor.space/' },
+      { name: 'colordrop', href: 'https://colordrop.io/' }
+    ]
+  },
+  {
     id: 'draw',
     label: '画图',
     sites: [
@@ -127,7 +147,8 @@ export const directoryGroups = [
     sites: [
       { name: '央视片库', href: 'https://tv.cctv.com/yxg' },
       { name: 'bilibili', href: 'https://www.bilibili.com/' },
-      { name: '斗鱼', href: 'https://www.douyu.com/' }
+      { name: '斗鱼', href: 'https://www.douyu.com/' },
+      { name: '抖音', href: 'https://www.douyin.com/' }
     ]
   },
   {
@@ -136,6 +157,15 @@ export const directoryGroups = [
     sites: [
       { name: 'OBS', href: 'https://obsproject.com/' },
       { name: 'EV录屏', href: 'https://www.ieway.cn/evcapture.html' }
+    ]
+  },
+  {
+    id: 'browser-ext',
+    label: '浏览器插件',
+    sites: [
+      { name: 'screenity', href: 'https://github.com/alyssaxuu/screenity' },
+      { name: 'SingleFile', href: 'https://github.com/gildas-lormeau/SingleFile' },
+      { name: '沉浸式翻译', href: 'https://github.com/immersive-translate/immersive-translate' }
     ]
   },
   {
@@ -220,5 +250,13 @@ export const designSiteGroups = {
 export const siteFolders = [
   { id: 'pdf', label: 'PDF', sites: pdfSites },
   ...directoryGroups.map((g) => ({ id: g.id, label: g.label, sites: g.sites })),
-  { id: 'icons', label: '图标', sites: designSiteGroups.icons }
+  { id: 'icons', label: '图标', sites: designSiteGroups.icons },
+  {
+    id: 'emoji',
+    label: 'Emoji',
+    sites: [
+      { name: 'getemoji', href: 'https://getemoji.com/', icon: '😋' },
+      { name: 'emojiall', href: 'https://www.emojiall.com/zh-hans' }
+    ]
+  }
 ]

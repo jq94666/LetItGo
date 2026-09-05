@@ -118,7 +118,6 @@ defineExpose({ open: openTool })
           <div class="flex items-start justify-between gap-apple-md border-b border-divider-soft p-apple-md sm:p-apple-lg">
             <div>
               <p class="text-body-strong text-ink">二维码生成</p>
-              <p class="text-fine-print text-ink-muted-48">输入文本或网址生成二维码 · 支持下载图片</p>
             </div>
             <button
               type="button"

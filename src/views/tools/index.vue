@@ -10,6 +10,9 @@ import ToolTile from './components/ToolTile.vue'
 // 工具改为按需加载：进入工具页只加载页面骨架，
 // 点开某个工具时才动态拉取其代码与依赖（pdf.js、pdf-lib、docx 等不再进首屏）
 const toolLoaders = {
+  publicIp: () => import('./components/PublicIpTool.vue'),
+  calculator: () => import('./components/CalculatorTool.vue'),
+  chineseColors: () => import('./components/ChineseColorsTool.vue'),
   relatives: () => import('./components/FamilyRelativesTool.vue'),
   uppercase: () => import('./components/UppercaseAmountTool.vue'),
   excelMerge: () => import('./components/ExcelMergeTool.vue'),
@@ -128,7 +131,10 @@ watch(
           @keydown.enter.prevent="openedId = tile.id"
           @keydown.space.prevent="openedId = tile.id"
         >
-          <DesktopFolderTile :title="tile.group.label" :items="tile.group.tools" />
+          <DesktopFolderTile
+            :title="tile.group.label"
+            :items="tile.group.tools.map((t) => ({ key: t.id, icon: t.icon }))"
+          />
         </button>
       </div>
     </div>

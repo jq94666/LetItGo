@@ -4,7 +4,7 @@ import { favicons } from '../assets/icons/favicon-manifest.js'
 
 // 网站页与工具页共用的文件夹图标：方形圆角，内部铺 1~9 个 mini 图标。
 // 传入 items，每项满足以下任一形态：
-//   - { key, icon }            工具：emoji 图标
+//   - { key, icon }            工具 / 指定 emoji 图标的站点：emoji 图标
 //   - { key, name }            网站：按 name 取 favicon，缺省时显示首字母
 const props = defineProps({
   title: { type: String, required: true },
@@ -17,6 +17,8 @@ const miniCols = computed(() => Math.min(3, Math.max(1, Math.ceil(Math.sqrt(prev
 const miniWidth = computed(() => `calc((100% - ${(miniCols.value - 1) * GAP}%) / ${miniCols.value})`)
 
 function iconSrc(item) {
+  // 有 emoji 图标（item.icon）时不叠加 favicon，直接显示 emoji
+  if (item.icon) return null
   return item.name ? favicons[item.name] : null
 }
 function iconText(item) {

@@ -4,6 +4,11 @@
 
 export const toolGroups = [
   {
+    id: 'network',
+    label: '网络',
+    tools: [{ id: 'publicIp', label: '我的公网IP', icon: '🌐', tint: 'from-sky-400 to-indigo-500' }]
+  },
+  {
     id: 'family',
     label: '家庭',
     tools: [{ id: 'relatives', label: '亲戚计算', icon: '👨‍👩‍👧', tint: 'from-violet-400 to-fuchsia-400' }]
@@ -11,7 +16,10 @@ export const toolGroups = [
   {
     id: 'finance',
     label: '财务',
-    tools: [{ id: 'uppercase', label: '大写金额', icon: '¥', tint: 'from-emerald-400 to-teal-400' }]
+    tools: [
+      { id: 'uppercase', label: '大写金额', icon: '¥', tint: 'from-emerald-400 to-teal-400' },
+      { id: 'calculator', label: '计算器', icon: '🧮', tint: 'from-sky-400 to-cyan-500' }
+    ]
   },
   {
     id: 'excel',
@@ -55,7 +63,10 @@ export const toolGroups = [
   {
     id: 'color',
     label: '色卡',
-    tools: [{ id: 'basicColor', label: '基础色卡', icon: '🎨', tint: 'from-fuchsia-500 to-purple-600' }]
+    tools: [
+      { id: 'basicColor', label: '基础色卡', icon: '🎨', tint: 'from-fuchsia-500 to-purple-600' },
+      { id: 'chineseColors', label: '中国传统色', icon: '🏮', tint: 'from-rose-500 to-red-500' }
+    ]
   },
   {
     id: 'simulate',

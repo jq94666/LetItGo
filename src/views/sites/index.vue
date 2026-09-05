@@ -32,40 +32,46 @@ if (!s.v2) {
   if (!s.layout.length) s.layout.splice(0, 0, ...defaultLayout())
 }
 function ensureFoldersOnly() {
-  if (!Array.isArray(s.layout)) {
-    s.layout.splice(0, 0, ...defaultLayout())
+  const list = s.layout
+  if (!Array.isArray(list)) {
+    list.splice(0, 0, ...defaultLayout())
     return
   }
-  const stray = s.layout.filter((it) => it.kind === 'site' && siteByName[it.name])
-  const hasFolder = s.layout.some((it) => it.kind === 'folder')
-  if (!stray.length && hasFolder) return
-  // 重建列表：保留用户排序中的文件夹（缺失的默认分组补在末尾）
+  // 每次进入都做「幂等对齐」：保留用户对文件夹的顺序 / 改名 / 站内排序，
+  // 补齐默认分组的新增文件夹、给已有文件夹自动补入默认新增的站点、剔除已下架的站点，
+  // 并把历史遗留的桌面独立站点收拢回其分类文件夹。
+  const defaults = defaultLayout()
+  const defById = new Map(defaults.map((f) => [f.id, f]))
   const seen = new Set()
   const out = []
-  for (const it of s.layout) {
+  for (const it of list) {
     if (it.kind !== 'folder') continue
     if (!it.id || typeof it.label !== 'string' || !Array.isArray(it.items)) continue
+    const def = defById.get(it.id)
+    // 清理已不存在于默认站点的名字；保留下架前用户的自定义排序
+    it.items = it.items.filter((n) => siteByName[n])
+    if (def) {
+      // 默认新增站点追加到该文件夹末尾（已存在的不动）
+      for (const name of def.items) if (!it.items.includes(name)) it.items.push(name)
+    }
     seen.add(it.id)
     out.push(it)
   }
-  for (const f of defaultLayout()) {
+  // 缺失的默认文件夹补在末尾
+  for (const f of defaults) {
     if (!seen.has(f.id)) {
       seen.add(f.id)
       out.push(f)
     }
   }
-  // 独立站点回到其分类文件夹
-  for (const sit of stray) {
+  // 历史遗留的桌面独立站点回到分类文件夹
+  for (const sit of list) {
+    if (sit.kind !== 'site' || !siteByName[sit.name]) continue
     const gid = groupOfSite[sit.name] ?? null
     const folder = gid ? out.find((f) => f.id === gid) : null
-    if (folder) {
-      if (!folder.items.includes(sit.name)) folder.items.push(sit.name)
-    } else {
-      const other = out.find((f) => f.id === '__other')
-      if (other) other.items.push(sit.name)
-    }
+    if (folder && !folder.items.includes(sit.name)) folder.items.push(sit.name)
   }
-  s.layout.splice(0, s.layout.length, ...out)
+  list.splice(0, list.length, ...out)
 }
 ensureFoldersOnly()
 
@@ -157,9 +163,11 @@ function measure() {
 onMounted(() => {
   measure()
   window.addEventListener('resize', measure)
+  window.addEventListener('site-swipe-lock', onPageSwipeLock)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', measure)
+  window.removeEventListener('site-swipe-lock', onPageSwipeLock)
   window.removeEventListener('pointermove', winMove)
   window.removeEventListener('pointerup', winUp)
   window.removeEventListener('pointercancel', winCancel)
@@ -216,7 +224,9 @@ function onTileTap(it) {
 
 function onTileDown(e, it, idx) {
   if (openedKey.value || e.button !== 0) return
-  e.stopPropagation?.() // 避免触发 App 整屏滑动
+  // 不拦截冒泡：页面级左右滑动与长按拖拽靠「竞争仲裁」协调——
+  // 快速横滑 → App 锁定并广播 site-swipe-lock，本手势让位；
+  // 静止长按 → 本文件广播 site-sort-begin，页面滑动让位。
   clearLong()
   // 遗留手势一律作废（例如触摸中途再次按下），防止旧长按定时器复活
   if (drag.value) drag.value.cancelled = true
@@ -243,6 +253,8 @@ function onTileDown(e, it, idx) {
     // 注意：drag 是深响应 ref，.value 返回 reactive 代理，不能与原始 st 做 === 比较
     if (st.cancelled || st.seq !== dragSeq) return
     st.ok = true
+    // 长按获胜：让页面级左右滑动让位（不再把本次手势当切页滑动）
+    window.dispatchEvent(new CustomEvent('site-sort-begin', { detail: { pid: st.pid } }))
     dragKey.value = st.key
     const base = slotPos(st.idx)
     dragPos.x = base.x
@@ -368,6 +380,17 @@ function winCancel(e) {
   drag.value = null
   dropDone()
 }
+/* 页面级左右滑动获胜：放弃当前长按候选（尚未进入拖拽时） */
+function onPageSwipeLock(e) {
+  const pid = e.detail?.pid
+  const st = drag.value
+  if (pid == null || !st || st.pid !== pid || st.ok) return
+  st.cancelled = true
+  clearLong()
+  detachWinListeners()
+  drag.value = null
+  dropDone()
+}
 
 watch(
   () => effLayout.value.length,
@@ -410,7 +433,7 @@ watch(
         >
           <DesktopFolderTile
             :title="tile.it.label"
-            :items="tile.it.items.map((n) => ({ key: n, name: n }))"
+            :items="tile.it.items.map((n) => ({ key: n, name: n, icon: siteByName[n]?.icon }))"
           />
 
           <!-- 拖拽悬停反馈 -->

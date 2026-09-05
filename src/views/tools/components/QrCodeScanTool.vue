@@ -152,7 +152,6 @@ onBeforeUnmount(() => { imageUrl.value = '' })
           <div class="flex items-start justify-between gap-apple-md border-b border-divider-soft p-apple-md sm:p-apple-lg">
             <div>
               <p class="text-body-strong text-ink">扫描二维码</p>
-              <p class="text-fine-print text-ink-muted-48">上传二维码图片，自动识别并展示内容</p>
             </div>
             <button
               type="button"

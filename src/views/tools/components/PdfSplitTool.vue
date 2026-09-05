@@ -149,7 +149,6 @@ onUnmounted(revokeAll)
             <div class="flex items-start justify-between gap-apple-md border-b border-divider-soft p-apple-md sm:p-apple-lg">
               <div>
                 <p class="text-body-strong text-ink">PDF拆分</p>
-                <p class="text-fine-print text-ink-muted-48">上传 PDF → 按页码或范围提取指定页面 → 下载</p>
               </div>
               <button type="button" aria-label="关闭" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/5 text-ink-muted-80 transition hover:bg-black/10 active:scale-[0.95]" @click="open = false">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>

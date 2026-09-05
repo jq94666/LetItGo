@@ -76,6 +76,8 @@ function onMove(e) {
     if (Math.abs(dx) < 4 || Math.abs(dx) <= Math.abs(dy)) return
     swipe.locked = true
     dragging.value = true
+    // 页面赢得本次手势：通知内部长按排序等取消，避免「滑不动 / 拖一半被吃」
+    window.dispatchEvent(new CustomEvent('site-swipe-lock', { detail: { pid: e.pointerId } }))
     // 清掉按下时可能已经产生的选区
     window.getSelection()?.removeAllRanges()
     // 注意：此处不调用 setPointerCapture，否则指针会被 viewportEl 抢占，
@@ -84,6 +86,15 @@ function onMove(e) {
   // 首尾面板加阻尼
   const atEdge = (tabIndex.value === 0 && dx > 0) || (tabIndex.value === tabs.length - 1 && dx < 0)
   dragX.value = atEdge ? dx * 0.32 : dx
+}
+
+/* 内部长按排序开始（如网站页文件夹拖拽）：该手势归内部处理，页面滑动让位 */
+function onChildGestureBegin(e) {
+  const pid = e.detail?.pid
+  if (!swipe || pid == null || swipe.id !== pid) return
+  swipe = null
+  dragging.value = false
+  dragX.value = 0
 }
 
 function onUp(e) {
@@ -109,9 +120,11 @@ function onTouchMoveGuard(e) {
 }
 onMounted(() => {
   viewportEl.value?.addEventListener('touchmove', onTouchMoveGuard, { passive: false })
+  window.addEventListener('site-sort-begin', onChildGestureBegin)
 })
 onBeforeUnmount(() => {
   viewportEl.value?.removeEventListener('touchmove', onTouchMoveGuard)
+  window.removeEventListener('site-sort-begin', onChildGestureBegin)
 })
 
 // 轨道盒宽 = 一个视口宽（面板是溢出撑开的），故每切换一屏位移 100%

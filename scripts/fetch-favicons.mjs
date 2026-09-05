@@ -22,7 +22,8 @@ function collectSites() {
     ...Object.values(designSiteGroups).flat()
   ]
   const seen = new Set()
-  return all.filter((s) => !seen.has(s.name) && seen.add(s.name))
+  // 站点配置了 icon（emoji 图标）时不需要抓取 favicon
+  return all.filter((s) => !s.icon && !seen.has(s.name) && seen.add(s.name))
 }
 
 // 按站点域名生成文件名（对中文 name 也更稳定，避免出现乱码文件名）

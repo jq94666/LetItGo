@@ -273,7 +273,6 @@ function iconOf(node) {
               <div class="flex flex-wrap items-center gap-x-apple-md gap-y-apple-xs">
                 <div>
                   <p class="text-body-strong text-ink">亲戚计算机器</p>
-                  <p class="text-fine-print text-ink-muted-48">点按钮逐层走家谱 · 亲属图实时绘制</p>
                 </div>
                 <div class="flex overflow-hidden rounded-pill border border-black/[0.08]">
                   <button type="button" class="px-apple-md py-apple-xs text-caption-strong transition" :class="mySex === '女' ? 'bg-primary text-on-primary' : 'text-ink-muted-80 hover:text-ink'" @click="mySex = '女'">👩 我（女）</button>

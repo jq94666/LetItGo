@@ -32,8 +32,8 @@ const siteIndex = siteFolders.flatMap((f) =>
     id: s.name,
     label: s.name,
     sub: f.label,
-    icon: null,
-    iconSrc: favicons[s.name] ?? null,
+    icon: s.icon ?? null,
+    iconSrc: s.icon ? null : (favicons[s.name] ?? null),
     href: s.href,
     names: [s.name],
     extra: [f.label]

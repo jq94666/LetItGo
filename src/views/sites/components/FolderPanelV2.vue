@@ -150,7 +150,8 @@ function onTileClick(site) {
 onBeforeUnmount(clearLong)
 
 function iconSrc(site) {
-  return favicons[site.name]
+  // 站点配置了 emoji 图标时不再使用 favicon
+  return site.icon ? null : favicons[site.name]
 }
 </script>
 
@@ -217,7 +218,8 @@ function iconSrc(site) {
             class="flex aspect-square w-full items-center justify-center rounded-[24%] bg-white/85 shadow-hairline ring-1 ring-black/5 transition-[transform,box-shadow] duration-200 ease-out"
             :class="dragState?.ok && dragState.idx === i ? 'desk-lifted' : dragState?.idx === i ? 'ring-2 ring-primary/50' : 'group-active:scale-[0.95]'"
           >
-            <img v-if="iconSrc(site)" :src="iconSrc(site)" :alt="site.name" class="h-[52%] w-[52%] object-contain" />
+            <img v-if="!site.icon && iconSrc(site)" :src="iconSrc(site)" :alt="site.name" class="h-[52%] w-[52%] object-contain" />
+            <span v-else-if="site.icon" class="text-[22px] leading-none sm:text-[26px]">{{ site.icon }}</span>
             <span v-else class="text-body-strong text-ink-muted-48">{{ site.name.charAt(0).toUpperCase() }}</span>
           </span>
           <span class="line-clamp-2 w-full text-center text-fine-print text-ink-muted-80 max-[767px]:text-[10px]">{{ site.name }}</span>

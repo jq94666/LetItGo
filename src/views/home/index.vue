@@ -17,7 +17,7 @@ const query = ref('')
 const listOpen = ref(false) // 下拉是否展开（Esc / 失焦 / 选中后关闭）
 const NONE = -1 // 未选中任何行：默认不预选，回车仍然走搜索引擎
 const activeIndex = ref(NONE) // 键盘高亮项
-const placeholder = computed(() => `搜本地文件夹与应用，或${settingsStore.currentEngine().label}一下`)
+const placeholder = '搜索本站或网络'
 
 const hasQuery = computed(() => !!query.value.trim())
 // 本地命中项：文件夹 / 应用 / 网站
@@ -106,9 +106,9 @@ function onSubmit(e) {
 
 <template>
   <!-- 背景：单一 parchment 表面，无大色块对比，靠磨砂卡片自身提供层次 -->
-  <div class="relative min-h-full w-full">
-    <!-- 内容：搜索框桌面端靠上；移动端下移（thumb 友好），避开顶部 -->
-    <div class="relative z-10 mx-auto w-full max-w-apple-content px-apple-xl pb-apple-section pt-apple-xl sm:pt-apple-xxl max-[767px]:mt-[48vh]">
+  <div class="relative flex min-h-full w-full flex-col sm:block">
+    <!-- 内容：桌面端靠上；移动端贴近底部「主页一排按钮」上方，左右端分别与主页/设置按钮对齐 -->
+    <div class="relative z-10 mt-auto w-full px-apple-md pb-[16px] pt-0 sm:mx-auto sm:max-w-apple-content sm:px-apple-xl sm:pb-apple-section sm:pt-apple-xxl">
       <!-- 搜索框：relative 作为下拉的定位容器 -->
       <div class="relative mx-auto w-full max-w-[680px]">
         <form
@@ -166,7 +166,7 @@ function onSubmit(e) {
             id="search-suggest"
             role="listbox"
             aria-label="搜索建议"
-            class="absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[52vh] overflow-y-auto overscroll-contain rounded-apple-lg bg-canvas/95 p-apple-xs shadow-product ring-1 ring-black/5 backdrop-blur-apple"
+            class="absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[52vh] overflow-y-auto overscroll-contain rounded-apple-lg bg-canvas/95 p-apple-xs shadow-product ring-1 ring-black/5 backdrop-blur-apple max-[767px]:top-auto max-[767px]:bottom-full max-[767px]:mb-[6px]"
           >
           <li v-for="(row, i) in rows" :key="row.key">
             <button
