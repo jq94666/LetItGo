@@ -42,6 +42,6 @@ function iconText(item) {
         </span>
       </div>
     </div>
-    <p class="w-full truncate text-center text-fine-print text-ink-muted-80 max-[767px]:text-[10px]">{{ title }}</p>
+    <p class="w-full truncate text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">{{ title }}</p>
   </div>
 </template>

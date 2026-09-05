@@ -222,7 +222,7 @@ function iconSrc(site) {
             <span v-else-if="site.icon" class="text-[22px] leading-none sm:text-[26px]">{{ site.icon }}</span>
             <span v-else class="text-body-strong text-ink-muted-48">{{ site.name.charAt(0).toUpperCase() }}</span>
           </span>
-          <span class="line-clamp-2 w-full text-center text-fine-print text-ink-muted-80 max-[767px]:text-[10px]">{{ site.name }}</span>
+          <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">{{ site.name }}</span>
         </button>
       </div>
     </div>
