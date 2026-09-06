@@ -57,6 +57,9 @@ export const useSettingsStore = defineStore('settings', () => {
   // 「编程：默认隐藏」是否已播种：老存档里 hiddenGroups 已持久化为 []，仅改默认值不生效；
   // 该标记 false 时播种一次（编程类全部隐藏），之后用户在显隐面板的手动调整始终优先
   const codingHiddenDefaulted = ref(false)
+  // 主页钉选：从文件夹「发送到主页」的网站/工具（[{ type: 'site'|'tool', key }]，
+  // site 用站点名、tool 用工具 id），数组顺序即主页展示顺序
+  const pinnedApps = ref([])
 
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
@@ -65,6 +68,11 @@ export const useSettingsStore = defineStore('settings', () => {
     codingHiddenDefaulted.value = raw?.codingHiddenDefaulted === true
     if (codingHiddenDefaulted.value && Array.isArray(raw?.hiddenGroups)) {
       hiddenGroups.value = raw.hiddenGroups.filter((x) => typeof x === 'string')
+    }
+    if (Array.isArray(raw?.pinnedApps)) {
+      pinnedApps.value = raw.pinnedApps.filter(
+        (p) => p && typeof p.key === 'string' && (p.type === 'site' || p.type === 'tool')
+      )
     }
   } catch {
     /* 本地存储不可用或数据损坏时回退默认值 */
@@ -79,12 +87,17 @@ export const useSettingsStore = defineStore('settings', () => {
   // 注意：settings 是一整个 key，所有字段必须一起写入，避免互相覆盖；
   // hiddenGroups 靠 push/splice 原地变更，必须显式 deep 才能侦听到。
   watch(
-    [searchEngine, hiddenGroups, codingHiddenDefaulted],
-    ([engine, hidden, seeded]) => {
+    [searchEngine, hiddenGroups, codingHiddenDefaulted, pinnedApps],
+    ([engine, hidden, seeded, pinned]) => {
       try {
         localStorage.setItem(
           STORAGE_KEY,
-          JSON.stringify({ searchEngine: engine, hiddenGroups: hidden, codingHiddenDefaulted: seeded })
+          JSON.stringify({
+            searchEngine: engine,
+            hiddenGroups: hidden,
+            codingHiddenDefaulted: seeded,
+            pinnedApps: pinned
+          })
         )
       } catch {
         /* 本地存储不可用时忽略 */
@@ -104,6 +117,23 @@ export const useSettingsStore = defineStore('settings', () => {
   if (!codingHiddenDefaulted.value) {
     codingHiddenDefaulted.value = true
     hiddenGroups.value = codingFolders.value.map((f) => f.id)
+  }
+
+  // 发送到主页：钉选网站/工具（重复钉选幂等）；钉选后应用在原文件夹视图中隐藏
+  function pinApp(type, key) {
+    if (!pinnedApps.value.some((p) => p.type === type && p.key === key)) {
+      pinnedApps.value.push({ type, key })
+    }
+  }
+
+  // 从主页删除：取消钉选，应用回归原文件夹（文件夹视图即时恢复显示）
+  function unpinApp(type, key) {
+    const i = pinnedApps.value.findIndex((p) => p.type === type && p.key === key)
+    if (i >= 0) pinnedApps.value.splice(i, 1)
+  }
+
+  function isPinned(type, key) {
+    return pinnedApps.value.some((p) => p.type === type && p.key === key)
   }
 
   // 切换某个网站页文件夹的显示 / 隐藏
@@ -171,6 +201,10 @@ export const useSettingsStore = defineStore('settings', () => {
   return {
     searchEngine,
     hiddenGroups,
+    pinnedApps,
+    pinApp,
+    unpinApp,
+    isPinned,
     codingFolders,
     codingFolderIds,
     toggleGroupHidden,

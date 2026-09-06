@@ -1,9 +1,19 @@
 <script setup>
+import { ref } from 'vue'
 import { favicons } from '../../../assets/icons/favicon-manifest.js'
+import ContextMenu from '../../../components/ContextMenu.vue'
+import { useSettingsStore } from '../../../stores/settings.js'
 
-defineProps({
+const props = defineProps({
   site: { type: Object, required: true }
 })
+
+const settingsStore = useSettingsStore()
+const ctxMenu = ref(null)
+// 右键发送到主页：钉选后该站点从各文件夹视图移除，出现在主页搜索框下方
+function onContext(e) {
+  ctxMenu.value?.show(e, [{ key: 'pin', label: '发送到主页' }], () => settingsStore.pinApp('site', props.site.name))
+}
 </script>
 
 <template>
@@ -12,6 +22,7 @@ defineProps({
     target="_blank"
     rel="noopener noreferrer"
     class="group flex flex-col items-center gap-apple-xs no-underline max-[767px]:gap-[4px]"
+    @contextmenu.prevent="onContext"
   >
     <!-- APP 图标：方形圆角（类 iOS 超级椭圆） -->
     <span
@@ -27,5 +38,7 @@ defineProps({
       <span v-else class="text-body-strong text-ink-muted-48">{{ site.name.charAt(0).toUpperCase() }}</span>
     </span>
     <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">{{ site.name }}</span>
+
+    <ContextMenu ref="ctxMenu" />
   </a>
 </template>

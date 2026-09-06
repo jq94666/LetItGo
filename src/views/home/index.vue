@@ -2,9 +2,12 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { siteFolders } from '../../data/sites.js'
+import { allTools } from '../../data/tools.js'
+import { favicons } from '../../assets/icons/favicon-manifest.js'
 import { useSettingsStore } from '../../stores/settings.js'
 import { useLauncherStore } from '../../stores/launcher.js'
 import { highlightParts, searchLocal, TYPE_LABEL } from '../../data/localSearch.js'
+import ContextMenu from '../../components/ContextMenu.vue'
 import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
 import AppTile from '../sites/components/AppTile.vue'
 
@@ -46,6 +49,10 @@ watch(query, () => {
    用 fixed 铺满视口，避免页面纵向滚动时弹窗随内容偏移。 */
 const openedFolderId = ref(null)
 const openedFolder = computed(() => siteFolders.find((f) => f.id === openedFolderId.value) ?? null)
+// 弹窗内站点：已「发送到主页」的从文件夹视图移除
+const openedFolderSites = computed(() =>
+  (openedFolder.value?.sites ?? []).filter((s) => !settingsStore.isPinned('site', s.name))
+)
 // 首帧内让遮罩不响应指针：移动端点按搜索结果后浏览器会合成一次 click，
 // 该 click 若落在刚出现的遮罩上会立刻关闭弹窗（与网站页同款处理）
 const armed = ref(true)
@@ -101,6 +108,41 @@ function onSubmit(e) {
   // 有高亮项时执行该项；默认未预选（或下拉已关闭）时回落到搜索引擎
   if (showList.value && activeIndex.value !== NONE) choose(activeIndex.value)
   else openWeb()
+}
+
+/* ---------- 主页钉选（发送到主页的应用） ---------- */
+const allSites = siteFolders.flatMap((f) => f.sites)
+// 钉选顺序即展示顺序；数据里已不存在的钉选项自动忽略
+const pinnedItems = computed(() =>
+  settingsStore.pinnedApps
+    .map((p) => {
+      if (p.type === 'site') {
+        const site = allSites.find((s) => s.name === p.key)
+        return site ? { ...p, label: site.name, site } : null
+      }
+      const tool = allTools.find((t) => t.id === p.key)
+      return tool ? { ...p, label: tool.label, tool } : null
+    })
+    .filter(Boolean)
+)
+
+function faviconFor(site) {
+  return site.icon ? null : favicons[site.name]
+}
+
+// 功能与原位置一致：网站新标签页打开，工具切到工具页并弹窗（与主页搜索命中行为相同）
+function openPinned(item) {
+  if (item.type === 'site') {
+    window.open(item.site.href, '_blank', 'noopener,noreferrer')
+  } else {
+    launcher.requestTool(item.tool.id)
+    router.push('/tools')
+  }
+}
+
+const homeCtx = ref(null)
+function onPinContext(e, item) {
+  homeCtx.value?.show(e, [{ key: 'remove', label: '删除' }], () => settingsStore.unpinApp(item.type, item.key))
 }
 </script>
 
@@ -201,14 +243,60 @@ function onSubmit(e) {
       </div>
     </div>
 
+    <!-- 发送到主页的应用：搜索框下方一排快捷方式，从最左侧开始排列（与网站/工具桌面同款 20px 边距）；
+         功能与原位置一致，右键删除回归原文件夹。负 margin 抵消搜索区的桌面端底部留白，使行紧贴搜索框下方 -->
+    <div
+      class="relative z-10 mt-apple-md flex w-full flex-wrap gap-apple-md px-[20px] pb-[16px] sm:-mt-apple-section sm:gap-apple-lg sm:pb-apple-section"
+    >
+      <button
+        v-for="item in pinnedItems"
+        :key="item.type + ':' + item.key"
+        type="button"
+        :aria-label="item.label"
+        class="group flex w-16 flex-col items-center gap-apple-xs rounded-apple-md no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus max-[767px]:gap-[4px]"
+        @click="openPinned(item)"
+        @contextmenu.prevent="onPinContext($event, item)"
+      >
+        <span
+          v-if="item.type === 'site'"
+          class="glass-tile flex aspect-square w-full items-center justify-center rounded-[24%] transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]"
+        >
+          <img v-if="faviconFor(item.site)" :src="faviconFor(item.site)" :alt="item.label" class="h-[52%] w-[52%] object-contain" />
+          <span v-else class="text-[22px] leading-none">{{ item.site.icon || item.label.charAt(0).toUpperCase() }}</span>
+        </span>
+        <span
+          v-else
+          class="flex aspect-square w-full items-center justify-center rounded-[24%] bg-linear-to-br text-[22px] leading-none shadow-hairline ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]"
+          :class="item.tool.tint"
+        >{{ item.tool.icon }}</span>
+        <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">{{ item.label }}</span>
+      </button>
+
+      <!-- 添加应用：固定排列在末尾的占位入口（功能后续开发） -->
+      <button
+        type="button"
+        aria-label="添加应用"
+        class="group flex w-16 flex-col items-center gap-apple-xs rounded-apple-md no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus max-[767px]:gap-[4px]"
+      >
+        <span
+          class="glass-tile flex aspect-square w-full items-center justify-center rounded-[24%] text-ink-muted-48 transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-6 w-6"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+        </span>
+        <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">添加应用</span>
+      </button>
+    </div>
+
     <!-- 命中文件夹：当前页直接弹窗展示内容，不切换 tab -->
     <Transition name="folder">
       <div v-if="openedFolder" class="fixed inset-0 z-40" :class="{ 'pointer-events-none': !armed }">
         <DesktopFolderPanel :title="openedFolder.label" @close="openedFolderId = null">
-          <AppTile v-for="site in openedFolder.sites" :key="site.name" :site="site" />
+          <AppTile v-for="site in openedFolderSites" :key="site.name" :site="site" />
         </DesktopFolderPanel>
       </div>
     </Transition>
+
+    <ContextMenu ref="homeCtx" />
   </div>
 </template>
 

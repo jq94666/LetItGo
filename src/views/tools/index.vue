@@ -2,6 +2,8 @@
 import { computed, markRaw, nextTick, ref, watch } from 'vue'
 import { useDesktop } from '../../composables/useDesktop.js'
 import { useDesktopStore } from '../../stores/desktop.js'
+import { useSettingsStore } from '../../stores/settings.js'
+import ContextMenu from '../../components/ContextMenu.vue'
 import { toolGroups, allTools } from '../../data/tools.js'
 import { useLauncherStore } from '../../stores/launcher.js'
 import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
@@ -50,6 +52,7 @@ const {
 // 签名持久化；分组新增/删除/改名导致签名变化时，把自定义顺序重置为默认顺序（新增分组
 // 因此落在正确排序位置），数据不变期间用户长按拖动的顺序照常保留。
 const s = useDesktopStore().getSettings('workmate.tools.screen')
+const settingsStore = useSettingsStore()
 const folderSig = toolGroups.map((g) => `${g.id}:${g.label}`).join('|')
 if (s.folderSig !== folderSig) {
   s.folderSig = folderSig
@@ -81,6 +84,12 @@ const tiles = computed(() => {
 })
 
 const openedGroup = computed(() => toolGroups.find((g) => g.id === openedId.value) ?? null)
+// 面板内工具：已「发送到主页」的工具从分组视图移除（数据不动，删除主页快捷方式后回归）
+const panelTools = computed(() => (openedGroup.value?.tools ?? []).filter((t) => !settingsStore.isPinned('tool', t.id)))
+const toolCtxMenu = ref(null)
+function onToolContext(e, tool) {
+  toolCtxMenu.value?.show(e, [{ key: 'pin', label: '发送到主页' }], () => settingsStore.pinApp('tool', tool.id))
+}
 // 桌面滚动容器（供滚动定位等用途）
 const deskScroller = ref(null)
 
@@ -152,7 +161,7 @@ watch(
         >
           <DesktopFolderTile
             :title="tile.group.label"
-            :items="tile.group.tools.map((t) => ({ key: t.id, icon: t.icon }))"
+            :items="tile.group.tools.filter((t) => !settingsStore.isPinned('tool', t.id)).map((t) => ({ key: t.id, icon: t.icon }))"
           />
         </button>
       </div>
@@ -169,10 +178,18 @@ watch(
           :title="openedGroup.label"
           @close="openedId = null"
         >
-          <ToolTile v-for="tool in openedGroup.tools" :key="tool.id" :tool="tool" @launch="launch" />
+          <ToolTile
+            v-for="tool in panelTools"
+            :key="tool.id"
+            :tool="tool"
+            @launch="launch"
+            @contextmenu.prevent="onToolContext($event, tool)"
+          />
         </DesktopFolderPanel>
       </div>
     </Transition>
+
+    <ContextMenu ref="toolCtxMenu" />
 
 
     <!-- 各工具的弹窗统一挂在此处（按需动态挂载，用过的工具驻留复用） -->

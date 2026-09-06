@@ -1,10 +1,13 @@
 <script setup>
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { favicons } from '../../../assets/icons/favicon-manifest.js'
+import ContextMenu from '../../../components/ContextMenu.vue'
+import { useSettingsStore } from '../../../stores/settings.js'
 
 /* v2 文件夹弹窗（网站页文件夹模式专用）：
    - 标题可改名（铅笔 → 输入框）
    - 长按站点图标可拖动排序（网格内左右上下移动即交换位置）
+   - 右键站点图标：发送到主页（钉选后该站点从文件夹视图移除）
 
    网站始终保存在文件夹中；状态变化通过 reorder / rename 通知上层。 */
 const props = defineProps({
@@ -12,6 +15,16 @@ const props = defineProps({
   items: { type: Array, required: true } // site 对象列表 { name, href }
 })
 const emit = defineEmits(['close', 'rename', 'reorder'])
+
+const settingsStore = useSettingsStore()
+const ctxMenu = ref(null)
+// 右键发送到主页：钉选后站点从各文件夹视图隐藏，出现在主页搜索框下方
+function onTileContext(e, site) {
+  // 触屏长按可能同时触发拖动候选与 contextmenu：放弃本次拖动，优先菜单
+  clearLong()
+  dragState.value = null
+  ctxMenu.value?.show(e, [{ key: 'pin', label: '发送到主页' }], () => settingsStore.pinApp('site', site.name))
+}
 
 const LONG_PRESS = 380
 const gridEl = ref(null)
@@ -213,6 +226,7 @@ function iconSrc(site) {
           @pointerup="onTileUp"
           @pointercancel="onTileCancel"
           @click="onTileClick(site)"
+          @contextmenu.prevent="onTileContext($event, site)"
         >
           <span
             class="glass-tile flex aspect-square w-full items-center justify-center rounded-[24%] transition-[transform,box-shadow] duration-200 ease-out"
@@ -227,6 +241,7 @@ function iconSrc(site) {
       </div>
     </div>
 
+    <ContextMenu ref="ctxMenu" />
   </div>
 </template>
 

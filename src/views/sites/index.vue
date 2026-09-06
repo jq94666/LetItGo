@@ -139,8 +139,11 @@ function liveOpenedFolder() {
 const openedItems = computed(() => {
   const folder = openedFolder.value
   if (!folder) return []
-  return folder.items.map((n) => siteByName[n]).filter(Boolean)
+  // 已「发送到主页」的站点从文件夹视图移除（布局里保留原位，删除主页快捷方式后回归）
+  return folder.items.map((n) => siteByName[n]).filter((s) => s && !settingsStore.isPinned('site', s.name))
 })
+// 文件夹图标预览 / 计数同样排除已钉选的站点
+const visibleItemNames = (items) => items.filter((n) => !settingsStore.isPinned('site', n))
 
 // 文件夹事件：改名 / 内部排序
 function onRename(label) {
@@ -151,7 +154,9 @@ function onRename(label) {
 function onReorder(names) {
   const folder = liveOpenedFolder()
   if (!folder) return
-  folder.items.splice(0, folder.items.length, ...names)
+  // 面板列表不含已钉选到主页的站点：重排后把它们补回末尾，保持布局完整
+  const pinnedOnes = folder.items.filter((n) => settingsStore.isPinned('site', n) && !names.includes(n))
+  folder.items.splice(0, folder.items.length, ...names, ...pinnedOnes)
 }
 
 /* ---------- 网格度量 ---------- */
@@ -463,7 +468,7 @@ watch(effLayout, (list) => {
               ? 'none'
               : 'transform 0.15s ease, left 0.22s cubic-bezier(0.25,0.8,0.4,1), top 0.22s cubic-bezier(0.25,0.8,0.4,1)'
           }"
-          :aria-label="`${tile.it.label}，${tile.it.items.length} 个网站`"
+          :aria-label="`${tile.it.label}，${visibleItemNames(tile.it.items).length} 个网站`"
           @pointerdown="onTileDown($event, tile.it, tile.idx)"
           @click="onTileTap(tile.it)"
           @keydown.enter.prevent="openedKey = tile.it.id"
@@ -471,7 +476,7 @@ watch(effLayout, (list) => {
         >
           <DesktopFolderTile
             :title="tile.it.label"
-            :items="tile.it.items.map((n) => ({ key: n, name: n, icon: siteByName[n]?.icon }))"
+            :items="visibleItemNames(tile.it.items).map((n) => ({ key: n, name: n, icon: siteByName[n]?.icon }))"
           />
 
           <!-- 拖拽悬停反馈 -->
