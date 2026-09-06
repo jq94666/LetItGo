@@ -1,12 +1,29 @@
 <script setup>
-import { computed } from 'vue'
+import { nextTick, ref } from 'vue'
 
 const props = defineProps({
   // 文件夹标题
-  title: { type: String, required: true }
+  title: { type: String, required: true },
+  // 是否允许改名（显示铅笔按钮）：主页自定义文件夹用，网站/工具页不传即为只读
+  renamable: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'rename'])
+
+/* 标题编辑：与网站页 FolderPanelV2 同款交互（铅笔 → 输入框 → Enter/失焦提交） */
+const editingName = ref(false)
+const nameText = ref('')
+async function startRename() {
+  nameText.value = props.title
+  editingName.value = true
+  await nextTick()
+  document.getElementById('desktop-folder-name-input')?.select?.()
+}
+function commitRename() {
+  const v = nameText.value.trim()
+  if (v && v !== props.title) emit('rename', v)
+  editingName.value = false
+}
 </script>
 
 <template>
@@ -20,9 +37,30 @@ const emit = defineEmits(['close'])
       :aria-label="title"
     >
       <div class="flex items-start justify-between gap-apple-sm">
-        <div class="min-w-0">
-          <p class="truncate text-body-strong text-ink">{{ title }}</p>
+        <div class="min-w-0 flex-1">
+          <input
+            v-if="editingName"
+            id="desktop-folder-name-input"
+            v-model="nameText"
+            class="w-full rounded-pill border border-primary/40 bg-canvas-parchment px-apple-sm py-1 text-body-strong text-ink focus:outline-none"
+            maxlength="20"
+            @blur="commitRename"
+            @keydown.enter.prevent="commitRename"
+            @keydown.esc="commitRename"
+          />
+          <p v-else class="truncate text-body-strong text-ink">{{ title }}</p>
         </div>
+        <button
+          v-if="renamable && !editingName"
+          type="button"
+          aria-label="重命名文件夹"
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/5 text-ink-muted-80 transition hover:bg-black/10 active:scale-[0.95]"
+          @click="startRename"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+          </svg>
+        </button>
         <button
           type="button"
           aria-label="关闭"

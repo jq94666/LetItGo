@@ -60,6 +60,11 @@ export const useSettingsStore = defineStore('settings', () => {
   // 主页钉选：从文件夹「发送到主页」的网站/工具（[{ type: 'site'|'tool', key }]，
   // site 用站点名、tool 用工具 id），数组顺序即主页展示顺序
   const pinnedApps = ref([])
+  // 主页自定义应用 / 文件夹（主页「添加应用」弹窗创建）：
+  // customApps: [{ id, name, url, icon }]，icon 为本地上传的 dataURL（null = 自动文字图标）
+  // customFolders: [{ id, name }]
+  const customApps = ref([])
+  const customFolders = ref([])
 
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
@@ -74,6 +79,14 @@ export const useSettingsStore = defineStore('settings', () => {
         (p) => p && typeof p.key === 'string' && (p.type === 'site' || p.type === 'tool')
       )
     }
+    if (Array.isArray(raw?.customApps)) {
+      customApps.value = raw.customApps.filter(
+        (a) => a && typeof a.id === 'string' && typeof a.name === 'string' && typeof a.url === 'string'
+      )
+    }
+    if (Array.isArray(raw?.customFolders)) {
+      customFolders.value = raw.customFolders.filter((f) => f && typeof f.id === 'string' && typeof f.name === 'string')
+    }
   } catch {
     /* 本地存储不可用或数据损坏时回退默认值 */
   }
@@ -87,8 +100,8 @@ export const useSettingsStore = defineStore('settings', () => {
   // 注意：settings 是一整个 key，所有字段必须一起写入，避免互相覆盖；
   // hiddenGroups 靠 push/splice 原地变更，必须显式 deep 才能侦听到。
   watch(
-    [searchEngine, hiddenGroups, codingHiddenDefaulted, pinnedApps],
-    ([engine, hidden, seeded, pinned]) => {
+    [searchEngine, hiddenGroups, codingHiddenDefaulted, pinnedApps, customApps, customFolders],
+    ([engine, hidden, seeded, pinned, apps, folders]) => {
       try {
         localStorage.setItem(
           STORAGE_KEY,
@@ -96,7 +109,9 @@ export const useSettingsStore = defineStore('settings', () => {
             searchEngine: engine,
             hiddenGroups: hidden,
             codingHiddenDefaulted: seeded,
-            pinnedApps: pinned
+            pinnedApps: pinned,
+            customApps: apps,
+            customFolders: folders
           })
         )
       } catch {
@@ -134,6 +149,38 @@ export const useSettingsStore = defineStore('settings', () => {
 
   function isPinned(type, key) {
     return pinnedApps.value.some((p) => p.type === type && p.key === key)
+  }
+
+  // 调整钉选应用所在的自定义文件夹（folderId 为 null = 主页行）
+  function setPinnedFolder(type, key, folderId) {
+    const p = pinnedApps.value.find((p) => p.type === type && p.key === key)
+    if (p) p.folderId = folderId
+  }
+
+  // 调整自定义应用所在的自定义文件夹（folderId 为 null = 主页行）
+  function setCustomAppFolder(id, folderId) {
+    const a = customApps.value.find((a) => a.id === id)
+    if (a) a.folderId = folderId
+  }
+
+  // 主页「添加应用」弹窗：创建/删除自定义应用与文件夹
+  function addCustomApp(app) {
+    customApps.value.push({ icon: null, folderId: null, ...app })
+  }
+  function removeCustomApp(id) {
+    const i = customApps.value.findIndex((a) => a.id === id)
+    if (i >= 0) customApps.value.splice(i, 1)
+  }
+  function addCustomFolder(folder) {
+    customFolders.value.push(folder)
+  }
+  function removeCustomFolder(id) {
+    const i = customFolders.value.findIndex((f) => f.id === id)
+    if (i < 0) return
+    customFolders.value.splice(i, 1)
+    // 其中移入的应用回到主页
+    for (const a of customApps.value) if (a.folderId === id) a.folderId = null
+    for (const p of pinnedApps.value) if (p.folderId === id) p.folderId = null
   }
 
   // 切换某个网站页文件夹的显示 / 隐藏
@@ -205,6 +252,14 @@ export const useSettingsStore = defineStore('settings', () => {
     pinApp,
     unpinApp,
     isPinned,
+    customApps,
+    customFolders,
+    addCustomApp,
+    removeCustomApp,
+    addCustomFolder,
+    removeCustomFolder,
+    setPinnedFolder,
+    setCustomAppFolder,
     codingFolders,
     codingFolderIds,
     toggleGroupHidden,

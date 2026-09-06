@@ -9,7 +9,9 @@ import { useLauncherStore } from '../../stores/launcher.js'
 import { highlightParts, searchLocal, TYPE_LABEL } from '../../data/localSearch.js'
 import ContextMenu from '../../components/ContextMenu.vue'
 import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
+import DesktopFolderTile from '../../components/DesktopFolderTile.vue'
 import AppTile from '../sites/components/AppTile.vue'
+import AddAppModal from './components/AddAppModal.vue'
 
 const router = useRouter()
 // 搜索引擎由「更多 → 设置」统一配置，默认必应；本地无命中时才用到
@@ -53,11 +55,59 @@ const openedFolder = computed(() => siteFolders.find((f) => f.id === openedFolde
 const openedFolderSites = computed(() =>
   (openedFolder.value?.sites ?? []).filter((s) => !settingsStore.isPinned('site', s.name))
 )
+// 主页自定义文件夹弹窗（「添加应用」创建，内容后续再开发）
+const openedCustomFolderId = ref(null)
+const openedCustomFolder = computed(
+  () => settingsStore.customFolders.find((f) => f.id === openedCustomFolderId.value) ?? null
+)
+// 文件夹内容 = 移入的钉选应用（网站/工具）+ 移入的自定义应用
+const openedCustomFolderApps = computed(() => {
+  const fid = openedCustomFolder.value?.id
+  if (!fid) return []
+  const items = []
+  for (const p of settingsStore.pinnedApps) {
+    if (p.folderId !== fid) continue
+    if (p.type === 'site') {
+      const site = allSites.find((s) => s.name === p.key)
+      if (site) items.push({ kind: 'site', key: p.key, label: site.name, site })
+    } else {
+      const tool = allTools.find((t) => t.id === p.key)
+      if (tool) items.push({ kind: 'tool', key: p.key, label: tool.label, tool })
+    }
+  }
+  for (const a of settingsStore.customApps) {
+    if (a.folderId === fid) items.push({ kind: 'custom', key: a.id, label: a.name, app: a })
+  }
+  return items
+})
+function openFolderApp(it) {
+  if (it.kind === 'site') window.open(it.site.href, '_blank', 'noopener,noreferrer')
+  else if (it.kind === 'tool') {
+    launcher.requestTool(it.key)
+    router.push('/tools')
+  } else window.open(it.app.url, '_blank', 'noopener,noreferrer')
+}
+// 移回主页：从自定义文件夹回到主页应用行
+function onFolderAppContext(e, it) {
+  homeCtx.value?.show(
+    e,
+    [{ key: 'back', label: '移回主页' }],
+    () => {
+      if (it.kind === 'custom') settingsStore.setCustomAppFolder(it.key, null)
+      else settingsStore.setPinnedFolder(it.kind, it.key, null)
+    }
+  )
+}
+// 重命名自定义文件夹（面板铅笔，与网站页文件夹同款交互）
+function onRenameCustomFolder(name) {
+  const f = settingsStore.customFolders.find((x) => x.id === openedCustomFolderId.value)
+  if (f) f.name = name
+}
 // 首帧内让遮罩不响应指针：移动端点按搜索结果后浏览器会合成一次 click，
 // 该 click 若落在刚出现的遮罩上会立刻关闭弹窗（与网站页同款处理）
 const armed = ref(true)
-watch(openedFolderId, (val, old) => {
-  if (val && !old) {
+watch([openedFolderId, openedCustomFolderId], (val, old) => {
+  if (val.some((v, i) => v && !old[i])) {
     armed.value = false
     requestAnimationFrame(() => requestAnimationFrame(() => { armed.value = true }))
   }
@@ -112,9 +162,10 @@ function onSubmit(e) {
 
 /* ---------- 主页钉选（发送到主页的应用） ---------- */
 const allSites = siteFolders.flatMap((f) => f.sites)
-// 钉选顺序即展示顺序；数据里已不存在的钉选项自动忽略
+// 钉选顺序即展示顺序；数据里已不存在的钉选项自动忽略；已移入自定义文件夹的不在主页行显示
 const pinnedItems = computed(() =>
   settingsStore.pinnedApps
+    .filter((p) => !p.folderId)
     .map((p) => {
       if (p.type === 'site') {
         const site = allSites.find((s) => s.name === p.key)
@@ -140,9 +191,107 @@ function openPinned(item) {
   }
 }
 
+/* 删除确认：自己添加的直接删除；从网站/工具发送而来的回归原文件夹 */
+const confirmBox = ref(null) // { title, body, action }
+function requestRemovePinned(item) {
+  confirmBox.value = {
+    title: `删除「${item.label}」？`,
+    body: '自己添加的应用会直接删除；从网站和工具发送而来的应用会回归原位。',
+    action: () => settingsStore.unpinApp(item.type, item.key)
+  }
+}
+function requestRemoveCustomApp(app) {
+  confirmBox.value = {
+    title: `删除「${app.name}」？`,
+    body: '自己添加的应用会直接删除；从网站和工具发送而来的应用会回归原位。',
+    action: () => settingsStore.removeCustomApp(app.id)
+  }
+}
+function requestRemoveFolder(folder) {
+  confirmBox.value = {
+    title: `删除「${folder.name}」？`,
+    body: '自己添加的文件夹会直接删除；其中移入的应用将回到主页。',
+    action: () => settingsStore.removeCustomFolder(folder.id)
+  }
+}
+function confirmOk() {
+  confirmBox.value?.action?.()
+  confirmBox.value = null
+}
+
+/* 移动到文件夹：选择一个主页自定义文件夹 */
+const movePicker = ref(null) // { type: 'site'|'tool'|'custom', key, label }
+const pickerFolderId = ref(null)
+function openMovePicker(item) {
+  movePicker.value = item
+  pickerFolderId.value = settingsStore.customFolders[0]?.id ?? null
+}
+function confirmMove() {
+  const it = movePicker.value
+  if (!it || !pickerFolderId.value) {
+    movePicker.value = null
+    return
+  }
+  if (it.type === 'custom') settingsStore.setCustomAppFolder(it.key, pickerFolderId.value)
+  else settingsStore.setPinnedFolder(it.type, it.key, pickerFolderId.value)
+  movePicker.value = null
+}
+
 const homeCtx = ref(null)
 function onPinContext(e, item) {
-  homeCtx.value?.show(e, [{ key: 'remove', label: '删除' }], () => settingsStore.unpinApp(item.type, item.key))
+  homeCtx.value?.show(
+    e,
+    [
+      { key: 'move', label: '移动到文件夹' },
+      { key: 'remove', label: '删除' }
+    ],
+    (key) => {
+      if (key === 'move') openMovePicker({ type: item.type, key: item.key, label: item.label })
+      else requestRemovePinned(item)
+    }
+  )
+}
+
+/* ---------- 主页自定义应用 / 文件夹（「添加应用」弹窗创建） ---------- */
+const addAppModal = ref(null)
+const rowCustomApps = computed(() => settingsStore.customApps.filter((a) => !a.folderId))
+function openCustomApp(app) {
+  window.open(app.url, '_blank', 'noopener,noreferrer')
+}
+function onCustomAppContext(e, app) {
+  homeCtx.value?.show(
+    e,
+    [
+      { key: 'move', label: '移动到文件夹' },
+      { key: 'remove', label: '删除' }
+    ],
+    (key) => {
+      if (key === 'move') openMovePicker({ type: 'custom', key: app.id, label: app.name })
+      else requestRemoveCustomApp(app)
+    }
+  )
+}
+function onCustomFolderContext(e, folder) {
+  homeCtx.value?.show(e, [{ key: 'remove', label: '删除' }], () => requestRemoveFolder(folder))
+}
+// 文件夹预览（DesktopFolderTile 形态）：映射移入的钉选网站/工具与自定义应用
+function folderPreviewItems(folderId) {
+  const items = []
+  for (const p of settingsStore.pinnedApps) {
+    if (p.folderId !== folderId) continue
+    if (p.type === 'site') {
+      const site = allSites.find((s) => s.name === p.key)
+      if (site) items.push({ key: `site:${p.key}`, name: site.name, icon: site.icon, fallback: site.name.charAt(0).toUpperCase() })
+    } else {
+      const tool = allTools.find((t) => t.id === p.key)
+      if (tool) items.push({ key: `tool:${p.key}`, icon: tool.icon })
+    }
+  }
+  for (const a of settingsStore.customApps) {
+    if (a.folderId !== folderId) continue
+    items.push({ key: `custom:${a.id}`, img: a.icon || null, fallback: a.name.charAt(0).toUpperCase() })
+  }
+  return items
 }
 </script>
 
@@ -272,31 +421,164 @@ function onPinContext(e, item) {
         <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">{{ item.label }}</span>
       </button>
 
-      <!-- 添加应用：固定排列在末尾的占位入口（功能后续开发） -->
+      <!-- 自定义应用（「添加应用」弹窗创建）：点击新标签页打开，右键删除/移动到文件夹 -->
+      <button
+        v-for="app in rowCustomApps"
+        :key="app.id"
+        type="button"
+        :aria-label="app.name"
+        class="group flex w-16 flex-col items-center gap-apple-xs rounded-apple-md no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus max-[767px]:gap-[4px]"
+        @click="openCustomApp(app)"
+        @contextmenu.prevent="onCustomAppContext($event, app)"
+      >
+        <span class="glass-tile flex aspect-square w-full items-center justify-center overflow-hidden rounded-[24%] transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]">
+          <img v-if="app.icon" :src="app.icon" :alt="app.name" class="h-full w-full object-cover" />
+          <span v-else class="text-body-strong text-ink-muted-80">{{ app.name.charAt(0).toUpperCase() }}</span>
+        </span>
+        <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">{{ app.name }}</span>
+      </button>
+
+      <!-- 自定义文件夹：空时显示 📁 占位，有应用时与网站页文件夹同款（内部铺 mini 图标） -->
+      <button
+        v-for="folder in settingsStore.customFolders"
+        :key="folder.id"
+        type="button"
+        :aria-label="folder.name"
+        class="group flex w-16 flex-col items-center gap-apple-xs rounded-apple-md no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus max-[767px]:gap-[4px]"
+        @click="openedCustomFolderId = folder.id"
+        @contextmenu.prevent="onCustomFolderContext($event, folder)"
+      >
+        <!-- 根元素需 w-full：按钮内宽度非确定（无网格单元格），否则内部百分比尺寸塌缩为 0 导致图标整体不可见 -->
+        <DesktopFolderTile v-if="folderPreviewItems(folder.id).length" class="w-full" :title="folder.name" :items="folderPreviewItems(folder.id)" />
+        <template v-else>
+          <span class="glass-tile flex aspect-square w-full items-center justify-center rounded-[24%] text-[22px] leading-none transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]">📁</span>
+          <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">{{ folder.name }}</span>
+        </template>
+      </button>
+
+      <!-- 添加应用：固定排列在末尾，打开添加弹窗 -->
       <button
         type="button"
-        aria-label="添加应用"
+        aria-label="添加"
         class="group flex w-16 flex-col items-center gap-apple-xs rounded-apple-md no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus max-[767px]:gap-[4px]"
+        @click="addAppModal?.open?.()"
       >
         <span
           class="glass-tile flex aspect-square w-full items-center justify-center rounded-[24%] text-ink-muted-48 transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-6 w-6"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
         </span>
-        <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">添加应用</span>
+        <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">添加</span>
       </button>
     </div>
 
-    <!-- 命中文件夹：当前页直接弹窗展示内容，不切换 tab -->
-    <Transition name="folder">
-      <div v-if="openedFolder" class="fixed inset-0 z-40" :class="{ 'pointer-events-none': !armed }">
-        <DesktopFolderPanel :title="openedFolder.label" @close="openedFolderId = null">
-          <AppTile v-for="site in openedFolderSites" :key="site.name" :site="site" />
-        </DesktopFolderPanel>
-      </div>
-    </Transition>
+    <!-- 命中文件夹：当前页直接弹窗展示内容，不切换 tab。
+         Teleport 到 body：App 的 tab 滑轨带 transform，会把 fixed 困在滑轨盒内（高度不足视口），
+         遮罩盖不到底部主页应用行 -->
+    <Teleport to="body">
+      <Transition name="folder">
+        <div v-if="openedFolder" class="fixed inset-0 z-40" :class="{ 'pointer-events-none': !armed }">
+          <DesktopFolderPanel :title="openedFolder.label" @close="openedFolderId = null">
+            <AppTile v-for="site in openedFolderSites" :key="site.name" :site="site" />
+          </DesktopFolderPanel>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- 自定义文件夹：点击弹出面板，内含移入的应用；右键图标可移回主页 -->
+    <Teleport to="body">
+      <Transition name="folder">
+        <div v-if="openedCustomFolder" class="fixed inset-0 z-40" :class="{ 'pointer-events-none': !armed }">
+          <DesktopFolderPanel
+            :title="openedCustomFolder.name"
+            renamable
+            @close="openedCustomFolderId = null"
+            @rename="onRenameCustomFolder"
+          >
+            <template v-if="openedCustomFolderApps.length">
+              <button
+                v-for="it in openedCustomFolderApps"
+                :key="it.kind + ':' + it.key"
+                type="button"
+                :aria-label="it.label"
+                class="group flex w-full flex-col items-center gap-apple-xs rounded-apple-md no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus max-[767px]:gap-[4px]"
+                @click="openFolderApp(it)"
+                @contextmenu.prevent="onFolderAppContext($event, it)"
+              >
+                <span v-if="it.kind === 'site'" class="glass-tile flex aspect-square w-full items-center justify-center rounded-[24%] transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]">
+                  <img v-if="faviconFor(it.site)" :src="faviconFor(it.site)" :alt="it.label" class="h-[52%] w-[52%] object-contain" />
+                  <span v-else class="text-[22px] leading-none">{{ it.site.icon || it.label.charAt(0).toUpperCase() }}</span>
+                </span>
+                <span v-else-if="it.kind === 'tool'" class="flex aspect-square w-full items-center justify-center rounded-[24%] bg-linear-to-br text-[22px] leading-none shadow-hairline ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]" :class="it.tool.tint">{{ it.tool.icon }}</span>
+                <span v-else class="glass-tile flex aspect-square w-full items-center justify-center overflow-hidden rounded-[24%] transition-transform duration-200 group-hover:scale-[1.05] group-active:scale-[0.95]">
+                  <img v-if="it.app.icon" :src="it.app.icon" :alt="it.label" class="h-full w-full object-cover" />
+                  <span v-else class="text-body-strong text-ink-muted-80">{{ it.label.charAt(0).toUpperCase() }}</span>
+                </span>
+                <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">{{ it.label }}</span>
+              </button>
+            </template>
+            <p v-else class="col-span-full py-apple-xl text-center text-caption text-ink-muted-48">文件夹为空，可在主页应用图标的右键菜单中选择「移动到文件夹」</p>
+          </DesktopFolderPanel>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- 删除确认：按应用来源说明去向 -->
+    <Teleport to="body">
+      <Transition name="suggest">
+        <div v-if="confirmBox" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-apple-sm backdrop-blur-sm" @click.self="confirmBox = null">
+          <div role="alertdialog" aria-modal="true" :aria-label="confirmBox.title" class="w-full max-w-sm rounded-apple-lg bg-canvas p-apple-lg shadow-product">
+            <p class="text-body-strong text-ink">{{ confirmBox.title }}</p>
+            <p class="mt-apple-sm text-caption leading-relaxed text-ink-muted-80">{{ confirmBox.body }}</p>
+            <div class="mt-apple-lg flex justify-end gap-apple-sm">
+              <button type="button" class="rounded-pill bg-canvas-parchment px-apple-lg py-apple-sm text-caption-strong text-ink transition hover:bg-black/5 active:scale-[0.97]" @click="confirmBox = null">取消</button>
+              <button type="button" class="rounded-pill bg-red-500 px-apple-lg py-apple-sm text-caption-strong text-white transition active:scale-[0.97]" @click="confirmOk">删除</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- 移动到文件夹：选择主页自定义文件夹 -->
+    <Teleport to="body">
+      <Transition name="suggest">
+        <div v-if="movePicker" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-apple-sm backdrop-blur-sm" @click.self="movePicker = null">
+          <div role="dialog" aria-modal="true" aria-label="移动到文件夹" class="w-full max-w-xs rounded-apple-lg bg-canvas p-apple-lg shadow-product">
+            <p class="text-body-strong text-ink">移动到文件夹</p>
+            <p class="mt-apple-xs text-fine-print text-ink-muted-48">「{{ movePicker.label }}」将移入所选文件夹</p>
+            <div v-if="settingsStore.customFolders.length" class="mt-apple-md flex max-h-56 flex-col gap-apple-xs overflow-y-auto" role="radiogroup" aria-label="文件夹列表">
+              <button
+                v-for="f in settingsStore.customFolders"
+                :key="f.id"
+                type="button"
+                role="radio"
+                :aria-checked="pickerFolderId === f.id"
+                class="flex items-center gap-apple-sm rounded-apple-md border px-apple-md py-apple-sm text-left text-caption transition active:scale-[0.98]"
+                :class="pickerFolderId === f.id ? 'border-primary bg-primary/5 text-ink' : 'border-hairline bg-canvas-parchment text-ink-muted-80 hover:text-ink'"
+                @click="pickerFolderId = f.id"
+              >
+                <span>📁</span>
+                <span class="min-w-0 flex-1 truncate">{{ f.name }}</span>
+                <svg v-if="pickerFolderId === f.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-primary"><path d="M20 6 9 17l-5-5" /></svg>
+              </button>
+            </div>
+            <p v-else class="mt-apple-md rounded-apple-md bg-amber-50 p-apple-sm text-caption text-amber-600">暂无文件夹，请先通过「添加应用 → 添加文件夹」创建</p>
+            <div class="mt-apple-lg flex justify-end gap-apple-sm">
+              <button type="button" class="rounded-pill bg-canvas-parchment px-apple-lg py-apple-sm text-caption-strong text-ink transition hover:bg-black/5 active:scale-[0.97]" @click="movePicker = null">取消</button>
+              <button
+                type="button"
+                class="rounded-pill bg-primary px-apple-lg py-apple-sm text-caption-strong text-on-primary transition active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                :disabled="!settingsStore.customFolders.length || !pickerFolderId"
+                @click="confirmMove"
+              >确认</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <ContextMenu ref="homeCtx" />
+    <AddAppModal ref="addAppModal" />
   </div>
 </template>
 

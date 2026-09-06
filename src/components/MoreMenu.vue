@@ -234,10 +234,6 @@ function openMenu() {
   open.value = true
 }
 
-// 开源地址：新窗口打开仓库
-function openSource() {
-  window.open('https://gitee.com/jq233/letitgo', '_blank', 'noopener,noreferrer')
-}
 function close() {
   open.value = false
 }
@@ -435,21 +431,6 @@ onBeforeUnmount(() => {
                   </span>
                   <span class="flex-1 text-[15px] font-semibold text-ink">关于</span>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 text-ink-muted-48"><path d="m9 18 6-6-6-6" /></svg>
-                </button>
-
-                <button
-                  type="button"
-                  class="flex w-full items-center gap-apple-sm rounded-apple-md bg-canvas-parchment p-apple-sm text-left transition hover:bg-hairline active:scale-[0.99]"
-                  @click="openSource"
-                >
-                  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-apple-md bg-canvas text-ink shadow-hairline ring-1 ring-black/5">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
-                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                    </svg>
-                  </span>
-                  <span class="flex-1 text-[15px] font-semibold text-ink">开源地址</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 text-ink-muted-48"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
                 </button>
               </div>
 
