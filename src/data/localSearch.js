@@ -24,12 +24,13 @@ const folderIndex = siteFolders.map((f) => ({
   extra: f.sites.map((s) => s.name)
 }))
 
-// 网站：名称匹配，所属文件夹名作为次级关键词
+// 网站：名称匹配，所属文件夹名作为次级关键词（groupId 供显隐过滤用）
 const siteIndex = siteFolders.flatMap((f) =>
   f.sites.map((s) => ({
     type: 'site',
     key: `site:${f.id}:${s.name}`,
     id: s.name,
+    groupId: f.id,
     label: s.name,
     sub: f.label,
     icon: s.icon ?? null,
@@ -91,12 +92,19 @@ export function highlightParts(text, rawQuery) {
   return parts.length ? parts : [{ text: t, hit: false }]
 }
 
-export function searchLocal(rawQuery, limit = 8) {
+export function searchLocal(rawQuery, limit = 8, excludeGroupIds = null) {
   const q = String(rawQuery ?? '').trim().toLowerCase()
   if (!q) return []
 
+  // 显隐联动：被隐藏文件夹本身及其下站点都不再参与搜索
+  const hidden = Array.isArray(excludeGroupIds) && excludeGroupIds.length ? excludeGroupIds : null
+
   const hits = []
   for (const item of INDEX) {
+    if (hidden) {
+      if (item.type === 'folder' && hidden.includes(item.id)) continue
+      if (item.type === 'site' && hidden.includes(item.groupId)) continue
+    }
     const score = scoreItem(item, q)
     if (score >= 0) hits.push({ item, score })
   }

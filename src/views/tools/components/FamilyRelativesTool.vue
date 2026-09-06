@@ -1,20 +1,38 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
+import FamilyKnowledgeCard from './FamilyKnowledgeCard.vue'
 
 const open = ref(false)
+const knowOpen = ref(false) // 亲属称谓知识卡片
 function openTool() {
   open.value = true
 }
+watch(open, (v) => {
+  if (!v) knowOpen.value = false
+})
 defineExpose({ open: openTool })
 const mySex = ref('女')
+
+// 切换「我」的性别：同步到图谱中“我”节点的性别（影响配偶/子女称谓推导）
+function setMySex(v) {
+  mySex.value = v
+  if (graph.me) graph.me.sex = v
+}
 
 // ------------- 家族图谱数据模型 -------------
 // 每个成员节点按真实血缘连接：
 //   upF=父亲(男祖链)、upM=母亲(女祖链)、spouse=配偶、g=相对"我"的代差(0=同代)
+// 必须用 reactive：新增成员 / 改连接都要实时反映到右侧亲属图
 let seq = 0
-const graph = {
-  me: { rel: '我', g: 0, sex: mySex.value === '男' ? '男' : '女', upF: null, upM: null, spouse: null },
-}
+const graph = reactive({
+  me: { rel: '我', g: 0, sex: '女', upF: null, upM: null, spouse: null }
+})
+watch(
+  () => mySex.value,
+  (v) => {
+    if (graph.me) graph.me.sex = v
+  }
+)
 function mk(rel, g, sex) {
   const id = 'n' + ++seq
   graph[id] = { rel, g, sex, upF: null, upM: null, spouse: null }
@@ -243,14 +261,19 @@ const focusName = computed(() => {
   return ids.length ? `我${ids.map((r) => '的' + r).join('')}` : '我'
 })
 
-// 亲属图分行：代差大的（长辈）在上，小的（晚辈）在下；同代横向排列
+// 亲属图分行：以「我」为起点，g>0（长辈）在上、g=0（同代）居中、g<0（晚辈）在下；同代横向排列
 const rows = computed(() => {
   const byG = {}
   for (const [id, o] of Object.entries(graph)) {
     ;(byG[o.g] = byG[o.g] || []).push({ ...o, id })
   }
   const gs = Object.keys(byG).map(Number).sort((a, b) => b - a)
-  return gs.map((g) => byG[g])
+  const badgeOf = (g) => {
+    if (g > 0) return { text: `上${g}代 · 长辈`, cls: 'bg-rose-100 text-rose-700' }
+    if (g < 0) return { text: `下${-g}代 · 晚辈`, cls: 'bg-sky-100 text-sky-700' }
+    return { text: '我 · 同代', cls: 'bg-primary/10 text-primary' }
+  }
+  return gs.map((g) => ({ g, badge: badgeOf(g), nodes: byG[g] }))
 })
 
 function iconOf(node) {
@@ -275,9 +298,14 @@ function iconOf(node) {
                   <p class="text-body-strong text-ink">亲戚计算机器</p>
                 </div>
                 <div class="flex overflow-hidden rounded-pill border border-black/[0.08]">
-                  <button type="button" class="px-apple-md py-apple-xs text-caption-strong transition" :class="mySex === '女' ? 'bg-primary text-on-primary' : 'text-ink-muted-80 hover:text-ink'" @click="mySex = '女'">👩 我（女）</button>
-                  <button type="button" class="px-apple-md py-apple-xs text-caption-strong transition" :class="mySex === '男' ? 'bg-primary text-on-primary' : 'text-ink-muted-80 hover:text-ink'" @click="mySex = '男'">👨 我（男）</button>
+                  <button type="button" class="px-apple-md py-apple-xs text-caption-strong transition" :class="mySex === '女' ? 'bg-primary text-on-primary' : 'text-ink-muted-80 hover:text-ink'" @click="setMySex('女')">👩 我（女）</button>
+                  <button type="button" class="px-apple-md py-apple-xs text-caption-strong transition" :class="mySex === '男' ? 'bg-primary text-on-primary' : 'text-ink-muted-80 hover:text-ink'" @click="setMySex('男')">👨 我（男）</button>
                 </div>
+                <button
+                  type="button"
+                  class="rounded-pill bg-canvas-parchment px-apple-sm py-apple-xs text-caption-strong text-primary transition hover:bg-divider-soft active:scale-[0.98]"
+                  @click="knowOpen = true"
+                >📖 称谓知识</button>
               </div>
               <button type="button" aria-label="关闭" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/5 text-ink-muted-80 transition hover:bg-black/10 active:scale-[0.95]" @click="open = false">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
@@ -317,25 +345,40 @@ function iconOf(node) {
                 </div>
               </div>
 
-              <!-- 右栏：实时亲属图（长辈在上 / 晚辈在下 / 同辈横向） -->
+              <!-- 右栏：实时亲属图（长辈在上 / 晚辈在下 / 同代横向），以“我”为起点 -->
               <div class="flex flex-col gap-apple-md p-apple-md sm:p-apple-lg">
                 <div class="flex items-center justify-between">
                   <p class="text-caption-strong text-ink">亲属图</p>
                   <p class="text-fine-print text-ink-muted-48">点击节点切换聚焦目标</p>
                 </div>
 
-                <div class="flex flex-col items-center gap-1 overflow-x-auto py-2">
-                  <template v-for="(row, ri) in rows" :key="ri">
-                    <div class="flex items-center justify-center gap-apple-md">
-                      <button v-for="node in row" :key="node.id" type="button" class="relative flex shrink-0 flex-col items-center gap-1" @click="focus = node.id">
-                        <span class="flex h-12 w-12 items-center justify-center rounded-full text-2xl shadow-hairline ring-2 transition-all duration-200"
-                          :class="node.id === focus ? 'scale-110 bg-primary ring-primary' : 'bg-canvas-parchment ring-black/5 hover:scale-105'">
-                          {{ iconOf(node) }}
-                        </span>
-                        <span class="rounded-full px-apple-xs py-0.5 text-caption-strong" :class="node.id === focus ? 'bg-primary text-on-primary' : 'text-ink'">
-                          {{ node.rel }}
-                        </span>
-                      </button>
+                <div class="flex flex-col gap-1 overflow-x-auto py-2">
+                  <template v-for="(row, ri) in rows" :key="row.g">
+                    <div class="flex flex-col items-center gap-1">
+                      <span
+                        class="rounded-pill px-apple-xs py-[2px] text-[11px] font-medium leading-normal"
+                        :class="row.badge.cls"
+                      >{{ row.badge.text }}</span>
+                      <div class="flex items-center justify-center gap-apple-md">
+                        <button
+                          v-for="node in row.nodes"
+                          :key="node.id"
+                          type="button"
+                          class="relative flex shrink-0 flex-col items-center gap-1"
+                          @click="focus = node.id"
+                        >
+                          <span
+                            class="flex h-12 w-12 items-center justify-center rounded-full text-2xl shadow-hairline ring-2 transition-all duration-200"
+                            :class="node.id === focus ? 'scale-110 bg-primary ring-primary' : node.id === 'me' ? 'bg-primary/10 ring-primary' : 'bg-canvas-parchment ring-black/5 hover:scale-105'"
+                          >
+                            {{ iconOf(node) }}
+                          </span>
+                          <span
+                            class="rounded-full px-apple-xs py-0.5 text-caption-strong"
+                            :class="node.id === focus ? 'bg-primary text-on-primary' : node.id === 'me' ? 'bg-primary/10 text-primary' : 'text-ink'"
+                          >{{ node.rel }}</span>
+                        </button>
+                      </div>
                     </div>
                     <span v-if="ri < rows.length - 1" class="mx-auto block h-6 w-px bg-black/15" />
                   </template>
@@ -346,5 +389,12 @@ function iconOf(node) {
         </Transition>
       </div>
     </Transition>
+
+    <!-- 亲属称谓知识卡片：直系血亲 + 三代以内旁系血亲称谓图 -->
+    <FamilyKnowledgeCard
+      v-if="knowOpen"
+      :sex="mySex"
+      @close="knowOpen = false"
+    />
   </Teleport>
 </template>

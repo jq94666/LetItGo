@@ -76,6 +76,13 @@ function extFrom(buf, url, contentType = '') {
   return 'svg'
 }
 
+// 反爬虫拦截页会伪装成任何路径的响应（如 foss.heptapod.net 的 bot 校验页），
+// 内容实为 HTML 时按抓取失败处理，避免把错误页存成「图标」
+const looksLikeHtml = (buf) => {
+  const head = buf.slice(0, 512).toString('ascii').trimStart().toLowerCase()
+  return head.startsWith('<!doctype') || head.startsWith('<html')
+}
+
 async function grab(site) {
   const origin = new URL(site.href).origin
 
@@ -91,7 +98,7 @@ async function grab(site) {
       try {
         const url = new URL(href, origin).href
         const buf = await fetchBuffer(url)
-        if (buf.length < 64) continue
+        if (buf.length < 64 || looksLikeHtml(buf)) continue
         return { buf, ext: extFrom(buf, url) }
       } catch {}
     }
@@ -101,7 +108,7 @@ async function grab(site) {
   try {
     const url = origin + '/favicon.ico'
     const buf = await fetchBuffer(url)
-    if (buf.length >= 64) return { buf, ext: extFrom(buf, url, 'image/x-icon') }
+    if (buf.length >= 64 && !looksLikeHtml(buf)) return { buf, ext: extFrom(buf, url, 'image/x-icon') }
   } catch {}
 
   return null
@@ -120,8 +127,25 @@ try {
 const sites = collectSites()
 await mkdir(ICONS_DIR, { recursive: true })
 
+// github.com 站点统一复用同一张 GitHub 图标：不逐站抓取（github.com 常限流），
+// 也保证所有 github 链接的图标绝对一致；文件缺失时才回退到常规抓取
+const GITHUB_ICON = 'favicon-github-com.svg'
+
 const entries = []
 for (const site of sites) {
+  let githubHost = false
+  try {
+    githubHost = new URL(site.href).hostname.replace(/^www\./, '') === 'github.com'
+  } catch {}
+  if (githubHost) {
+    const shared = path.join(ICONS_DIR, GITHUB_ICON)
+    try {
+      await stat(shared)
+      entries.push([site.name, `./${GITHUB_ICON}`])
+      console.log(`==  ${site.name}: github 站点，统一使用 ${GITHUB_ICON}`)
+      continue
+    } catch {}
+  }
   // 已抓取过且本地图标文件仍在：直接沿用，不再重复下载
   if (prev[site.name]) {
     const existing = path.join(ICONS_DIR, path.basename(prev[site.name]))

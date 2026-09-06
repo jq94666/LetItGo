@@ -18,7 +18,8 @@ function createState(storageKey) {
     pos: {}, // id -> { x, y }（屏幕百分比坐标，手动模式下的自由摆放位置）
     order: [], // 用户自定义文件夹顺序（folder id 列表）；为空时回退默认顺序
     layout: [], // v2 布局快照（views/sites iOS 主屏）：{kind:'folder'|'site', ...}；空则回退静态分组默认
-    v2: false // 当前屏幕是否启用 v2 iOS 主屏布局
+    v2: false, // 当前屏幕是否启用 v2 iOS 主屏布局
+    folderSig: '' // 上次应用默认排序时的文件夹集合签名（id:label…）；与当前数据不一致 = 文件夹有新增/删除/改名，页面据此自动重排
   })
 
   try {
@@ -32,6 +33,7 @@ function createState(storageKey) {
     if (Array.isArray(raw.order)) state.order = raw.order.filter((x) => typeof x === 'string')
     if (Array.isArray(raw.layout)) state.layout.splice(0, state.layout.length, ...raw.layout)
     state.v2 = raw.v2 === true
+    state.folderSig = typeof raw.folderSig === 'string' ? raw.folderSig : ''
   } catch {
     /* 本地存储不可用时忽略 */
   }
@@ -46,7 +48,14 @@ function createState(storageKey) {
         try {
           localStorage.setItem(
             storageKey,
-            JSON.stringify({ auto: state.auto, pos: state.pos, order: state.order, layout: state.layout, v2: state.v2 })
+            JSON.stringify({
+              auto: state.auto,
+              pos: state.pos,
+              order: state.order,
+              layout: state.layout,
+              v2: state.v2,
+              folderSig: state.folderSig
+            })
           )
         } catch {
           /* 本地存储不可用时忽略 */

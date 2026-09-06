@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
 import { siteFolders } from '../../data/sites.js'
 import { useDesktopStore } from '../../stores/desktop.js'
+import { useSettingsStore } from '../../stores/settings.js'
 import DesktopFolderTile from '../../components/DesktopFolderTile.vue'
 import FolderPanelV2 from './components/FolderPanelV2.vue'
 
@@ -13,6 +14,7 @@ import FolderPanelV2 from './components/FolderPanelV2.vue'
    - 历史数据里散落在桌面的独立站点会被自动收拢回各自的分类文件夹 */
 
 const store = useDesktopStore()
+const settingsStore = useSettingsStore()
 const s = store.getSettings('workmate.sites.screen')
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
@@ -54,6 +56,9 @@ function ensureFoldersOnly() {
     if (it.kind !== 'folder') continue
     if (!it.id || typeof it.label !== 'string' || !Array.isArray(it.items)) continue
     const def = defById.get(it.id)
+    // 数据里已删除的分组：连同快照一并移除，避免留下 UI 无法删除的空壳文件夹
+    // （其中已下架的站点清理、仍在的站点由默认分组补齐逻辑收回）
+    if (!def) continue
     // 清理已不存在于默认站点的名字；保留下架前用户的自定义排序
     it.items = it.items.filter((n) => siteByName[n])
     if (def) {
@@ -83,6 +88,19 @@ function ensureFoldersOnly() {
 }
 ensureFoldersOnly()
 
+// 文件夹集合自动重排：siteFolders 按名称首字母排好后生成签名（id:label…）持久化。
+// 数据新增/删除/改名文件夹导致签名变化时，布局按默认顺序重排（新增文件夹因此
+// 落在正确位置而不是被补在末尾）；数据不变期间用户长按拖动的自定义顺序照常保留。
+// 自定义文件夹（不在默认分组里）稳定排在末尾，相对顺序不变。
+const folderSig = siteFolders.map((f) => `${f.id}:${f.label}`).join('|')
+if (s.folderSig !== folderSig) {
+  s.folderSig = folderSig
+  const idx = new Map(defaultLayout().map((f, i) => [f.id, i]))
+  s.layout.sort(
+    (a, b) => (idx.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (idx.get(b.id) ?? Number.MAX_SAFE_INTEGER)
+  )
+}
+
 // 恢复默认图标布局（v2）：清空用户定制回静态分组
 s.resetLayout = () => {
   s.layout.splice(0, s.layout.length)
@@ -91,7 +109,16 @@ s.resetLayout = () => {
   s.auto = true
 }
 
-const effLayout = computed(() => (s.layout.length ? s.layout : defaultLayout()))
+// 有效布局 = 持久化布局（空则回默认）过滤掉设置里隐藏的文件夹。
+// 隐藏的文件夹仍保留在 s.layout 中（排序/改名不丢），只是不参与渲染与计数。
+// 双重条件：id 在隐藏列表里 且 当前仍属于「编程：」类——分组改名去掉前缀后自动恢复显示。
+const effLayout = computed(() => {
+  const base = s.layout.length ? s.layout : defaultLayout()
+  const hid = settingsStore.hiddenGroups
+  if (!hid.length) return base
+  const coding = settingsStore.codingFolderIds
+  return base.filter((it) => !(coding.has(it.id) && hid.includes(it.id)))
+})
 function mutableLayout() {
   if (!s.layout.length) s.layout.splice(0, s.layout.length, ...defaultLayout())
   return s.layout
@@ -308,9 +335,15 @@ function hoverAt(e) {
 
 function reorderItem(from, to) {
   const list = mutableLayout()
-  if (from < 0 || to < 0 || from === to || from >= list.length || to >= list.length) return
-  const [item] = list.splice(from, 1)
-  list.splice(to, 0, item)
+  // 调用方传入的都是「可见序列」下标（effLayout 已滤掉隐藏文件夹），
+  // 这里对可见子序列重排后按原顺序回填，隐藏项保持在原列表中的相对位置。
+  const vis = [...effLayout.value] // 副本：无隐藏项时 effLayout 即 s.layout 本体，不能原地 splice
+  if (from < 0 || to < 0 || from === to || from >= vis.length || to >= vis.length) return
+  const [item] = vis.splice(from, 1)
+  vis.splice(to, 0, item)
+  let vi = 0
+  const merged = list.map((it) => (vis.includes(it) ? vis[vi++] : it))
+  list.splice(0, list.length, ...merged)
 }
 
 function liveShift(e) {
@@ -400,15 +433,12 @@ function onPageSwipeLock(e) {
   dropDone()
 }
 
-watch(
-  () => effLayout.value.length,
-  () => {
-    if (openedKey.value) {
-      const it = effLayout.value.find((x) => itemKey(x) === openedKey.value)
-      if (!it || it.kind !== 'folder') openedKey.value = null
-    }
+// 打开中的文件夹若从有效布局中消失（被隐藏 / 被重置），自动收起弹层
+watch(effLayout, (list) => {
+  if (openedKey.value && !list.some((x) => itemKey(x) === openedKey.value)) {
+    openedKey.value = null
   }
-)
+})
 </script>
 
 <template>

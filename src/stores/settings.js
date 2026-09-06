@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
+import { siteFolders } from '../data/sites.js'
 
 /* 全局偏好设置（与桌面布局无关，跨页面共享，持久化到 localStorage）。
    目前包含：默认搜索引擎、自定义壁纸。
@@ -20,6 +21,12 @@ const WALLPAPER_KEY = 'workmate.wallpaper'
 // 壁纸结构：{ src: dataURL, zoom: 1~8, tx/ty: 缩放后中心偏移像素 }
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
 const norm = (v, dft = 0) => (Number.isFinite(v) ? v : dft)
+
+/* 「编程：」类文件夹：应用显隐功能的作用范围，直接派生自 sites.js 数据——
+   新增 / 删除 / 改名（前缀增减）后设置面板与桌面过滤都自动跟上，无需另行维护 */
+const CODING_PREFIX = '编程：'
+const codingFolders = computed(() => siteFolders.filter((f) => f.label.startsWith(CODING_PREFIX)))
+const codingFolderIds = computed(() => new Set(codingFolders.value.map((f) => f.id)))
 function readWallpaper() {
   try {
     const raw = localStorage.getItem(WALLPAPER_KEY)
@@ -45,11 +52,20 @@ function readWallpaper() {
 
 export const useSettingsStore = defineStore('settings', () => {
   const searchEngine = ref(DEFAULT_ENGINE)
+  // 应用显隐：需要隐藏的网站页文件夹 id 列表（如编程类分组），空数组 = 全部显示
+  const hiddenGroups = ref([])
+  // 「编程：默认隐藏」是否已播种：老存档里 hiddenGroups 已持久化为 []，仅改默认值不生效；
+  // 该标记 false 时播种一次（编程类全部隐藏），之后用户在显隐面板的手动调整始终优先
+  const codingHiddenDefaulted = ref(false)
 
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
     const saved = raw?.searchEngine
     if (SEARCH_ENGINES.some((e) => e.id === saved)) searchEngine.value = saved
+    codingHiddenDefaulted.value = raw?.codingHiddenDefaulted === true
+    if (codingHiddenDefaulted.value && Array.isArray(raw?.hiddenGroups)) {
+      hiddenGroups.value = raw.hiddenGroups.filter((x) => typeof x === 'string')
+    }
   } catch {
     /* 本地存储不可用或数据损坏时回退默认值 */
   }
@@ -59,14 +75,48 @@ export const useSettingsStore = defineStore('settings', () => {
   const wallpaperSrc = computed(() => wallpaper.value?.src ?? null)
 
   // pinia 的 setup store 自带 effectScope，watcher 脱离组件生命周期，
-  // 因此页面切换后设置仍能持久化
-  watch(searchEngine, (v) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ searchEngine: v }))
-    } catch {
-      /* 本地存储不可用时忽略 */
-    }
-  })
+  // 因此页面切换后设置仍能持久化。
+  // 注意：settings 是一整个 key，所有字段必须一起写入，避免互相覆盖；
+  // hiddenGroups 靠 push/splice 原地变更，必须显式 deep 才能侦听到。
+  watch(
+    [searchEngine, hiddenGroups, codingHiddenDefaulted],
+    ([engine, hidden, seeded]) => {
+      try {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({ searchEngine: engine, hiddenGroups: hidden, codingHiddenDefaulted: seeded })
+        )
+      } catch {
+        /* 本地存储不可用时忽略 */
+      }
+    },
+    { deep: true }
+  )
+
+  // 数据同步：分组被删除或不再带「编程：」前缀时，清掉对应的隐藏记录——
+  // 避免面板「已隐藏 N 个」虚高、或文件夹已不属于编程类却仍被隐藏且无处恢复。
+  // 放在 watch 之后执行，清理结果会立即持久化。
+  if (hiddenGroups.value.length) {
+    hiddenGroups.value = hiddenGroups.value.filter((id) => codingFolderIds.value.has(id))
+  }
+
+  // 默认隐藏编程类：老存档首次升级时播种一次（放在 watch 之后，结果立即持久化）
+  if (!codingHiddenDefaulted.value) {
+    codingHiddenDefaulted.value = true
+    hiddenGroups.value = codingFolders.value.map((f) => f.id)
+  }
+
+  // 切换某个网站页文件夹的显示 / 隐藏
+  function toggleGroupHidden(id) {
+    const i = hiddenGroups.value.indexOf(id)
+    if (i >= 0) hiddenGroups.value.splice(i, 1)
+    else hiddenGroups.value.push(id)
+  }
+
+  // 批量显隐：一键隐藏 / 显示全部「编程：」类文件夹
+  function setAllGroupsHidden(hidden) {
+    hiddenGroups.value = hidden ? codingFolders.value.map((f) => f.id) : []
+  }
 
   // 替换壁纸（含初始变换）。persist=false 时仅本次会话生效
   function setWallpaper(config, persist = true) {
@@ -100,9 +150,10 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  // 恢复默认：搜索引擎回默认值、壁纸回内置默认
+  // 恢复默认：搜索引擎回默认值、壁纸回内置默认、文件夹显隐回默认状态（编程类隐藏）
   function resetDefaults() {
     searchEngine.value = DEFAULT_ENGINE
+    hiddenGroups.value = codingFolders.value.map((f) => f.id)
     setWallpaper(null)
   }
 
@@ -119,6 +170,11 @@ export const useSettingsStore = defineStore('settings', () => {
 
   return {
     searchEngine,
+    hiddenGroups,
+    codingFolders,
+    codingFolderIds,
+    toggleGroupHidden,
+    setAllGroupsHidden,
     wallpaper,
     wallpaperSrc,
     setWallpaper,

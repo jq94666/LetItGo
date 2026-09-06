@@ -10,16 +10,16 @@ const props = defineProps({
 const emit = defineEmits(['reset'])
 
 const open = ref(false)
-// 视图：menu 主菜单 → settings 设置分组 → wallpaper/search/layout 具体设置；about 由主菜单直接进入
-const view = ref('menu') // menu | settings | wallpaper | search | layout | about
+// 视图：menu 主菜单 → settings 设置分组 → wallpaper/search/layout/visibility 具体设置；about 由主菜单直接进入
+const view = ref('menu') // menu | settings | wallpaper | search | layout | visibility | about
 
 // 面板标题与无障碍标签：随 view 切换
 const viewTitle = computed(() => {
-  const t = { menu: '更多', settings: '设置', wallpaper: '壁纸', search: '搜索', layout: '自动排列', about: '关于' }
+  const t = { menu: '更多', settings: '设置', wallpaper: '壁纸', search: '搜索', layout: '自动排列', visibility: '应用显隐', about: '关于' }
   return t[view.value] ?? '更多'
 })
 const viewAria = computed(() => {
-  const t = { menu: '更多', settings: '设置', wallpaper: '壁纸设置', search: '搜索设置', layout: '自动排列设置', about: '关于' }
+  const t = { menu: '更多', settings: '设置', wallpaper: '壁纸设置', search: '搜索设置', layout: '自动排列设置', visibility: '应用显隐设置', about: '关于' }
   return t[view.value] ?? '更多'
 })
 
@@ -31,6 +31,13 @@ function goBack() {
 // 全局偏好（默认搜索引擎、壁纸等），与传入的桌面布局设置相互独立
 const settingsStore = useSettingsStore()
 const engines = SEARCH_ENGINES
+
+// 应用显隐：可隐藏的「编程：」类网站文件夹——列表派生自 settings store（sites.js 数据），
+// 数据新增 / 删除 / 改名后面板自动同步
+const codingFolders = computed(() => settingsStore.codingFolders)
+const hiddenCount = computed(
+  () => codingFolders.value.filter((f) => settingsStore.hiddenGroups.includes(f.id)).length
+)
 
 /* 自定义壁纸：选择本机图片 → canvas 压缩 → dataURL 存入全局偏好（localStorage） */
 const fileInput = ref(null)
@@ -505,6 +512,24 @@ onBeforeUnmount(() => {
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 text-ink-muted-48"><path d="m9 18 6-6-6-6" /></svg>
                 </button>
 
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-apple-sm rounded-apple-md bg-canvas-parchment p-apple-sm text-left transition hover:bg-hairline active:scale-[0.99]"
+                  @click="go('visibility')"
+                >
+                  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-apple-md bg-canvas text-ink shadow-hairline ring-1 ring-black/5">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                      <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-[15px] font-semibold text-ink">应用显隐</span>
+                    <span class="block truncate text-[12px] text-ink-muted-48">{{ hiddenCount ? `已隐藏 ${hiddenCount} 个文件夹` : '全部显示' }}</span>
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 text-ink-muted-48"><path d="m9 18 6-6-6-6" /></svg>
+                </button>
+
                 <!-- 恢复默认设置 -->
                 <button
                   type="button"
@@ -711,6 +736,57 @@ onBeforeUnmount(() => {
                     整理图标（恢复网格排列）
                   </button>
                 </template>
+              </div>
+
+              <!-- 应用显隐设置面板：隐藏 / 恢复「编程：」类网站文件夹（全局偏好） -->
+              <div v-else-if="view === 'visibility'" key="visibility" class="flex flex-col gap-apple-md px-apple-md py-apple-md">
+                <div class="min-w-0">
+                  <p class="text-[14px] text-ink-muted-80">编程类文件夹</p>
+                  <p class="text-[12px] leading-normal text-ink-muted-48">关闭后，网站页桌面不再显示该文件夹，主页搜索也不会命中其中网站；随时可回来重新打开。文件夹的排序与改名会保留。</p>
+                </div>
+
+                <!-- 批量操作：全部显示 / 全部隐藏 -->
+                <div class="flex gap-apple-xs">
+                  <button
+                    type="button"
+                    class="flex-1 rounded-apple-md bg-canvas-parchment py-apple-xs text-[14px] text-ink-muted-80 transition hover:text-ink active:scale-[0.98] disabled:cursor-default disabled:opacity-40 disabled:active:scale-100"
+                    :disabled="hiddenCount === 0"
+                    @click="settingsStore.setAllGroupsHidden(false)"
+                  >全部显示</button>
+                  <button
+                    type="button"
+                    class="flex-1 rounded-apple-md bg-canvas-parchment py-apple-xs text-[14px] text-ink-muted-80 transition hover:text-ink active:scale-[0.98] disabled:cursor-default disabled:opacity-40 disabled:active:scale-100"
+                    :disabled="hiddenCount === codingFolders.length"
+                    @click="settingsStore.setAllGroupsHidden(true)"
+                  >全部隐藏</button>
+                </div>
+
+                <div class="flex flex-col gap-apple-xs">
+                  <div
+                    v-for="folder in codingFolders"
+                    :key="folder.id"
+                    class="flex items-center justify-between gap-apple-sm rounded-apple-md bg-canvas-parchment p-apple-sm"
+                  >
+                    <div class="min-w-0">
+                      <p class="truncate text-[14px] text-ink">{{ folder.label }}</p>
+                      <p class="text-[12px] text-ink-muted-48">{{ folder.sites.length }} 个网站 · {{ settingsStore.hiddenGroups.includes(folder.id) ? '已隐藏' : '显示中' }}</p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      :aria-checked="!settingsStore.hiddenGroups.includes(folder.id)"
+                      :aria-label="`显示${folder.label}`"
+                      class="relative h-6 w-11 shrink-0 rounded-pill transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
+                      :class="settingsStore.hiddenGroups.includes(folder.id) ? 'bg-hairline' : 'bg-primary'"
+                      @click="settingsStore.toggleGroupHidden(folder.id)"
+                    >
+                      <span
+                        class="absolute top-[2px] h-5 w-5 rounded-full bg-white shadow-hairline transition-all duration-200"
+                        :class="settingsStore.hiddenGroups.includes(folder.id) ? 'left-[2px]' : 'left-[22px]'"
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- 关于 -->

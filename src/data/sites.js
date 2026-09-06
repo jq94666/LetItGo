@@ -1,5 +1,6 @@
 /* 站点数据中心：网站页所有网址统一定义在此，
    scripts/fetch-favicons.mjs 也会读取本文件自动抓取 favicon */
+import { compareByLabel } from '../utils/folderNameSort.js'
 
 // PDF 工具站
 export const pdfSites = [
@@ -126,8 +127,16 @@ export const directoryGroups = [
       { name: 'HeidiSQL', href: 'https://www.heidisql.com/' },
       { name: 'DataGrip', href: 'https://www.jetbrains.com/zh-cn/datagrip/' },
       { name: 'SSMS', href: 'https://learn.microsoft.com/zh-cn/ssms/release-history' },
-      { name: 'dbx', href: 'https://github.com/t8y2/dbx' }
+      { name: 'dbx', href: 'https://github.com/t8y2/dbx' },
+      { name: 'ARDM', href: 'https://github.com/qishibo/AnotherRedisDesktopManager' },
+      { name: 'Navicat', href: 'https://www.navicat.com.cn/products/navicat-premium-lite' },
+      { name: 'ES-Client', href: 'https://gitee.com/q2316367743/es-client' }
     ]
+  },
+  {
+    id: 'database-libs',
+    label: '数据库',
+    sites: [{ name: 'duckdb', href: 'https://github.com/duckdb/duckdb' }]
   },
   {
     id: 'data-viz',
@@ -201,7 +210,8 @@ export const directoryGroups = [
     sites: [
       { name: 'screenity', href: 'https://github.com/alyssaxuu/screenity' },
       { name: 'SingleFile', href: 'https://github.com/gildas-lormeau/SingleFile' },
-      { name: '沉浸式翻译', href: 'https://github.com/immersive-translate/immersive-translate' }
+      { name: '沉浸式翻译', href: 'https://github.com/immersive-translate/immersive-translate' },
+      { name: 'AdGuard', href: 'https://github.com/AdguardTeam/AdguardBrowserExtension' }
     ]
   },
   {
@@ -237,7 +247,8 @@ export const directoryGroups = [
       { name: 'FileZilla', href: 'https://filezilla-project.org/' },
       { name: 'Nginx', href: 'https://nginx.org/' },
       { name: 'Caddy', href: 'https://caddyserver.com/' },
-      { name: 'CFP', href: 'https://www.cloudflare-cn.com/developer-platform/products/pages/' }
+      { name: 'CFP', href: 'https://www.cloudflare-cn.com/developer-platform/products/pages/' },
+      { name: 'SafeLine', href: 'https://github.com/chaitin/SafeLine' }
     ]
   },
   {
@@ -290,6 +301,123 @@ export const directoryGroups = [
     id: 'office',
     label: 'Office',
     sites: [{ name: 'WPS', href: 'https://www.wps.cn/' }]
+  },
+  {
+    id: 'regex',
+    label: '正则表达式',
+    sites: [
+      { name: 'JsRegexMiniBook', href: 'https://github.com/qdlaoyao/js-regex-mini-book' },
+      { name: 'Regulex', href: 'https://github.com/CJex/regulex' }
+    ]
+  },
+  {
+    id: 'code-image',
+    label: '编程：代码图片',
+    legacyLabel: '代码图片',
+    sites: [
+      { name: 'chalk', href: 'https://chalk.ist/' },
+      { name: 'ray', href: 'https://ray.so' },
+      { name: 'carbon', href: 'https://carbon.now.sh/' }
+    ]
+  },
+  {
+    id: 'java',
+    label: '编程：JAVA库',
+    legacyLabel: ['JAVA', '编程：JAVA'],
+    sites: [
+      { name: 'fesod', href: 'https://github.com/apache/fesod' },
+      { name: 'mybatis-plus', href: 'https://github.com/baomidou/mybatis-plus' },
+      { name: 'mybatis-flex', href: 'https://gitee.com/mybatis-flex/mybatis-flex' },
+      { name: 'hutool', href: 'https://github.com/dromara/hutool' },
+      { name: 'sa-token', href: 'https://gitee.com/dromara/sa-token' },
+      { name: 'xxl-job', href: 'https://github.com/xuxueli/xxl-job' },
+      { name: 'dom4j', href: 'https://github.com/dom4j/dom4j' }
+    ]
+  },
+  {
+    id: 'frontend',
+    label: '编程：前端库',
+    legacyLabel: ['前端', '前端库'],
+    sites: [
+      { name: 'aieditor', href: 'https://gitee.com/aieditor-team/aieditor' },
+      { name: 'EmbedPDF', href: 'https://github.com/embedpdf/embed-pdf-viewer' },
+      { name: 'uiverse', href: 'https://uiverse.io/' },
+      { name: 'element-plus', href: 'https://github.com/element-plus/element-plus' },
+      { name: 'naive-ui', href: 'https://github.com/tusen-ai/naive-ui' },
+      { name: 'varlet', href: 'https://github.com/varletjs/varlet' },
+      { name: 'AntV', href: 'https://antv-2018.alipay.com/zh-cn/index.html' },
+      { name: 'anime', href: 'https://github.com/juliangarnier/anime' },
+      { name: 'vue', href: 'https://cn.vuejs.org/' },
+      { name: 'vite', href: 'https://cn.vitejs.dev/' },
+      { name: 'echarts', href: 'https://github.com/apache/echarts' },
+      { name: 'tailwindcss', href: 'https://github.com/tailwindlabs/tailwindcss' },
+      { name: 'axios', href: 'https://github.com/axios/axios' },
+      { name: 'dayjs', href: 'https://github.com/iamkun/dayjs/' },
+      { name: 'sheetjs', href: 'https://docs.sheetjs.com/' },
+      { name: 'DPlayer', href: 'https://github.com/MoePlayer/DPlayer' },
+      { name: 'snapdom', href: 'https://github.com/zumerlab/snapdom' },
+      { name: 'nutui', href: 'https://github.com/jd-opensource/nutui' },
+      { name: 'vant', href: 'https://github.com/youzan/vant' },
+      { name: 'decimal.js', href: 'https://github.com/MikeMcl/decimal.js' },
+      { name: 'lodash', href: 'https://github.com/lodash/lodash' },
+      { name: 'puppeteer', href: 'https://github.com/puppeteer/puppeteer' },
+      { name: 'nestjs', href: 'https://github.com/nestjs/nest' }
+    ]
+  },
+  {
+    id: 'frontend-design',
+    label: '编程：前端设计',
+    legacyLabel: '前端设计',
+    sites: [
+      { name: 'Acro', href: 'https://arco.design/' },
+      { name: 'Ant', href: 'https://4x.ant.design/index-cn' },
+      { name: 'TDesign', href: 'https://tdesign.tencent.com/' },
+      { name: 'Fluent2', href: 'https://fluent2.microsoft.design/' },
+      { name: 'material', href: 'https://m3.material.io/' }
+    ]
+  },
+  {
+    id: 'api-test',
+    label: '接口测试',
+    sites: [
+      { name: 'Apifox', href: 'https://apifox.com/' },
+      { name: 'Apipost', href: 'https://www.apipost.cn/' },
+      { name: 'Postman', href: 'https://www.postman.com/' }
+    ]
+  },
+  {
+    id: 'python-libs',
+    label: '编程：Python库',
+    sites: [
+      { name: 'openpyxl', href: 'https://foss.heptapod.net/openpyxl/openpyxl' },
+      { name: 'polars', href: 'https://github.com/pola-rs/polars' },
+      { name: 'uv', href: 'https://github.com/astral-sh/uv' },
+      { name: 'fastapi', href: 'https://github.com/fastapi/fastapi' },
+      { name: 'sqlmodel', href: 'https://github.com/fastapi/sqlmodel' },
+      { name: 'pandas', href: 'https://github.com/pandas-dev/pandas' },
+      { name: 'matplotlib', href: 'https://github.com/matplotlib/matplotlib' }
+    ]
+  },
+  {
+    id: 'fullstack',
+    label: '编程：全栈知识库',
+    sites: [
+      { name: 'pdai', href: 'https://www.pdai.tech/' },
+      { name: '凤凰架构', href: 'https://github.com/fenixsoft/awesome-fenix' },
+      { name: '现代 JavaScript 教程', href: 'https://github.com/javascript-tutorial/zh.javascript.info' },
+      { name: '小白Python教程', href: 'https://github.com/walter201230/Python' }
+    ]
+  },
+  {
+    id: 'government',
+    label: '政务',
+    sites: [
+      { name: '中国庭审公开网', href: 'https://tingshen.court.gov.cn/' },
+      { name: '国家法律法规数据库', href: 'https://flk.npc.gov.cn/index' },
+      { name: '国情', href: 'https://www.gov.cn/guoqing/index.htm' },
+      { name: '标准地图服务系统', href: 'http://bzdt.ch.mnr.gov.cn/index.html' },
+      { name: '省市县', href: 'https://github.com/ruiduobao/shengshixian.com' }
+    ]
   }
 ]
 
@@ -324,3 +452,6 @@ export const siteFolders = [
     ]
   }
 ]
+
+// 文件夹默认顺序：按名称首字母排列（英文 A-Z 在前，中文按拼音在后），网站页默认布局与应用显隐面板共用
+siteFolders.sort((a, b) => compareByLabel(a.label, b.label))

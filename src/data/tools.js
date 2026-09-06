@@ -1,6 +1,7 @@
 /* 工具（应用）数据中心：工具页渲染与本地搜索共用同一份元数据。
    工具组件本身仍由 views/tools/index.vue 按需动态 import，
    这里只保留 id / 名称 / 图标等展示信息，避免搜索时拉取全部工具代码。 */
+import { compareByLabel } from '../utils/folderNameSort.js'
 
 export const toolGroups = [
   {
@@ -63,7 +64,8 @@ export const toolGroups = [
     label: '图片',
     tools: [
       { id: 'imageCompress', label: '压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' },
-      { id: 'drawPad', label: '简易画板', icon: '✏️', tint: 'from-emerald-400 to-teal-500' }
+      { id: 'drawPad', label: '简易画板', icon: '✏️', tint: 'from-emerald-400 to-teal-500' },
+      { id: 'nineGrid', label: '转九宫格', icon: '🧩', tint: 'from-violet-400 to-fuchsia-500' }
     ]
   },
   {
@@ -79,7 +81,7 @@ export const toolGroups = [
     label: '模拟',
     tools: [
       { id: 'analogClock', label: '模拟时钟', icon: '🕰️', tint: 'from-amber-400 to-orange-500' },
-      { id: 'bsod', label: '蓝屏', icon: '💻', tint: 'from-sky-400 to-blue-600' }
+      { id: 'bsod', label: '模拟蓝屏', icon: '💻', tint: 'from-sky-400 to-blue-600' }
     ]
   },
   {
@@ -91,6 +93,9 @@ export const toolGroups = [
     ]
   }
 ]
+
+// 分组默认顺序：按名称首字母排列（英文 A-Z 在前，中文按拼音在后）
+toolGroups.sort((a, b) => compareByLabel(a.label, b.label))
 
 // 扁平化的工具列表（供搜索与跨页启动按 id 查找）
 export const allTools = toolGroups.flatMap((g) =>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 /* ---------- 大写金额工具 ---------- */
 const open = ref(false)
@@ -8,6 +8,12 @@ function openTool() {
 }
 defineExpose({ open: openTool })
 const amountInput = ref('')
+
+// 关闭主弹窗时同步收起知识点弹窗
+const knowOpen = ref(false)
+watch(open, (v) => {
+  if (!v) knowOpen.value = false
+})
 
 const cnDigit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
 const cnSmallUnit = ['', '拾', '佰', '仟']
@@ -86,7 +92,7 @@ const converted = computed(() => {
   return toChineseUpperCase(amountInput.value)
 })
 
-/* ---------- 知识卡片 ---------- */
+/* ---------- 知识点：大写汉字一览（田字格）与转换规则 ---------- */
 const charGroups = [
   { label: '数字', chars: '零壹贰叁肆伍陆柒捌玖' },
   { label: '位单位', chars: '拾佰仟' },
@@ -117,14 +123,23 @@ const ruleList = [
           role="dialog"
           aria-modal="true"
           aria-label="大写金额"
-          class="modal-card flex max-h-[calc(100dvh-2*var(--spacing-apple-lg))] w-full max-w-[960px] flex-col rounded-apple-lg bg-canvas p-apple-lg shadow-hairline sm:p-apple-xl"
+          class="modal-card flex max-h-[calc(100dvh-2*var(--spacing-apple-lg))] w-full max-w-[560px] flex-col rounded-apple-lg bg-canvas p-apple-lg shadow-hairline sm:p-apple-xl"
         >
           <!-- 头部（不随内容滚动） -->
-          <div class="flex shrink-0 items-center justify-between">
+          <div class="flex shrink-0 items-center justify-between gap-apple-sm">
             <h2 class="text-display-md text-ink">大写金额</h2>
             <button
               type="button"
-              class="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted-48 transition-colors hover:bg-canvas-parchment hover:text-ink focus:outline-none"
+              class="flex shrink-0 items-center gap-apple-xs rounded-pill bg-canvas-parchment px-apple-md py-apple-xs text-caption-strong text-ink transition hover:bg-hairline active:scale-[0.97] focus:outline-none"
+              aria-label="打开知识点"
+              @click="knowOpen = true"
+            >
+              <span aria-hidden="true">📖</span>
+              知识点
+            </button>
+            <button
+              type="button"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-muted-48 transition-colors hover:bg-canvas-parchment hover:text-ink focus:outline-none"
               aria-label="关闭"
               @click="open = false"
             >
@@ -134,54 +149,80 @@ const ruleList = [
             </button>
           </div>
 
-          <!-- 中间内容区域：滚动限制在弹窗内部 -->
-          <div class="mt-apple-lg grid min-h-0 flex-1 grid-cols-1 gap-apple-lg overflow-y-auto md:grid-cols-[1fr_1fr]">
-            <!-- 左栏：转换工具 -->
-            <div>
-              <label for="amount-input" class="text-caption-strong text-ink-muted-80">
-                金额（元，最多两位小数）
-              </label>
-              <input
-                id="amount-input"
-                v-model="amountInput"
-                type="number"
-                min="0"
-                step="0.01"
-                inputmode="decimal"
-                placeholder="请输入阿拉伯数字金额"
-                class="mt-apple-xs w-full rounded-apple-md border border-hairline bg-surface-pearl px-apple-md py-apple-sm text-apple-body text-ink placeholder:text-ink-muted-48 focus:border-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
-              />
+          <!-- 内容区域：滚动限制在弹窗内部 -->
+          <div class="mt-apple-lg min-h-0 flex-1 overflow-y-auto">
+            <label for="amount-input" class="text-caption-strong text-ink-muted-80">
+              金额（元，最多两位小数）
+            </label>
+            <input
+              id="amount-input"
+              v-model="amountInput"
+              type="number"
+              min="0"
+              step="0.01"
+              inputmode="decimal"
+              placeholder="请输入阿拉伯数字金额"
+              class="mt-apple-xs w-full rounded-apple-md border border-hairline bg-surface-pearl px-apple-md py-apple-sm text-apple-body text-ink placeholder:text-ink-muted-48 focus:border-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
+            />
 
-              <p class="mt-apple-md text-caption-strong text-ink-muted-80">中文大写</p>
-              <div class="mt-apple-xs min-h-[72px] rounded-apple-md bg-canvas-parchment px-apple-md py-apple-md">
-                <p class="break-all text-body-strong text-ink">
-                  {{ converted || '—' }}
-                </p>
+            <p class="mt-apple-md text-caption-strong text-ink-muted-80">中文大写</p>
+            <div class="mt-apple-xs min-h-[72px] rounded-apple-md bg-canvas-parchment px-apple-md py-apple-md">
+              <p class="break-all text-body-strong text-ink">
+                {{ converted || '—' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- 知识点弹窗：左侧大写汉字田字格，右侧转换规则 -->
+    <Transition name="modal">
+      <div
+        v-if="knowOpen"
+        class="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-ink/40 p-apple-md backdrop-blur-apple sm:p-apple-lg"
+        @click.self="knowOpen = false"
+      >
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="大写金额知识点"
+          class="modal-card flex max-h-[calc(100dvh-2*var(--spacing-apple-lg))] w-full max-w-[860px] flex-col rounded-apple-lg bg-canvas p-apple-lg shadow-hairline sm:p-apple-xl"
+        >
+          <div class="flex shrink-0 items-center justify-between">
+            <h2 class="text-display-md text-ink">知识点</h2>
+            <button
+              type="button"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted-48 transition-colors hover:bg-canvas-parchment hover:text-ink focus:outline-none"
+              aria-label="关闭知识点"
+              @click="knowOpen = false"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M1 1l12 12M13 1 1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="mt-apple-lg grid min-h-0 flex-1 grid-cols-1 gap-apple-lg overflow-y-auto md:grid-cols-[minmax(0,470px)_1fr]">
+            <!-- 左：大写汉字一览（田字格正楷） -->
+            <div class="rounded-apple-md bg-canvas-parchment p-apple-md">
+              <p class="text-caption-strong text-ink">大写汉字一览</p>
+              <div v-for="group in charGroups" :key="group.label" class="mt-apple-sm">
+                <p class="text-fine-print text-ink-muted-48">{{ group.label }}</p>
+                <div class="mt-apple-xs flex flex-wrap gap-apple-xs">
+                  <div v-for="ch in group.chars" :key="ch" class="tzg">
+                    <span class="tzg-char">{{ ch }}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- 右栏：知识卡片（上下结构） -->
-            <div class="flex flex-col gap-apple-md md:border-l md:border-divider-soft md:pl-apple-lg">
-              <!-- 上：大写汉字一览 -->
-              <div class="rounded-apple-md bg-canvas-parchment p-apple-md">
-                <p class="text-caption-strong text-ink">大写汉字一览</p>
-                <div
-                  v-for="group in charGroups"
-                  :key="group.label"
-                  class="mt-apple-xs"
-                >
-                  <p class="text-fine-print text-ink-muted-48">{{ group.label }}</p>
-                  <p class="text-body-strong text-ink">{{ group.chars }}</p>
-                </div>
-              </div>
-
-              <!-- 下：转换规则 -->
-              <div class="rounded-apple-md bg-canvas-parchment p-apple-md">
-                <p class="text-caption-strong text-ink">转换规则</p>
-                <ol class="mt-apple-xs list-decimal space-y-apple-xs pl-apple-md text-caption text-ink-muted-80">
-                  <li v-for="(rule, i) in ruleList" :key="i">{{ rule }}</li>
-                </ol>
-              </div>
+            <!-- 右：转换规则 -->
+            <div class="rounded-apple-md bg-canvas-parchment p-apple-md md:border-l md:border-divider-soft md:pl-apple-lg">
+              <p class="text-caption-strong text-ink">转换规则</p>
+              <ol class="mt-apple-xs list-decimal space-y-apple-sm pl-apple-md text-caption text-ink-muted-80">
+                <li v-for="(rule, i) in ruleList" :key="i">{{ rule }}</li>
+              </ol>
             </div>
           </div>
         </div>
@@ -208,5 +249,40 @@ const ruleList = [
 .modal-leave-to .modal-card {
   transform: scale(0.94) translateY(14px);
   opacity: 0;
+}
+
+/* 田字格：红虚线十字辅助格，正楷书写 */
+.tzg {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: #fff;
+  border: 1.5px solid rgba(214, 116, 116, 0.65);
+  border-radius: 2px;
+}
+.tzg::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 50%;
+  border-top: 1px dashed rgba(214, 116, 116, 0.5);
+}
+.tzg::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 50%;
+  border-left: 1px dashed rgba(214, 116, 116, 0.5);
+}
+.tzg-char {
+  font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', 'AR PL UKai CN', serif;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--color-ink, #1c1c1e);
 }
 </style>

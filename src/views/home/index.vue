@@ -20,8 +20,8 @@ const activeIndex = ref(NONE) // 键盘高亮项
 const placeholder = '搜索本站或网络'
 
 const hasQuery = computed(() => !!query.value.trim())
-// 本地命中项：文件夹 / 应用 / 网站
-const localHits = computed(() => (hasQuery.value ? searchLocal(query.value, 8) : []))
+// 本地命中项：文件夹 / 应用 / 网站（设置里隐藏的文件夹及其站点一并排除）
+const localHits = computed(() => (hasQuery.value ? searchLocal(query.value, 8, settingsStore.hiddenGroups) : []))
 // 下拉行 = 本地命中 + 兜底的「用引擎搜索」
 const rows = computed(() => [
   ...localHits.value,
