@@ -1,6 +1,7 @@
 <script setup>
 import { computed, markRaw, nextTick, ref, watch } from 'vue'
 import { useDesktop } from '../../composables/useDesktop.js'
+import { useDesktopStore } from '../../stores/desktop.js'
 import { toolGroups, allTools } from '../../data/tools.js'
 import { useLauncherStore } from '../../stores/launcher.js'
 import DesktopFolderPanel from '../../components/DesktopFolderPanel.vue'
@@ -31,7 +32,9 @@ const toolLoaders = {
   imageCompress: () => import('./components/ImageCompressTool.vue'),
   drawPad: () => import('./components/DrawPadTool.vue'),
   nineGrid: () => import('./components/NineGridTool.vue'),
+  imgBase64: () => import('./components/ImgBase64Tool.vue'),
   basicColor: () => import('./components/BasicColorTool.vue'),
+  colorConvert: () => import('./components/ColorConvertTool.vue'),
   analogClock: () => import('./components/AnalogClockTool.vue'),
   bsod: () => import('./components/BsodTool.vue'),
   textMarquee: () => import('./components/TextMarqueeTool.vue'),
@@ -42,6 +45,16 @@ const {
   screenEl, auto, positions, openedId, order, dragId, dragX, dragY, tileWidth, deskHeight, slotPos,
   onDown, onMove, onUp, onCancel, onClick
 } = useDesktop({ storageKey: 'workmate.tools.screen', itemCount: toolGroups.length, defaultOrder: toolGroups.map((g) => g.id) })
+
+// 分组集合自动重排（与网站页 folderSig 机制一致）：toolGroups 按名称首字母排好后生成
+// 签名持久化；分组新增/删除/改名导致签名变化时，把自定义顺序重置为默认顺序（新增分组
+// 因此落在正确排序位置），数据不变期间用户长按拖动的顺序照常保留。
+const s = useDesktopStore().getSettings('workmate.tools.screen')
+const folderSig = toolGroups.map((g) => `${g.id}:${g.label}`).join('|')
+if (s.folderSig !== folderSig) {
+  s.folderSig = folderSig
+  s.order.splice(0, s.order.length, ...toolGroups.map((g) => g.id))
+}
 
 // 打开弹窗后，首帧内禁止遮罩捕获指针事件：移动端点按按钮后浏览器会合成一次 click，
 // 此时遮罩恰好覆盖按钮，该 click 会落在遮罩上触发关闭（phantom click），导致弹窗一开即关。

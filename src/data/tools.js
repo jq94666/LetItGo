@@ -63,17 +63,19 @@ export const toolGroups = [
     id: 'image',
     label: '图片',
     tools: [
-      { id: 'imageCompress', label: '压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' },
+      { id: 'imageCompress', label: '图片压缩', icon: '🗜️', tint: 'from-amber-400 to-orange-400' },
       { id: 'drawPad', label: '简易画板', icon: '✏️', tint: 'from-emerald-400 to-teal-500' },
-      { id: 'nineGrid', label: '转九宫格', icon: '🧩', tint: 'from-violet-400 to-fuchsia-500' }
+      { id: 'nineGrid', label: '转九宫格', icon: '🧩', tint: 'from-violet-400 to-fuchsia-500' },
+      { id: 'imgBase64', label: '图片Base64互转', icon: '🔁', tint: 'from-sky-400 to-blue-500' }
     ]
   },
   {
     id: 'color',
-    label: '色卡',
+    label: '颜色',
     tools: [
       { id: 'basicColor', label: '基础色卡', icon: '🎨', tint: 'from-fuchsia-500 to-purple-600' },
-      { id: 'chineseColors', label: '中国传统色', icon: '🏮', tint: 'from-rose-500 to-red-500' }
+      { id: 'chineseColors', label: '中国传统色', icon: '🏮', tint: 'from-rose-500 to-red-500' },
+      { id: 'colorConvert', label: '颜色编码转换', icon: '🔀', tint: 'from-pink-400 to-rose-500' }
     ]
   },
   {
