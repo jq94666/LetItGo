@@ -1,15 +1,22 @@
-/* 本地搜索索引：主页搜索框优先在本应用的「文件夹 / 应用 / 网站」里找名字相近的项，
+/* 本地搜索索引：主页搜索框优先在本应用的「文件夹 / 应用 / 网站 / 主页自定义内容」里找名字相近的项，
    命中即可直接弹出文件夹内容或进入应用；本地搜不到才回落到搜索引擎。
-   数据全部来自前端静态数据，不发起任何网络请求。 */
+   静态数据（网站页文件夹 / 站点、工具）在模块加载时建好索引；
+   主页自定义内容（自定义应用 / 文件夹，存于 localStorage）由主页实时构建后经 extraItems 传入。 */
 
 import { siteFolders } from './sites.js'
 import { toolGroups } from './tools.js'
 import { favicons } from '../assets/icons/favicon-manifest.js'
 
-export const TYPE_LABEL = { folder: '文件夹', tool: '应用', site: '网站' }
+export const TYPE_LABEL = {
+  folder: '文件夹',
+  'custom-folder': '文件夹',
+  tool: '应用',
+  custom: '应用',
+  site: '网站'
+}
 
-// 排序时的类型优先级：文件夹 > 应用 > 网站
-const TYPE_ORDER = { folder: 0, tool: 1, site: 2 }
+// 排序时的类型优先级：文件夹（含主页自定义文件夹）> 应用（含主页自定义应用）> 网站
+const TYPE_ORDER = { folder: 0, 'custom-folder': 0, tool: 1, custom: 1, site: 2 }
 
 // 文件夹：名称直接匹配，其下站点名作为次级关键词（搜 VSCode 也能命中「文本编辑器」）
 const folderIndex = siteFolders.map((f) => ({
@@ -92,15 +99,16 @@ export function highlightParts(text, rawQuery) {
   return parts.length ? parts : [{ text: t, hit: false }]
 }
 
-export function searchLocal(rawQuery, limit = 8, excludeGroupIds = null) {
+export function searchLocal(rawQuery, limit = 8, excludeGroupIds = null, extraItems = []) {
   const q = String(rawQuery ?? '').trim().toLowerCase()
   if (!q) return []
 
   // 显隐联动：被隐藏文件夹本身及其下站点都不再参与搜索
   const hidden = Array.isArray(excludeGroupIds) && excludeGroupIds.length ? excludeGroupIds : null
 
+  const pool = extraItems.length ? INDEX.concat(extraItems) : INDEX
   const hits = []
-  for (const item of INDEX) {
+  for (const item of pool) {
     if (hidden) {
       if (item.type === 'folder' && hidden.includes(item.id)) continue
       if (item.type === 'site' && hidden.includes(item.groupId)) continue

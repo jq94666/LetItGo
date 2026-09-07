@@ -25,8 +25,57 @@ const activeIndex = ref(NONE) // 键盘高亮项
 const placeholder = '搜索本站或网络'
 
 const hasQuery = computed(() => !!query.value.trim())
-// 本地命中项：文件夹 / 应用 / 网站（设置里隐藏的文件夹及其站点一并排除）
-const localHits = computed(() => (hasQuery.value ? searchLocal(query.value, 8, settingsStore.hiddenGroups) : []))
+
+// 主页内容搜索索引：自定义文件夹 + 自定义应用（存于 localStorage，随增删实时变化）。
+// 钉选的网站 / 工具不必重复索引——它们本就在网站/工具静态索引里。
+const allSites = siteFolders.flatMap((f) => f.sites)
+const customSearchItems = computed(() => {
+  const items = []
+  for (const f of settingsStore.customFolders) {
+    // 文件夹内应用名作为次级关键词：搜应用名也能命中所在文件夹（与网站页文件夹一致）
+    const inside = [
+      ...settingsStore.pinnedApps
+        .filter((p) => p.folderId === f.id)
+        .map((p) => {
+          if (p.type === 'site') return allSites.find((s) => s.name === p.key)?.name ?? null
+          return allTools.find((t) => t.id === p.key)?.label ?? null
+        }),
+      ...settingsStore.customApps.filter((a) => a.folderId === f.id).map((a) => a.name)
+    ].filter(Boolean)
+    items.push({
+      type: 'custom-folder',
+      key: `custom-folder:${f.id}`,
+      id: f.id,
+      label: f.name,
+      sub: `${inside.length} 个应用`,
+      icon: '📁',
+      iconSrc: null,
+      names: [f.name],
+      extra: inside
+    })
+  }
+  for (const a of settingsStore.customApps) {
+    const folder = settingsStore.customFolders.find((f) => f.id === a.folderId)
+    items.push({
+      type: 'custom',
+      key: `custom:${a.id}`,
+      id: a.id,
+      label: a.name,
+      sub: folder?.name ?? '主页',
+      icon: null,
+      iconSrc: a.icon ?? null,
+      url: a.url,
+      names: [a.name],
+      extra: folder ? [folder.name] : []
+    })
+  }
+  return items
+})
+
+// 本地命中项：文件夹 / 应用 / 网站 + 主页自定义应用 / 文件夹（设置里隐藏的文件夹及其站点一并排除）
+const localHits = computed(() =>
+  hasQuery.value ? searchLocal(query.value, 8, settingsStore.hiddenGroups, customSearchItems.value) : []
+)
 // 下拉行 = 本地命中 + 兜底的「用引擎搜索」
 const rows = computed(() => [
   ...localHits.value,
@@ -143,12 +192,15 @@ function choose(i) {
   } else if (row.type === 'folder') {
     // 直接在当前页弹出文件夹内容，不切到网站页
     openedFolderId.value = row.id
+  } else if (row.type === 'custom-folder') {
+    // 主页自定义文件夹：当前页弹出面板
+    openedCustomFolderId.value = row.id
   } else if (row.type === 'tool') {
     // 切到工具页并进入该应用
     launcher.requestTool(row.id)
     router.push('/tools')
-  } else if (row.type === 'site') {
-    window.open(row.href, '_blank', 'noopener,noreferrer')
+  } else if (row.type === 'site' || row.type === 'custom') {
+    window.open(row.href ?? row.url, '_blank', 'noopener,noreferrer')
   }
 }
 
@@ -161,7 +213,6 @@ function onSubmit(e) {
 }
 
 /* ---------- 主页钉选（发送到主页的应用） ---------- */
-const allSites = siteFolders.flatMap((f) => f.sites)
 // 钉选顺序即展示顺序；数据里已不存在的钉选项自动忽略；已移入自定义文件夹的不在主页行显示
 const pinnedItems = computed(() =>
   settingsStore.pinnedApps
@@ -393,9 +444,11 @@ function folderPreviewItems(folderId) {
     </div>
 
     <!-- 发送到主页的应用：搜索框下方一排快捷方式，从最左侧开始排列（与网站/工具桌面同款 20px 边距）；
-         功能与原位置一致，右键删除回归原文件夹。负 margin 抵消搜索区的桌面端底部留白，使行紧贴搜索框下方 -->
+         功能与原位置一致，右键删除回归原文件夹。负 margin 抵消搜索区的桌面端底部留白，使行紧贴搜索框下方。
+         桌面端负 margin 会使该行与搜索下拉（同为 z-10，DOM 靠后者在上）重叠，容器自身若拦截指针
+         会吞掉下拉前几行的点击，因此容器 pointer-events-none、仅子级图标保留点击 -->
     <div
-      class="relative z-10 mt-apple-md flex w-full flex-wrap gap-apple-md px-[20px] pb-[16px] sm:-mt-apple-section sm:gap-apple-lg sm:pb-apple-section"
+      class="pointer-events-none relative z-10 mt-apple-md flex w-full flex-wrap gap-apple-md px-[20px] pb-[16px] [&>*]:pointer-events-auto sm:-mt-apple-section sm:gap-apple-lg sm:pb-apple-section"
     >
       <button
         v-for="item in pinnedItems"
