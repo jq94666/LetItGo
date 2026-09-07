@@ -204,15 +204,15 @@ function resetForms() {
 
                 <!-- 添加文件夹 -->
                 <div class="col-start-1 row-start-1 flex flex-col gap-apple-md" :class="tab === 'folder' ? 'visible' : 'invisible'">
-                  <div class="flex flex-col gap-apple-xs">
-                    <label for="add-folder-name" class="text-caption-strong text-ink-muted-80">文件夹名称</label>
+                  <div class="flex items-center gap-apple-sm">
+                    <label for="add-folder-name" class="shrink-0 text-caption-strong text-ink-muted-80">文件夹名称</label>
                     <input
                       id="add-folder-name"
                       v-model="folderName"
                       type="text"
                       maxlength="20"
                       placeholder="显示在主页的文件夹名"
-                      class="w-full rounded-apple-md border border-hairline bg-surface-pearl px-apple-md py-apple-sm text-apple-body text-ink placeholder:text-ink-muted-48 focus:border-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
+                      class="min-w-0 flex-1 rounded-apple-md border border-hairline bg-surface-pearl px-apple-md py-apple-sm text-apple-body text-ink placeholder:text-ink-muted-48 focus:border-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
                     />
                   </div>
 

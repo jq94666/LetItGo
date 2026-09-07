@@ -210,7 +210,7 @@ function requestRemoveCustomApp(app) {
 function requestRemoveFolder(folder) {
   confirmBox.value = {
     title: `删除「${folder.name}」？`,
-    body: '自己添加的文件夹会直接删除；其中移入的应用将回到主页。',
+    body: '应用将回到主页。',
     action: () => settingsStore.removeCustomFolder(folder.id)
   }
 }
