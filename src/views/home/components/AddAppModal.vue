@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useSettingsStore } from '../../../stores/settings.js'
 
-/* 主页「添加应用」弹窗：左侧「添加应用 / 添加文件夹」两个 tab，右侧对应表单。
+/* 主页「添加」弹窗：左侧「添加应用 / 添加文件夹」两个 tab，右侧对应表单。
    添加应用：网址 + 名称，未上传图标时按名称自动生成文字图标，支持本地上传（压缩到 128px）。 */
 const open = ref(false)
 const tab = ref('app') // 'app' | 'folder'
@@ -115,11 +115,11 @@ function resetForms() {
     <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0" leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0">
       <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-apple-sm backdrop-blur-sm sm:p-apple-xl" @click.self="close">
         <Transition appear enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-4 scale-95 opacity-0">
-          <div role="dialog" aria-modal="true" aria-label="添加应用" class="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-apple-lg bg-canvas shadow-product">
+          <div role="dialog" aria-modal="true" aria-label="添加" class="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-apple-lg bg-canvas shadow-product">
             <!-- 头部 -->
             <div class="flex items-start justify-between gap-apple-md border-b border-divider-soft p-apple-md sm:p-apple-lg">
               <div>
-                <p class="text-body-strong text-ink">添加应用</p>
+                <p class="text-body-strong text-ink">添加</p>
               </div>
               <button type="button" aria-label="关闭" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/5 text-ink-muted-80 transition hover:bg-black/10 active:scale-[0.95]" @click="close">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
@@ -152,8 +152,8 @@ function resetForms() {
               <div class="grid min-w-0 flex-1 sm:pl-apple-md">
                 <!-- 添加应用 -->
                 <div class="col-start-1 row-start-1 flex flex-col gap-apple-md" :class="tab === 'app' ? 'visible' : 'invisible'">
-                  <div class="flex flex-col gap-apple-xs">
-                    <label for="add-app-url" class="text-caption-strong text-ink-muted-80">网址</label>
+                  <div class="flex items-center gap-apple-sm">
+                    <label for="add-app-url" class="shrink-0 text-caption-strong text-ink-muted-80">网址</label>
                     <input
                       id="add-app-url"
                       v-model="url"
@@ -162,19 +162,19 @@ function resetForms() {
                       placeholder="如 www.example.com 或 https://example.com"
                       spellcheck="false"
                       autocomplete="off"
-                      class="w-full rounded-apple-md border border-hairline bg-surface-pearl px-apple-md py-apple-sm text-apple-body text-ink placeholder:text-ink-muted-48 focus:border-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
+                      class="min-w-0 flex-1 rounded-apple-md border border-hairline bg-surface-pearl px-apple-md py-apple-sm text-apple-body text-ink placeholder:text-ink-muted-48 focus:border-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
                     />
                   </div>
 
-                  <div class="flex flex-col gap-apple-xs">
-                    <label for="add-app-name" class="text-caption-strong text-ink-muted-80">名称</label>
+                  <div class="flex items-center gap-apple-sm">
+                    <label for="add-app-name" class="shrink-0 text-caption-strong text-ink-muted-80">名称</label>
                     <input
                       id="add-app-name"
                       v-model="name"
                       type="text"
                       maxlength="20"
                       placeholder="显示在图标下方（未填网址名时文字图标按域名生成）"
-                      class="w-full rounded-apple-md border border-hairline bg-surface-pearl px-apple-md py-apple-sm text-apple-body text-ink placeholder:text-ink-muted-48 focus:border-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
+                      class="min-w-0 flex-1 rounded-apple-md border border-hairline bg-surface-pearl px-apple-md py-apple-sm text-apple-body text-ink placeholder:text-ink-muted-48 focus:border-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus/30"
                     />
                   </div>
 

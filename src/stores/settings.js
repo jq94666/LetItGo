@@ -60,7 +60,7 @@ export const useSettingsStore = defineStore('settings', () => {
   // 主页钉选：从文件夹「发送到主页」的网站/工具（[{ type: 'site'|'tool', key }]，
   // site 用站点名、tool 用工具 id），数组顺序即主页展示顺序
   const pinnedApps = ref([])
-  // 主页自定义应用 / 文件夹（主页「添加应用」弹窗创建）：
+  // 主页自定义应用 / 文件夹（主页「添加」弹窗创建）：
   // customApps: [{ id, name, url, icon }]，icon 为本地上传的 dataURL（null = 自动文字图标）
   // customFolders: [{ id, name }]
   const customApps = ref([])
@@ -163,7 +163,7 @@ export const useSettingsStore = defineStore('settings', () => {
     if (a) a.folderId = folderId
   }
 
-  // 主页「添加应用」弹窗：创建/删除自定义应用与文件夹
+  // 主页「添加」弹窗：创建/删除自定义应用与文件夹
   function addCustomApp(app) {
     customApps.value.push({ icon: null, folderId: null, ...app })
   }

@@ -6,7 +6,7 @@ import { favicons } from '../assets/icons/favicon-manifest.js'
 // 传入 items，每项满足以下任一形态：
 //   - { key, icon }            工具 / 指定 emoji 图标的站点：emoji 图标
 //   - { key, name }            网站：按 name 取 favicon，缺省时显示首字母
-//   - { key, img }             自定义 dataURL 图标（主页「添加应用」上传）
+//   - { key, img }             自定义 dataURL 图标（主页「添加」弹窗上传）
 //   - { key, fallback }        兜底文字（无 icon/name/img 时显示）
 const props = defineProps({
   title: { type: String, required: true },

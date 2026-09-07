@@ -161,19 +161,17 @@ input[type='search']::-webkit-search-cancel-button {
   cursor: pointer;
 }
 
-/* 移动端：纵向滚动不显示右侧滚动条（触摸/惯性手势本身可滚动） */
-@media (max-width: 767px) {
-  .overflow-y-auto,
-  .overflow-y-scroll,
-  .overflow-auto {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* 旧版 Edge / IE */
-  }
-  .overflow-y-auto::-webkit-scrollbar,
-  .overflow-y-scroll::-webkit-scrollbar,
-  .overflow-auto::-webkit-scrollbar {
-    display: none; /* Chrome / Safari */
-  }
+/* 所有滚动容器不显示滚动条（网站/工具页滚动区及各弹层），滚轮与触摸滚动不受影响 */
+.overflow-y-auto,
+.overflow-y-scroll,
+.overflow-auto {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* 旧版 Edge / IE */
+}
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-y-scroll::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar {
+  display: none; /* Chrome / Safari */
 }
 
 /* ============ Liquid Glass 玻璃层工具类（iOS 26） ============

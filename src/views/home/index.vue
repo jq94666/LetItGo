@@ -55,7 +55,7 @@ const openedFolder = computed(() => siteFolders.find((f) => f.id === openedFolde
 const openedFolderSites = computed(() =>
   (openedFolder.value?.sites ?? []).filter((s) => !settingsStore.isPinned('site', s.name))
 )
-// 主页自定义文件夹弹窗（「添加应用」创建，内容后续再开发）
+// 主页自定义文件夹弹窗（「添加」弹窗创建，内容后续再开发）
 const openedCustomFolderId = ref(null)
 const openedCustomFolder = computed(
   () => settingsStore.customFolders.find((f) => f.id === openedCustomFolderId.value) ?? null
@@ -252,7 +252,7 @@ function onPinContext(e, item) {
   )
 }
 
-/* ---------- 主页自定义应用 / 文件夹（「添加应用」弹窗创建） ---------- */
+/* ---------- 主页自定义应用 / 文件夹（「添加」弹窗创建） ---------- */
 const addAppModal = ref(null)
 const rowCustomApps = computed(() => settingsStore.customApps.filter((a) => !a.folderId))
 function openCustomApp(app) {
@@ -421,7 +421,7 @@ function folderPreviewItems(folderId) {
         <span class="line-clamp-2 w-full text-center text-caption text-ink-muted-80 max-[767px]:text-[11px]">{{ item.label }}</span>
       </button>
 
-      <!-- 自定义应用（「添加应用」弹窗创建）：点击新标签页打开，右键删除/移动到文件夹 -->
+      <!-- 自定义应用（「添加」弹窗创建）：点击新标签页打开，右键删除/移动到文件夹 -->
       <button
         v-for="app in rowCustomApps"
         :key="app.id"
@@ -456,7 +456,7 @@ function folderPreviewItems(folderId) {
         </template>
       </button>
 
-      <!-- 添加应用：固定排列在末尾，打开添加弹窗 -->
+      <!-- 添加：固定排列在末尾，打开添加弹窗 -->
       <button
         type="button"
         aria-label="添加"
@@ -562,7 +562,7 @@ function folderPreviewItems(folderId) {
                 <svg v-if="pickerFolderId === f.id" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-primary"><path d="M20 6 9 17l-5-5" /></svg>
               </button>
             </div>
-            <p v-else class="mt-apple-md rounded-apple-md bg-amber-50 p-apple-sm text-caption text-amber-600">暂无文件夹，请先通过「添加应用 → 添加文件夹」创建</p>
+            <p v-else class="mt-apple-md rounded-apple-md bg-amber-50 p-apple-sm text-caption text-amber-600">暂无文件夹，请先通过「添加 → 添加文件夹」创建</p>
             <div class="mt-apple-lg flex justify-end gap-apple-sm">
               <button type="button" class="rounded-pill bg-canvas-parchment px-apple-lg py-apple-sm text-caption-strong text-ink transition hover:bg-black/5 active:scale-[0.97]" @click="movePicker = null">取消</button>
               <button
