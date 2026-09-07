@@ -59,6 +59,14 @@ export const directoryGroups = [
     ]
   },
   {
+    id: 'ime',
+    label: '输入法',
+    sites: [
+      { name: '微信输入法', href: 'https://z.weixin.qq.com/' },
+      { name: '豆包输入法', href: 'https://shurufa.doubao.com/pc' }
+    ]
+  },
+  {
     id: 'xinchuan',
     label: '打印机驱动',
     legacyLabel: '信创',

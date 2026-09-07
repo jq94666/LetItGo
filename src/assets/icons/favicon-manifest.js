@@ -21,6 +21,8 @@ export const favicons = {
   '向日葵': new URL('./favicon-sunlogin-oray-com.ico', import.meta.url).href,
   '360（认准极速）': new URL('./favicon-360-cn.ico', import.meta.url).href,
   'PotPlayer': new URL('./favicon-potplayer-tv.ico', import.meta.url).href,
+  '微信输入法': new URL('./favicon-z-weixin-qq-com.png', import.meta.url).href,
+  '豆包输入法': new URL('./favicon-shurufa-doubao-com.png', import.meta.url).href,
   '统信打印机驱动': new URL('./favicon-chinauos-com.png', import.meta.url).href,
   '立思辰': new URL('./favicon-cgprintech-com.ico', import.meta.url).href,
   '惠普打印机': new URL('./favicon-support-hp-com.png', import.meta.url).href,
